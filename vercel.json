@@ -1,0 +1,13 @@
+{
+  "env": {
+    "DATABASE_URL": "",
+    "SUPABASE_URL": "",
+    "SUPABASE_ANON_KEY": "",
+    "SUPABASE_SERVICE_ROLE_KEY": "",
+    "MANGOPAY_CLIENT_ID": "",
+    "MANGOPAY_API_KEY": "",
+    "MANGOPAY_BASE_URL": "https://api.sandbox.mangopay.com",
+    "NEXTAUTH_URL": "",
+    "NEXTAUTH_SECRET": ""
+  }
+} 
