@@ -1,6 +1,10 @@
 import React from "react";
 
-const PaymentPage = ({ params }: { params: { reservationId: string } }) => {
+const PaymentPage = ({
+  params,
+}: {
+  params: Promise<{ reservationId: string }>;
+}) => {
   // TODO: fetch infos réservation, formulaire paiement MangoPay
   return (
     <main className="max-w-2xl mx-auto p-4">

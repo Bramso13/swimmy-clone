@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     // On met à jour la transaction
     await prisma.transaction.update({
-      where: { mangopayId: event.TransactionId },
+      where: { id: event.TransactionId },
       data: { status: event.Status },
     });
     return NextResponse.json({ message: "OK" });

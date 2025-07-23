@@ -1,6 +1,11 @@
 import React from "react";
 
-const PoolDetailPage = async ({ params }: { params: { id: string } }) => {
+const PoolDetailPage = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
+  const { id } = await params;
   // TODO: fetch piscine par ID via API
   // const pool = await fetch(...)
   return (
