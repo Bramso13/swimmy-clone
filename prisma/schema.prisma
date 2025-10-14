@@ -28,6 +28,14 @@ model User {
 
   @@map("user")
 }
+model Annonce {
+  id String @id @default(uuid())
+  title String
+  description String
+  pricePerHour Float
+  availability Json
+ 
+}
 
 model Pool {
   id           String        @id @default(uuid())

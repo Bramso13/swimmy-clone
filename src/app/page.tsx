@@ -1,7 +1,19 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
+  const handleTest = async () => {
+    const res = await fetch("/api/test", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await res.json();
+    console.log(data);
+  };
   return (
     <div className="flex flex-col gap-16">
       {/* Hero Section */}
@@ -16,6 +28,13 @@ export default function Home() {
             piscine en toute simplicité. Profitez d’un moment de détente, où que
             vous soyez, en toute sécurité.
           </p>
+          <button
+            onClick={() => {
+              handleTest();
+            }}
+          >
+            Test
+          </button>
           <form className="flex gap-2 w-full max-w-md mt-2">
             <input
               type="text"
