@@ -47,6 +47,10 @@ model Pool {
   photos       String[]
   pricePerHour Float
   availability Json
+  // New metadata fields
+  rules        String[]     @default([])
+  extras       Json?
+  additional   Json?
   owner        User          @relation("OwnerPools", fields: [ownerId], references: [id])
   ownerId      String
   reservations Reservation[]
@@ -125,3 +129,4 @@ model Verification {
 
   @@map("verification")
 }
+

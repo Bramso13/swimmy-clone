@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import SearchBar from "@/components/SearchBar";
 
 export default function Home() {
   const handleTest = async () => {
@@ -17,39 +18,26 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-16">
       {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between gap-8 py-12">
-        <div className="flex-1 flex flex-col gap-6 items-start">
-          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-blue-700">
-            Louez une piscine{" "}
-            <span className="text-blue-400">près de chez vous</span>
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-xl">
-            Swimmy Clone vous permet de trouver, réserver ou proposer une
-            piscine en toute simplicité. Profitez d’un moment de détente, où que
-            vous soyez, en toute sécurité.
-          </p>
-          <button
-            onClick={() => {
-              handleTest();
-            }}
-          >
-            Test
-          </button>
-          <form className="flex gap-2 w-full max-w-md mt-2">
-            <input
-              type="text"
-              placeholder="Ville, code postal..."
-              className="flex-1 border rounded px-3 py-2"
-            />
-            <input type="date" className="border rounded px-3 py-2" />
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition"
-            >
-              Rechercher
-            </button>
-          </form>
-          <div className="flex gap-4 mt-4">
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-blue-400 text-white">
+        <div className="grid md:grid-cols-2 items-center gap-6 px-6 md:px-10 py-12">
+          <div className="flex flex-col gap-6 items-start">
+            <h1 className="text-5xl md:text-6xl font-extrabold leading-tight">
+              Le bonheur
+              <br />
+              se partage
+            </h1>
+            <p className="text-white/90 max-w-xl text-lg">
+              Ici, vous pouvez louer une piscine privée partout en France
+            </p>
+          </div>
+          <div className="flex items-start justify-center md:justify-end">
+            <div className="w-full md:max-w-xl">
+              <SearchBar />
+            </div>
+          </div>
+        </div>
+      </section>
+      <div className="flex gap-4 mt-4">
             <Link
               href="/dashboard/pools/new"
               className="underline text-blue-600 hover:text-blue-800"
@@ -62,18 +50,7 @@ export default function Home() {
             >
               Voir toutes les piscines
             </Link>
-          </div>
-        </div>
-        <div className="flex-1 flex justify-center">
-          <Image
-            src="/vercel.svg"
-            alt="Piscine"
-            width={320}
-            height={220}
-            className="rounded-lg shadow-lg border"
-          />
-        </div>
-      </section>
+      </div>
 
       {/* Carrousel de piscines */}
       <section className="w-full">

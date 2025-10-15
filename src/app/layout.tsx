@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import SideMenu from "@/components/SideMenu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,15 +30,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground min-h-screen flex flex-col`}
       >
-        <nav className="sticky top-0 z-30 w-full bg-white/80 dark:bg-black/80 backdrop-blur border-b border-border flex items-center justify-between px-6 py-3 shadow-sm">
-          <Link
-            href="/"
-            className="font-bold text-xl tracking-tight text-blue-700"
-          >
-            Swimmy<span className="text-blue-400">Clone</span>
-          </Link>
+        <nav className="sticky top-0 z-30 w-full bg-white/80 dark:bg-black/80 backdrop-blur border-b border-border flex items-center justify-between px-3 md:px-6 py-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <SideMenu />
+            <Link
+              href="/"
+              className="font-bold text-xl tracking-tight text-blue-700"
+            >
+              Swimmy<span className="text-blue-400">Clone</span>
+            </Link>
+          </div>
           <div className="flex gap-4 items-center">
-            <Link href="/search" className="hover:underline">
+            <Link href="/" className="hover:underline">
               Rechercher
             </Link>
             <Link href="/dashboard" className="hover:underline">

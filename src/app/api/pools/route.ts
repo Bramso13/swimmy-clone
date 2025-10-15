@@ -18,6 +18,9 @@ export async function POST(req: NextRequest) {
     photos,
     pricePerHour,
     availability,
+    rules,
+    extras,
+    additional,
     ownerId,
   } = await req.json();
   if (!ownerId) {
@@ -34,6 +37,9 @@ export async function POST(req: NextRequest) {
         photos,
         pricePerHour,
         availability,
+        rules,
+        extras,
+        additional,
         ownerId,
       },
     });
