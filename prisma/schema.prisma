@@ -51,8 +51,8 @@ model Pool {
   rules        String[]     @default([])
   extras       Json?
   additional   Json?
-  owner        User          @relation("OwnerPools", fields: [ownerId], references: [id])
-  ownerId      String
+  owner        User?         @relation("OwnerPools", fields: [ownerId], references: [id])
+  ownerId      String?
   reservations Reservation[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt

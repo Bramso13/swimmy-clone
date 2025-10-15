@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../../../lib/prisma";
 
 export async function GET() {
   const pools = await prisma.pool.findMany({ include: { owner: true } });
@@ -23,9 +22,9 @@ export async function POST(req: NextRequest) {
     additional,
     ownerId,
   } = await req.json();
-  if (!ownerId) {
-    return NextResponse.json({ error: "ownerId requis." }, { status: 400 });
-  }
+  // ownerId now optional; proceed without it
+
+  //verifier si l'utilisateur est connecté
   try {
     const pool = await prisma.pool.create({
       data: {
@@ -37,10 +36,11 @@ export async function POST(req: NextRequest) {
         photos,
         pricePerHour,
         availability,
-        rules,
-        extras,
-        additional,
-        ownerId,
+        // rules,
+        // extras,
+        // additional,
+        // verified: false,
+        ownerId: ownerId || null,
       },
     });
     return NextResponse.json({ pool });

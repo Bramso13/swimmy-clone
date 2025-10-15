@@ -69,6 +69,16 @@ const ProfilePage = () => {
 
   return (
     <main className="mx-auto max-w-5xl p-4 md:p-6">
+
+    <section className="bg-blue-600 text-white p-6 rounded-xl flex-col items-center justify-between mb-6 w-full">
+      <div className="flex flex-col items-center justify-between">
+        <h2 className="text-5xl font-semibold mb-2">Mon compte</h2>
+      </div>
+      <div className="flex flex-col items-center justify-between">
+        <p className="text-xl">{user?.name ?? "Utilisateur"}, {(user as { email?: string })?.email ?? "Utilisateur email"}</p>
+      </div>
+    </section>
+
       {showAlert && (
         <div className="mb-6 rounded-xl border bg-amber-50 text-amber-900 border-amber-200 overflow-hidden">
           <div className="flex">

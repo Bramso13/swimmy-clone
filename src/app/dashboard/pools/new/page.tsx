@@ -28,13 +28,11 @@ const NewPoolPage = () => {
   const [latitude, setLatitude] = useState<string>("");
   const [longitude, setLongitude] = useState<string>("");
   const [photos, setPhotos] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
   const [pricePerHour, setPricePerHour] = useState<string>("");
   const [rules, setRules] = useState<string>("");
-  const [extras, setExtras] = useState<string>("");
   const [ownerPresent, setOwnerPresent] = useState(false);
-  const [privacy, setPrivacy] = useState("Vis à vis léger");
   const [product, setProduct] = useState("Chlore");
-  const [safety, setSafety] = useState<string>("Alarme de sécurité");
 
   const revenue = useMemo(() => {
     const base = persons ? persons * 8 : 0; // simple maquette de calcul
@@ -102,8 +100,34 @@ const NewPoolPage = () => {
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium">Photos (URLs séparées par des virgules)</label>
-                    <input value={photos} onChange={(e)=>setPhotos(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
+                    <label className="text-sm font-medium">Téléverser une photo</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="mt-1 w-full border rounded-md px-3 py-2"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploading(true);
+                        try {
+                          const form = new FormData();
+                          form.append("file", file);
+                          const res = await fetch("/api/upload", { method: "POST", body: form });
+                          const j = await res.json();
+                          if (res.ok) {
+                            setPhotos((prev) => [prev, j.url].filter(Boolean).join(","));
+                          } else {
+                            alert(j.error || "Upload échoué");
+                          }
+                        } finally {
+                          setUploading(false);
+                        }
+                      }}
+                    />
+                    {uploading && <div className="text-xs text-muted-foreground mt-1">Téléversement…</div>}
+                    {photos && (
+                      <div className="text-xs mt-2 break-all">Images: {photos}</div>
+                    )}
                   </div>
                   <div>
                     <label className="text-sm font-medium">Prix à l’heure (€)</label>
@@ -172,32 +196,20 @@ const NewPoolPage = () => {
                   </div>
                 </div>
 
-                {/* Extras, règles, informations supplémentaires */}
+                {/* Règles et informations supplémentaires */}
                 <div>
                   <label className="text-sm font-medium">Règlement (séparés par des virgules)</label>
                   <input value={rules} onChange={(e)=>setRules(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Extras (JSON simple: [{`{"title":"Barbecue","price":"20 €"}`}])</label>
-                  <textarea value={extras} onChange={(e)=>setExtras(e.target.value)} rows={3} className="mt-1 w-full border rounded-md px-3 py-2" />
-                </div>
-                <div className="grid md:grid-cols-3 gap-3">
+                <div className="grid md:grid-cols-2 gap-3">
                   <div className="flex items-center gap-2">
                     <input type="checkbox" checked={ownerPresent} onChange={(e)=>setOwnerPresent(e.target.checked)} />
                     <span>Propriétaire présent</span>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Vis à vis</label>
-                    <input value={privacy} onChange={(e)=>setPrivacy(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
-                  </div>
-                  <div>
                     <label className="text-sm font-medium">Produit d'entretien</label>
                     <input value={product} onChange={(e)=>setProduct(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
                   </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Équipements de sécurité (séparés par des virgules)</label>
-                  <input value={safety} onChange={(e)=>setSafety(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
                 </div>
               </div>
 
@@ -225,14 +237,7 @@ const NewPoolPage = () => {
                     pricePerHour: Number(pricePerHour),
                     availability: {},
                     rules: rules.split(",").map((s)=>s.trim()).filter(Boolean),
-                    extras: extras ? JSON.parse(extras) : [],
-                    additional: {
-                      ownerPresent,
-                      privacy,
-                      product,
-                      safety: safety.split(",").map((s)=>s.trim()).filter(Boolean),
-                    },
-                    ownerId: "demo-owner-id",
+                    additional: { ownerPresent, product },
                   };
                   const res = await fetch("/api/pools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
                   const j = await res.json();
