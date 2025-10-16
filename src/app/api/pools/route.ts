@@ -5,25 +5,25 @@ import { auth } from "../../../../lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    // Vérifier l'authentification
-    const session = await auth.api.getSession({ headers: req.headers });
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-    }
-
     const { searchParams } = new URL(req.url);
     const includeReservations = searchParams.get("includeReservations") === "true";
     const ownerId = searchParams.get("ownerId");
 
-    // Si ownerId est spécifié, vérifier que c'est l'utilisateur connecté ou qu'il est owner
-    if (ownerId && ownerId !== session.user.id) {
-      // Vérifier si l'utilisateur est owner pour voir les piscines d'autres propriétaires
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { role: true }
-      });
-      if (user?.role !== "owner") {
-        return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    // Auth seulement si on demande des infos sensibles (ownerId filtré ou réservations incluses)
+    let sessionUserId: string | null = null;
+    if (includeReservations || ownerId) {
+      const session = await auth.api.getSession({ headers: req.headers });
+      if (!session?.user) {
+        return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+      }
+      sessionUserId = session.user.id as string;
+
+      // Si ownerId est différent de l'utilisateur courant, s'assurer qu'il a le rôle owner
+      if (ownerId && ownerId !== sessionUserId) {
+        const user = await prisma.user.findUnique({ where: { id: sessionUserId }, select: { role: true } });
+        if (user?.role !== "owner") {
+          return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+        }
       }
     }
 
@@ -34,17 +34,9 @@ export async function GET(req: NextRequest) {
         ...(includeReservations && {
           reservations: {
             include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                },
-              },
+              user: { select: { id: true, name: true, email: true } },
             },
-            orderBy: {
-              startDate: "desc",
-            },
+            orderBy: { startDate: "desc" },
           },
         }),
       },
@@ -77,10 +69,36 @@ export async function POST(req: NextRequest) {
   try {
     // Récupérer l'utilisateur connecté via better-auth (si dispo)
     let finalOwnerId: string | null = null;
+    let currentUserRole: string | null = null;
     try {
       const session = await auth.api.getSession({ headers: req.headers });
       finalOwnerId = (session?.user?.id as string | undefined) ?? null;
+      if (session?.user?.id) {
+        const u = await prisma.user.findUnique({ where: { id: session.user.id as string }, select: { role: true } });
+        currentUserRole = u?.role ?? null;
+      }
     } catch {}
+
+    // Si le créateur est un tenant, on ne crée PAS la Pool. On crée une demande d'approbation.
+    if (currentUserRole === "tenant") {
+      const approval = await prisma.poolApprovalRequest.create({
+        data: {
+          requesterId: finalOwnerId,
+          status: "pending",
+          title,
+          description,
+          address,
+          latitude,
+          longitude,
+          photos,
+          pricePerHour,
+          availability,
+          rules,
+          additional,
+        },
+      });
+      return NextResponse.json({ approval, message: "Votre annonce a été soumise et attend validation." }, { status: 202 });
+    }
 
     const pool = await prisma.pool.create({
       data: {

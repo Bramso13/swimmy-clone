@@ -78,6 +78,9 @@ export default function NavBar() {
               </Link>
             </>
           )}
+          <Link href="/dashboard/messages" className="hover:underline">
+            Messages
+          </Link>
           <Link href="/profile" className="hover:underline">
             Profil
           </Link>

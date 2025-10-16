@@ -179,6 +179,17 @@ export default function SideMenu() {
                     </Link>
                   </li>
                 )}
+
+                {/* Messages reçus */}
+                <li>
+                  <Link
+                    href="/dashboard/messages"
+                    onClick={() => setOpen(false)}
+                    className="block px-4 py-3 hover:bg-muted rounded-md"
+                  >
+                    ✉️ Messages
+                  </Link>
+                </li>
               </>
             )}
 

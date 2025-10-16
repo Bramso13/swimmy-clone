@@ -27,6 +27,7 @@ interface Reservation {
 export default function AvailabilityPage() {
   const [pools, setPools] = useState<Pool[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
+  const [poolApprovals, setPoolApprovals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -75,6 +76,13 @@ export default function AvailabilityPage() {
         if (reqRes.ok) {
           const reqJson = await reqRes.json();
           setRequests(reqJson.requests || []);
+        }
+
+        // Charger les demandes d'approbation de piscines
+        const apprRes = await fetch(`/api/pools/approvals?ownerId=${userData.user.id}`);
+        if (apprRes.ok) {
+          const apprJson = await apprRes.json();
+          setPoolApprovals(apprJson.requests || []);
         }
       } catch (err: any) {
         setError(err.message || "Une erreur est survenue");
@@ -174,8 +182,49 @@ export default function AvailabilityPage() {
             📅 Vérifier la disponibilité
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Consultez toutes les réservations de vos piscines
+            Gérez les demandes de disponibilité envoyées par les utilisateurs
           </p>
+        </div>
+
+        {/* Bloc demandes d'approbation de piscines */}
+        <div className="mb-10">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Demandes d'approbation d'annonces</h2>
+          {poolApprovals.length === 0 ? (
+            <div className="text-gray-600 dark:text-gray-400">Aucune demande pour le moment.</div>
+          ) : (
+            <div className="space-y-3">
+              {poolApprovals.map((p) => (
+                <div key={p.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800 flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="font-semibold">{p.title || "Annonce sans titre"}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">{p.address}</div>
+                    <div className="text-xs text-gray-500">{p.pricePerHour ?? 0}€ / heure</div>
+                    <div className="text-xs">Statut: <span className="font-medium">{p.status}</span></div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved" }) });
+                        setPoolApprovals((prev) => prev.filter((x) => x.id !== p.id));
+                      }}
+                      className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
+                    >
+                      Accepter
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected" }) });
+                        setPoolApprovals((prev) => prev.filter((x) => x.id !== p.id));
+                      }}
+                      className="px-3 py-2 rounded bg-red-600 text-white text-sm"
+                    >
+                      Refuser
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Bloc demandes de disponibilité */}
@@ -198,9 +247,15 @@ export default function AvailabilityPage() {
                     <div className="text-xs">Statut: <span className="font-medium">{r.status}</span></div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Message à envoyer…"
+                      onChange={(e) => ((r as any).__msg = e.target.value)}
+                      className="border rounded-md px-2 py-1 text-sm"
+                    />
                     <button
                       onClick={async () => {
-                        await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved" }) });
+                        await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved", message: (r as any).__msg }) });
                         setRequests((prev) => prev.map((x) => x.id === r.id ? { ...x, status: "approved" } : x));
                       }}
                       className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
@@ -209,7 +264,7 @@ export default function AvailabilityPage() {
                     </button>
                     <button
                       onClick={async () => {
-                        await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected" }) });
+                        await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected", message: (r as any).__msg }) });
                         setRequests((prev) => prev.map((x) => x.id === r.id ? { ...x, status: "rejected" } : x));
                       }}
                       className="px-3 py-2 rounded bg-red-600 text-white text-sm"
@@ -223,88 +278,7 @@ export default function AvailabilityPage() {
           )}
         </div>
 
-        {pools.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Vous n'avez pas encore de piscines enregistrées.
-            </p>
-            <Link
-              href="/dashboard/pools/new"
-              className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-            >
-              Ajouter une piscine
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {pools.map((pool) => (
-              <div
-                key={pool.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
-              >
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
-                  <h2 className="text-2xl font-bold">{pool.title}</h2>
-                  <p className="text-blue-100 mt-1">{pool.address}</p>
-                  <p className="text-blue-100 mt-1">
-                    {pool.pricePerHour}€ / heure
-                  </p>
-                </div>
-
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Réservations ({pool.reservations.length})
-                  </h3>
-
-                  {pool.reservations.length === 0 ? (
-                    <p className="text-gray-600 dark:text-gray-400 italic">
-                      Aucune réservation pour cette piscine
-                    </p>
-                  ) : (
-                    <div className="space-y-4">
-                      {pool.reservations.map((reservation) => (
-                        <div
-                          key={reservation.id}
-                          className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition"
-                        >
-                          <div className="flex justify-between items-start flex-wrap gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span
-                                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                                    reservation.status
-                                  )}`}
-                                >
-                                  {getStatusLabel(reservation.status)}
-                                </span>
-                                <span className="text-lg font-bold text-gray-900 dark:text-white">
-                                  {reservation.amount}€
-                                </span>
-                              </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                                <p>
-                                  <span className="font-medium">Client :</span>{" "}
-                                  {reservation.user.name || reservation.user.email}
-                                </p>
-                                <p>
-                                  <span className="font-medium">Début :</span>{" "}
-                                  {formatDate(reservation.startDate)}
-                                </p>
-                                <p>
-                                  <span className="font-medium">Fin :</span>{" "}
-                                  {formatDate(reservation.endDate)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* On masque la liste des piscines et réservations pour ne garder que les demandes */}
       </div>
     </div>
   );

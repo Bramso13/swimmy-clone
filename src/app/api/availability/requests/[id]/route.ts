@@ -50,6 +50,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       data: { status },
     });
 
+    // Envoyer un message au demandeur si présent
+    if (request.userId) {
+      await (prisma as any).message.create({
+        data: {
+          senderId: session.user.id as string,
+          recipientId: request.userId,
+          content: (body?.message as string) || (status === "approved" ? "Votre demande est acceptée." : "Votre demande est refusée."),
+          availabilityRequestId: request.id,
+        },
+      });
+    }
+
     return NextResponse.json({ request: updated });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Erreur serveur" }, { status: 500 });

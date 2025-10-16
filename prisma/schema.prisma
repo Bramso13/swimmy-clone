@@ -26,6 +26,9 @@ model User {
   sessions      Session[]
   accounts      Account[]
   availabilityRequests AvailabilityRequest[]
+  poolApprovalRequests PoolApprovalRequest[]
+  messagesSent   Message[]   @relation("MessagesSent")
+  messagesReceived Message[]  @relation("MessagesReceived")
 
   @@map("user")
 }
@@ -56,6 +59,8 @@ model Pool {
   ownerId      String?
   reservations Reservation[]
   availabilityRequests AvailabilityRequest[]
+  approvalRequests PoolApprovalRequest[]
+  approved    Boolean       @default(false)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -91,6 +96,29 @@ model AvailabilityRequest {
   babies     Int      @default(0)
   status     String   @default("pending") // 'pending' | 'approved' | 'rejected'
   createdAt  DateTime @default(now())
+  messages   Message[]
+}
+
+// Demande d'approbation d'une nouvelle piscine (créée par un tenant)
+model PoolApprovalRequest {
+  id          String   @id @default(uuid())
+  pool        Pool?    @relation(fields: [poolId], references: [id])
+  poolId      String?
+  requester   User?    @relation(fields: [requesterId], references: [id])
+  requesterId String?
+  status      String   @default("pending") // pending | approved | rejected
+  createdAt   DateTime @default(now())
+  // Données de la piscine proposée (snapshot)
+  title        String?
+  description  String?
+  address      String?
+  latitude     Float?
+  longitude    Float?
+  photos       String[]   @default([])
+  pricePerHour Float?
+  availability Json?
+  rules        String[]   @default([])
+  additional   Json?
 }
 
 model Transaction {
@@ -103,6 +131,19 @@ model Transaction {
   status        String // 'pending', 'succeeded', 'failed', etc.
   amount        Float
   createdAt     DateTime    @default(now())
+}
+
+model Message {
+  id           String   @id @default(uuid())
+  sender       User     @relation("MessagesSent", fields: [senderId], references: [id])
+  senderId     String
+  recipient    User     @relation("MessagesReceived", fields: [recipientId], references: [id])
+  recipientId  String
+  content      String
+  // optionnel: rattacher à une demande de dispo
+  availabilityRequest AvailabilityRequest? @relation(fields: [availabilityRequestId], references: [id])
+  availabilityRequestId String?
+  createdAt    DateTime @default(now())
 }
 
 model Session {
