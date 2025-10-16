@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     ownerId,
   } = await req.json();
   // ownerId now optional; proceed without it
-
+ 
   //verifier si l'utilisateur est connecté
   try {
     const pool = await prisma.pool.create({

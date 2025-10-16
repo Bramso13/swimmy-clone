@@ -1,11 +1,28 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export default function SideMenu() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Vérifier le statut de connexion
+    const checkAuth = async () => {
+      try {
+        const session = await authClient.getSession();
+        setUser(session.data?.user || null);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+
     if (open) {
       document.body.style.overflow = "hidden";
     } else {
@@ -15,6 +32,15 @@ export default function SideMenu() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const handleProposePool = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      window.location.href = "/register";
+      return;
+    }
+    // Si l'utilisateur est connecté, laisser le lien normal fonctionner
+  };
 
   return (
     <>
@@ -59,8 +85,38 @@ export default function SideMenu() {
         </div>
         <nav className="p-2">
           <ul className="flex flex-col">
-            {[
-              { label: "Trouver ma piscine", href: "/" },
+            {/* Menu pour utilisateurs non connectés */}
+            {!user && !loading && [
+              { label: "Trouver une piscine", href: "/search" },
+              { 
+                label: "Proposer ma piscine", 
+                href: "/dashboard/pools/new",
+                requiresAuth: true 
+              },
+              { label: "Inscription", href: "/register" },
+              { label: "Connexion", href: "/login" },
+              { label: "Aide", href: "/settings" },
+              { label: "Blog", href: "/" },
+            ].map((item) => (
+              <li key={item.label}>
+                <Link
+                  href={item.href}
+                  onClick={(e) => {
+                    setOpen(false);
+                    if (item.requiresAuth) {
+                      handleProposePool(e);
+                    }
+                  }}
+                  className="block px-4 py-3 hover:bg-muted rounded-md"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+
+            {/* Menu pour utilisateurs connectés */}
+            {user && !loading && [
+              { label: "Trouver ma piscine", href: "/search" },
               { label: "Proposer ma piscine", href: "/dashboard/pools/new" },
               { label: "Messages", href: "/dashboard" },
               { label: "Reservations", href: "/dashboard/reservations" },
@@ -80,6 +136,13 @@ export default function SideMenu() {
                 </Link>
               </li>
             ))}
+
+            {/* Affichage de chargement */}
+            {loading && (
+              <li className="px-4 py-3 text-gray-500">
+                Chargement...
+              </li>
+            )}
           </ul>
         </nav>
       </div>

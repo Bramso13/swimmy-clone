@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import SideMenu from "@/components/SideMenu";
+import NavBar from "@/components/NavBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,23 +41,7 @@ export default function RootLayout({
               Swimmy<span className="text-blue-400">Clone</span>
             </Link>
           </div>
-          <div className="flex gap-4 items-center">
-            <Link href="/" className="hover:underline">
-              Rechercher
-            </Link>
-            <Link href="/dashboard" className="hover:underline">
-              Dashboard
-            </Link>
-            <Link href="/profile" className="hover:underline">
-              Profil
-            </Link>
-            <Link
-              href="/login"
-              className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 transition"
-            >
-              Connexion
-            </Link>
-          </div>
+          <NavBar />
         </nav>
         <main className="flex-1 w-full mx-auto max-w-7xl px-4 py-8">
           {children}
