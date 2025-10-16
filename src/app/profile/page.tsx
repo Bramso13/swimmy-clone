@@ -8,15 +8,26 @@ type LocalProfile = {
   image?: string;
 };
 
+type FullUser = {
+  id: string;
+  email: string;
+  name?: string;
+  role: string;
+  image?: string;
+  emailVerified: boolean;
+};
+
 const STORAGE_KEY = "profile.local";
 
 const ProfilePage = () => {
   const { data: session } = authClient.useSession?.() ?? { data: undefined };
   const user = (session as any)?.user as
-    | { emailVerified?: boolean; image?: string; name?: string }
+    | { emailVerified?: boolean; image?: string; name?: string; id?: string }
     | undefined;
 
   const [local, setLocal] = useState<LocalProfile>({});
+  const [fullUser, setFullUser] = useState<FullUser | null>(null);
+  const [loadingRole, setLoadingRole] = useState(true);
 
   useEffect(() => {
     try {
@@ -24,6 +35,30 @@ const ProfilePage = () => {
       if (raw) setLocal(JSON.parse(raw));
     } catch {}
   }, []);
+
+  // Récupérer les informations complètes de l'utilisateur avec le rôle
+  useEffect(() => {
+    const fetchFullUser = async () => {
+      if (!user?.id) {
+        setLoadingRole(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/users/${user.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setFullUser(data.user);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération du rôle:", error);
+      } finally {
+        setLoadingRole(false);
+      }
+    };
+
+    fetchFullUser();
+  }, [user?.id]);
 
   useEffect(() => {
     try {
@@ -75,7 +110,21 @@ const ProfilePage = () => {
         <h2 className="text-5xl font-semibold mb-2">Mon compte</h2>
       </div>
       <div className="flex flex-col items-center justify-between">
-        <p className="text-xl">{user?.name ?? "Utilisateur"}, {(user as { email?: string })?.email ?? "Utilisateur email"}</p>
+        <p className="text-xl mb-3">{user?.name ?? "Utilisateur"}, {(user as { email?: string })?.email ?? "Utilisateur email"}</p>
+        {!loadingRole && fullUser && (
+          <div className="flex items-center gap-2">
+            <span className={`px-4 py-2 rounded-full font-semibold text-sm ${
+              fullUser.role === "owner" 
+                ? "bg-yellow-400 text-yellow-900" 
+                : "bg-blue-400 text-blue-900"
+            }`}>
+              {fullUser.role === "owner" ? "👑 Propriétaire (Owner)" : "🏊 Locataire (Tenant)"}
+            </span>
+          </div>
+        )}
+        {loadingRole && (
+          <div className="animate-pulse bg-blue-400 h-8 w-48 rounded-full"></div>
+        )}
       </div>
     </section>
 
@@ -104,6 +153,63 @@ const ProfilePage = () => {
       )}
 
       <div className="grid md:grid-cols-3 gap-4">
+        <section
+          id="status"
+          className="rounded-xl border bg-card p-5 hover:shadow-sm transition"
+        >
+          <div className="flex items-start gap-3">
+            <div className="text-2xl">{fullUser?.role === "owner" ? "👑" : "🏊"}</div>
+            <div>
+              <h2 className="font-semibold">Statut du compte</h2>
+              <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+                Votre type de compte et ses privilèges.
+              </p>
+            </div>
+          </div>
+          <div className="mt-4">
+            {loadingRole ? (
+              <div className="animate-pulse space-y-2">
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            ) : fullUser ? (
+              <div className="space-y-3">
+                <div className={`px-3 py-2 rounded-lg font-semibold text-center ${
+                  fullUser.role === "owner" 
+                    ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/20 dark:text-yellow-400" 
+                    : "bg-blue-100 text-blue-900 dark:bg-blue-900/20 dark:text-blue-400"
+                }`}>
+                  {fullUser.role === "owner" ? "👑 Propriétaire" : "🏊 Locataire"}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {fullUser.role === "owner" ? (
+                    <>
+                      <p className="font-medium mb-1">Vous pouvez :</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Proposer vos piscines</li>
+                        <li>Gérer vos réservations</li>
+                        <li>Vérifier la disponibilité</li>
+                        <li>Recevoir des paiements</li>
+                      </ul>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium mb-1">Vous pouvez :</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Rechercher des piscines</li>
+                        <li>Réserver des créneaux</li>
+                        <li>Gérer vos réservations</li>
+                      </ul>
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">Impossible de charger le statut</p>
+            )}
+          </div>
+        </section>
+
         <section
           id="profile"
           className="rounded-xl border bg-card p-5 hover:shadow-sm transition"

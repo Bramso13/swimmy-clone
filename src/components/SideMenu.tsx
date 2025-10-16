@@ -115,27 +115,44 @@ export default function SideMenu() {
             ))}
 
             {/* Menu pour utilisateurs connectés */}
-            {user && !loading && [
-              { label: "Trouver ma piscine", href: "/search" },
-              { label: "Proposer ma piscine", href: "/dashboard/pools/new" },
-              { label: "Messages", href: "/dashboard" },
-              { label: "Reservations", href: "/dashboard/reservations" },
-              { label: "Favoris", href: "/dashboard" },
-              { label: "Compte", href: "/profile" },
-              { label: "Aide", href: "/settings" },
-              { label: "Blog", href: "/" },
-              { label: "Déconnexion", href: "/login" },
-            ].map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className="block px-4 py-3 hover:bg-muted rounded-md"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            {user && !loading && (
+              <>
+                {[
+                  { label: "Trouver ma piscine", href: "/search" },
+                  { label: "Proposer ma piscine", href: "/dashboard/pools/new" },
+                  { label: "Messages", href: "/dashboard" },
+                  { label: "Reservations", href: "/dashboard/reservations" },
+                  { label: "Favoris", href: "/dashboard" },
+                  { label: "Compte", href: "/profile" },
+                  { label: "Aide", href: "/settings" },
+                  { label: "Blog", href: "/" },
+                  { label: "Déconnexion", href: "/login" },
+                ].map((item) => (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="block px-4 py-3 hover:bg-muted rounded-md"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+                
+                {/* Option supplémentaire pour les owners/admins */}
+                {user.role === "owner" && (
+                  <li>
+                    <Link
+                      href="/dashboard/availability"
+                      onClick={() => setOpen(false)}
+                      className="block px-4 py-3 hover:bg-muted rounded-md bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
+                    >
+                      📅 Vérifier la disponibilité
+                    </Link>
+                  </li>
+                )}
+              </>
+            )}
 
             {/* Affichage de chargement */}
             {loading && (

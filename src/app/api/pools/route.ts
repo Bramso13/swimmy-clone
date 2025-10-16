@@ -2,8 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { prisma } from "../../../../lib/prisma";
 
-export async function GET() {
-  const pools = await prisma.pool.findMany({ include: { owner: true } });
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const includeReservations = searchParams.get("includeReservations") === "true";
+  const ownerId = searchParams.get("ownerId");
+
+  const pools = await prisma.pool.findMany({
+    where: ownerId ? { ownerId } : undefined,
+    include: {
+      owner: true,
+      ...(includeReservations && {
+        reservations: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            startDate: "desc",
+          },
+        },
+      }),
+    },
+  });
+
   return NextResponse.json({ pools });
 }
 

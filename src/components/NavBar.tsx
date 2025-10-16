@@ -53,6 +53,11 @@ export default function NavBar() {
           <Link href="/dashboard" className="hover:underline">
             Dashboard
           </Link>
+          {user.role === "owner" && (
+            <Link href="/dashboard/availability" className="hover:underline text-blue-600 font-semibold">
+              Disponibilité
+            </Link>
+          )}
           <Link href="/profile" className="hover:underline">
             Profil
           </Link>
