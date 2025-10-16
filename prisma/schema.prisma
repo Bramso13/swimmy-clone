@@ -25,6 +25,7 @@ model User {
   image         String?
   sessions      Session[]
   accounts      Account[]
+  availabilityRequests AvailabilityRequest[]
 
   @@map("user")
 }
@@ -54,6 +55,7 @@ model Pool {
   owner        User?         @relation("OwnerPools", fields: [ownerId], references: [id])
   ownerId      String?
   reservations Reservation[]
+  availabilityRequests AvailabilityRequest[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -71,6 +73,24 @@ model Reservation {
   transaction Transaction?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+}
+
+// Demandes de disponibilité soumises par les locataires pour qu'un owner confirme
+model AvailabilityRequest {
+  id         String   @id @default(uuid())
+  pool       Pool     @relation(fields: [poolId], references: [id])
+  poolId     String
+  // optionnel: qui a fait la demande
+  user       User?    @relation(fields: [userId], references: [id])
+  userId     String?
+  date       DateTime
+  startTime  String
+  endTime    String
+  adults     Int      @default(1)
+  children   Int      @default(0)
+  babies     Int      @default(0)
+  status     String   @default("pending") // 'pending' | 'approved' | 'rejected'
+  createdAt  DateTime @default(now())
 }
 
 model Transaction {

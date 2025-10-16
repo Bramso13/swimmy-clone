@@ -12,7 +12,22 @@ export default function NavBar() {
     const checkAuth = async () => {
       try {
         const session = await authClient.getSession();
-        setUser(session.data?.user || null);
+        const baseUser = session.data?.user || null;
+        if (!baseUser) {
+          setUser(null);
+        } else {
+          try {
+            const res = await fetch(`/api/users/${baseUser.id}`);
+            if (res.ok) {
+              const data = await res.json();
+              setUser(data.user);
+            } else {
+              setUser(baseUser);
+            }
+          } catch {
+            setUser(baseUser);
+          }
+        }
       } catch (error) {
         setUser(null);
       } finally {
@@ -54,9 +69,14 @@ export default function NavBar() {
             Dashboard
           </Link>
           {user.role === "owner" && (
-            <Link href="/dashboard/availability" className="hover:underline text-blue-600 font-semibold">
-              Disponibilité
-            </Link>
+            <>
+              <Link href="/dashboard/availability" className="hover:underline text-blue-600 font-semibold">
+                Disponibilité
+              </Link>
+              <Link href="/dashboard/transactions" className="hover:underline text-emerald-600 font-semibold">
+                Commandes
+              </Link>
+            </>
           )}
           <Link href="/profile" className="hover:underline">
             Profil

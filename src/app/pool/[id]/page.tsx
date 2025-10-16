@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { prisma } from "../../../../lib/prisma";
+import BookingForm from "./BookingForm";
 
 export default async function PoolDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -13,7 +14,8 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
       </main>
     );
   }
-  const images: string[] = Array.isArray(pool.photos) ? (pool.photos as string[]) : [];
+  const rawPhotos: string[] = Array.isArray(pool.photos) ? (pool.photos as string[]) : [];
+  const images: string[] = rawPhotos.filter((src) => typeof src === "string" && src.trim().length > 0);
   const imagesCount = images.length;
 
   return (
@@ -81,10 +83,11 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
           </ul>
         </section>
 
-        <aside className="h-max rounded-2xl border shadow-sm p-4 sticky top-20">
-          <div className="font-semibold mb-3">À partir de</div>
-          <div className="text-2xl font-extrabold text-blue-700">{pool.pricePerHour} € / heure</div>
-        </aside>
+          <aside className="h-max rounded-2xl border shadow-sm p-4 sticky top-20">
+            <div className="font-semibold mb-2">À partir de</div>
+            <div className="text-2xl font-extrabold text-blue-700 mb-4">{pool.pricePerHour} € / heure</div>
+            <BookingForm poolId={pool.id} />
+          </aside>
       </div>
       {/* Règles si disponibles */}
       {Array.isArray((pool as any).rules) && (pool as any).rules.length > 0 && (

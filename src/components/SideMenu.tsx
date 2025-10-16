@@ -9,11 +9,26 @@ export default function SideMenu() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Vérifier le statut de connexion
+    // Vérifier le statut de connexion + récupérer le rôle depuis l'API utilisateur
     const checkAuth = async () => {
       try {
         const session = await authClient.getSession();
-        setUser(session.data?.user || null);
+        const baseUser = session.data?.user || null;
+        if (!baseUser) {
+          setUser(null);
+        } else {
+          try {
+            const res = await fetch(`/api/users/${baseUser.id}`);
+            if (res.ok) {
+              const data = await res.json();
+              setUser(data.user);
+            } else {
+              setUser(baseUser);
+            }
+          } catch {
+            setUser(baseUser);
+          }
+        }
       } catch (error) {
         setUser(null);
       } finally {
@@ -148,6 +163,19 @@ export default function SideMenu() {
                       className="block px-4 py-3 hover:bg-muted rounded-md bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
                     >
                       📅 Vérifier la disponibilité
+                    </Link>
+                  </li>
+                )}
+
+                {/* Vérifier les commandes (owners) */}
+                {user.role === "owner" && (
+                  <li>
+                    <Link
+                      href="/dashboard/transactions"
+                      onClick={() => setOpen(false)}
+                      className="block px-4 py-3 hover:bg-muted rounded-md bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500"
+                    >
+                      📦 Vérifier les commandes
                     </Link>
                   </li>
                 )}

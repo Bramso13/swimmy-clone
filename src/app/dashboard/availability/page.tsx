@@ -26,6 +26,7 @@ interface Reservation {
 
 export default function AvailabilityPage() {
   const [pools, setPools] = useState<Pool[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -60,7 +61,7 @@ export default function AvailabilityPage() {
 
         // Récupérer les piscines du propriétaire avec leurs réservations
         const response = await fetch(
-          `/api/pools?includeReservations=true&ownerId=${authUser.id}`
+          `/api/pools?includeReservations=true&ownerId=${userData.user.id}`
         );
         if (!response.ok) {
           throw new Error("Erreur lors du chargement des données");
@@ -68,6 +69,13 @@ export default function AvailabilityPage() {
 
         const data = await response.json();
         setPools(data.pools || []);
+
+        // Charger les demandes de disponibilité pour cet owner
+        const reqRes = await fetch(`/api/availability/requests?ownerId=${userData.user.id}`);
+        if (reqRes.ok) {
+          const reqJson = await reqRes.json();
+          setRequests(reqJson.requests || []);
+        }
       } catch (err: any) {
         setError(err.message || "Une erreur est survenue");
       } finally {
@@ -168,6 +176,51 @@ export default function AvailabilityPage() {
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Consultez toutes les réservations de vos piscines
           </p>
+        </div>
+
+        {/* Bloc demandes de disponibilité */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Demandes de disponibilité</h2>
+          {requests.length === 0 ? (
+            <div className="text-gray-600 dark:text-gray-400">Aucune demande pour le moment.</div>
+          ) : (
+            <div className="space-y-3">
+              {requests.map((r) => (
+                <div key={r.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800 flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="font-semibold">{r.pool?.title}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {new Date(r.date).toLocaleDateString("fr-FR")} • {r.startTime} → {r.endTime}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {r.adults} adultes • {r.children} enfants • {r.babies} bébés
+                    </div>
+                    <div className="text-xs">Statut: <span className="font-medium">{r.status}</span></div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved" }) });
+                        setRequests((prev) => prev.map((x) => x.id === r.id ? { ...x, status: "approved" } : x));
+                      }}
+                      className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
+                    >
+                      Oui, disponible
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected" }) });
+                        setRequests((prev) => prev.map((x) => x.id === r.id ? { ...x, status: "rejected" } : x));
+                      }}
+                      className="px-3 py-2 rounded bg-red-600 text-white text-sm"
+                    >
+                      Non, indisponible
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {pools.length === 0 ? (
