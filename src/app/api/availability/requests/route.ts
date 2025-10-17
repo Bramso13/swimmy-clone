@@ -72,8 +72,8 @@ export async function GET(req: NextRequest) {
     }
 
     const where = ownerId
-      ? { pool: { ownerId } }
-      : { pool: { ownerId: session.user.id } }; // Par défaut, les demandes de l'utilisateur connecté
+      ? { pool: { ownerId }, status: "pending" }
+      : { pool: { ownerId: session.user.id }, status: "pending" }; // Par défaut, les demandes de l'utilisateur connecté en statut pending
 
     const requests = await prisma.availabilityRequest.findMany({
       where,

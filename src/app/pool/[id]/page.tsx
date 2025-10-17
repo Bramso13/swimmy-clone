@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { prisma } from "../../../../lib/prisma";
 import BookingForm from "./BookingForm";
+import FavoriteButton from "./FavoriteButton";
 
 export default async function PoolDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,7 +35,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
         </div>
         <div className="flex items-center gap-2 text-sm">
           <button className="inline-flex items-center gap-2 border px-3 py-1.5 rounded-full hover:bg-muted">Partager</button>
-          <button className="inline-flex items-center gap-2 border px-3 py-1.5 rounded-full hover:bg-muted">Enregistrer</button>
+          <FavoriteButton poolId={pool.id} />
         </div>
       </div>
 

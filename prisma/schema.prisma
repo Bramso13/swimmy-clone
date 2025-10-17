@@ -29,6 +29,7 @@ model User {
   poolApprovalRequests PoolApprovalRequest[]
   messagesSent   Message[]   @relation("MessagesSent")
   messagesReceived Message[]  @relation("MessagesReceived")
+  favorites     Favorite[]
 
   @@map("user")
 }
@@ -63,6 +64,7 @@ model Pool {
   approved    Boolean       @default(false)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  favorites    Favorite[]
 }
 
 model Reservation {
@@ -189,5 +191,17 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  pool      Pool     @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  poolId    String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, poolId])
+  @@map("favorite")
 }
 

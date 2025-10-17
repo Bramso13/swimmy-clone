@@ -256,7 +256,7 @@ export default function AvailabilityPage() {
                     <button
                       onClick={async () => {
                         await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved", message: (r as any).__msg }) });
-                        setRequests((prev) => prev.map((x) => x.id === r.id ? { ...x, status: "approved" } : x));
+                        setRequests((prev) => prev.filter((x) => x.id !== r.id));
                       }}
                       className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
                     >
@@ -265,7 +265,7 @@ export default function AvailabilityPage() {
                     <button
                       onClick={async () => {
                         await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected", message: (r as any).__msg }) });
-                        setRequests((prev) => prev.map((x) => x.id === r.id ? { ...x, status: "rejected" } : x));
+                        setRequests((prev) => prev.filter((x) => x.id !== r.id));
                       }}
                       className="px-3 py-2 rounded bg-red-600 text-white text-sm"
                     >

@@ -48,7 +48,7 @@ export default function Home() {
 
       {/* Swimmy Section */}
       <section className="py-12 bg-white rounded-lg shadow flex flex-row items-center">
-        <h2 className="text-2xl font-bold text-center mb-8">
+        <h2 className="text-3xl font-bold text-center mb-8">
           Swimmy, c’est deux façons de faire{" "}
           <span className="text-blue-600">des heureux !</span>
         </h2>

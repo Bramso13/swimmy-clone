@@ -18,6 +18,11 @@ const DashboardPage = () => {
         </a>
       </div>
       <div className="mb-4">
+        <a href="/dashboard/favorites" className="underline">
+          ❤️ Mes favoris
+        </a>
+      </div>
+      <div className="mb-4">
         <a href="/dashboard/transactions" className="underline">
           Mes transactions
         </a>
