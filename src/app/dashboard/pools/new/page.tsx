@@ -27,12 +27,14 @@ const NewPoolPage = () => {
   const [address, setAddress] = useState("");
   const [latitude, setLatitude] = useState<string>("");
   const [longitude, setLongitude] = useState<string>("");
-  const [photos, setPhotos] = useState<string>("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [pricePerHour, setPricePerHour] = useState<string>("");
   const [rules, setRules] = useState<string>("");
   const [ownerPresent, setOwnerPresent] = useState(false);
   const [product, setProduct] = useState("Chlore");
+  const [submitting, setSubmitting] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const revenue = useMemo(() => {
     const base = persons ? persons * 8 : 0; // simple maquette de calcul
@@ -98,41 +100,57 @@ const NewPoolPage = () => {
                   <label className="text-sm font-medium">Description</label>
                   <textarea value={description} onChange={(e)=>setDescription(e.target.value)} rows={3} className="mt-1 w-full border rounded-md px-3 py-2" />
                 </div>
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium">Téléverser une photo</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="mt-1 w-full border rounded-md px-3 py-2"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        setUploading(true);
-                        try {
+                <div>
+                  <label className="text-sm font-medium">Téléverser des photos (multiple)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="mt-1 w-full border rounded-md px-3 py-2"
+                    onChange={async (e) => {
+                      const files = Array.from(e.target.files || []);
+                      if (files.length === 0) return;
+                      setUploading(true);
+                      try {
+                        const uploadedUrls: string[] = [];
+                        for (const file of files) {
                           const form = new FormData();
                           form.append("file", file);
                           const res = await fetch("/api/upload", { method: "POST", body: form });
                           const j = await res.json();
                           if (res.ok) {
-                            setPhotos((prev) => [prev, j.url].filter(Boolean).join(","));
+                            uploadedUrls.push(j.url);
                           } else {
                             alert(j.error || "Upload échoué");
                           }
-                        } finally {
-                          setUploading(false);
                         }
-                      }}
-                    />
-                    {uploading && <div className="text-xs text-muted-foreground mt-1">Téléversement…</div>}
-                    {photos && (
-                      <div className="text-xs mt-2 break-all">Images: {photos}</div>
-                    )}
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Prix à l’heure (€)</label>
-                    <input value={pricePerHour} onChange={(e)=>setPricePerHour(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
-                  </div>
+                        setPhotos((prev) => [...prev, ...uploadedUrls]);
+                      } finally {
+                        setUploading(false);
+                      }
+                    }}
+                  />
+                  {uploading && <div className="text-xs text-muted-foreground mt-1">Téléversement en cours…</div>}
+                  {photos.length > 0 && (
+                    <div className="mt-3 grid grid-cols-4 gap-2">
+                      {photos.map((url, idx) => (
+                        <div key={idx} className="relative group">
+                          <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-20 object-cover rounded border" />
+                          <button
+                            type="button"
+                            onClick={() => setPhotos(photos.filter((_, i) => i !== idx))}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Prix à l'heure (€)</label>
+                  <input value={pricePerHour} onChange={(e)=>setPricePerHour(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Vous habitez en</label>
@@ -224,29 +242,88 @@ const NewPoolPage = () => {
               </div>
             </div>
             <div className="mt-6">
-        <button
-                className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
-                onClick={async () => {
-                  const body = {
-                    title,
-                    description,
-                    address,
-                    latitude: Number(latitude),
-                    longitude: Number(longitude),
-                    photos: photos.split(",").map((s)=>s.trim()).filter(Boolean),
-                    pricePerHour: Number(pricePerHour),
-                    availability: {},
-                    rules: rules.split(",").map((s)=>s.trim()).filter(Boolean),
-                    additional: { ownerPresent, product },
-                  };
-                  const res = await fetch("/api/pools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-                  const j = await res.json();
-                  if(res.ok){ router.push(`/pool/${j.pool.id}`); }
-                  else{ alert(j.error || "Erreur de création"); }
-                }}
-              >
-                Enregistrer ma piscine
-        </button>
+              {showSuccessMessage ? (
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">✅</div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-green-800 dark:text-green-400 mb-2">
+                        Demande envoyée avec succès !
+                      </h3>
+                      <p className="text-green-700 dark:text-green-300 mb-4">
+                        Votre annonce a été soumise et est en attente de validation par un administrateur. 
+                        Vous recevrez une notification dès qu'elle sera approuvée.
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => router.push("/dashboard")}
+                          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                        >
+                          Retour au tableau de bord
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowSuccessMessage(false);
+                            setTitle("");
+                            setDescription("");
+                            setAddress("");
+                            setLatitude("");
+                            setLongitude("");
+                            setPhotos([]);
+                            setPricePerHour("");
+                            setRules("");
+                          }}
+                          className="bg-white dark:bg-gray-800 border border-green-600 text-green-600 px-4 py-2 rounded-md hover:bg-green-50 dark:hover:bg-green-900/20 transition"
+                        >
+                          Créer une autre annonce
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  disabled={submitting}
+                  className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  onClick={async () => {
+                    setSubmitting(true);
+                    try {
+                      const body = {
+                        title,
+                        description,
+                        address,
+                        latitude: Number(latitude),
+                        longitude: Number(longitude),
+                        photos: photos,
+                        pricePerHour: Number(pricePerHour),
+                        availability: {},
+                        rules: rules.split(",").map((s)=>s.trim()).filter(Boolean),
+                        additional: { ownerPresent, product },
+                      };
+                      const res = await fetch("/api/pools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                      const j = await res.json();
+                      
+                      if(res.ok || res.status === 202) {
+                        // Si c'est une demande d'approbation (status 202)
+                        if (res.status === 202 || j.approval) {
+                          setShowSuccessMessage(true);
+                        } else if (j.pool) {
+                          // Si c'est une création directe (owner)
+                          router.push(`/pool/${j.pool.id}`);
+                        }
+                      } else {
+                        alert(j.error || "Erreur de création");
+                      }
+                    } catch (error) {
+                      alert("Une erreur est survenue lors de la création");
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                >
+                  {submitting ? "Envoi en cours..." : "Enregistrer ma piscine"}
+                </button>
+              )}
             </div>
           </div>
         </div>

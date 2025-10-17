@@ -1,8 +1,8 @@
 import React from "react";
-import Image from "next/image";
 import { prisma } from "../../../../lib/prisma";
 import BookingForm from "./BookingForm";
 import FavoriteButton from "./FavoriteButton";
+import ImageCarousel from "./ImageCarousel";
 
 export default async function PoolDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,7 +17,6 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
   }
   const rawPhotos: string[] = Array.isArray(pool.photos) ? (pool.photos as string[]) : [];
   const images: string[] = rawPhotos.filter((src) => typeof src === "string" && src.trim().length > 0);
-  const imagesCount = images.length;
 
   return (
     <main className="mx-auto max-w-6xl p-4 md:p-6">
@@ -39,26 +38,8 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
         </div>
       </div>
 
-      {/* Gallery */}
-      <div className="relative rounded-xl overflow-hidden border">
-        <div className="absolute left-3 top-3 z-10 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-          1/{imagesCount}
-        </div>
-        <div className="grid md:grid-cols-2 gap-1">
-          <div className="relative h-[340px] md:h-[460px]">
-            {images[0] && (
-              <Image src={images[0]} alt="pool" fill className="object-cover" />
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-1">
-            {images.slice(1).map((src: string, i: number) => (
-              <div key={i} className="relative h-[170px] md:h-[230px]">
-                <Image src={src} alt="pool" fill className="object-cover" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Carrousel d'images */}
+      <ImageCarousel images={images} title={pool.title} />
 
       {/* Content + booking card */}
       <div className="mt-8 grid lg:grid-cols-[1fr_360px] gap-8">
