@@ -259,7 +259,7 @@ export default function Home() {
         </section>
       
       {/* Section FAQ et Contact */}
-      <section className="py-12 bg-gray-50 w-full -mx-4 px-4">
+      <section id="faq" className="py-12 bg-gray-50 w-full -mx-4 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8">
             
@@ -353,9 +353,12 @@ export default function Home() {
                 Plus simple en direct ?
               </h2>
               
-              <button className="bg-white text-blue-500 px-8 py-4 rounded-full font-medium transition hover:bg-gray-100 border border-blue-200">
+              <Link
+                href="/contact"
+                className="bg-white text-blue-500 px-8 py-4 rounded-full font-medium transition hover:bg-gray-100 border border-blue-200 inline-block"
+              >
                 Contactez-nous →
-              </button>
+              </Link>
             </div>
           </div>
         </div>
