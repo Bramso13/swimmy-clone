@@ -6,6 +6,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [openCard, setOpenCard] = useState<"share" | "swim" | null>(null);
+  const [openFaq, setOpenFaq] = useState<"children" | "contact" | "clean" | null>(null);
 
   const handleTest = async () => {
     const res = await fetch("/api/test", {
@@ -21,6 +22,10 @@ export default function Home() {
 
   const toggleCard = (card: "share" | "swim") => {
     setOpenCard((prev) => (prev === card ? null : card));
+  };
+
+  const toggleFaq = (faq: "children" | "contact" | "clean") => {
+    setOpenFaq((prev) => (prev === faq ? null : faq));
   };
 
   return (
@@ -253,6 +258,97 @@ export default function Home() {
           </div>
         </section>
       
+      {/* Section FAQ */}
+      <section className="py-12 bg-white rounded-lg shadow w-full -mx-4 px-4">
+        <div className="flex flex-col items-center w-full">
+          <h2 className="text-3xl font-bold text-center mb-8">
+            Des questions ?{" "}
+            <span style={{color: '#0094ec'}}>Swimmy a tout prévu</span>
+          </h2>
+
+          <div className="flex flex-col gap-6 w-full justify-center items-stretch max-w-4xl">
+            {/* FAQ : Est-ce gratuit pour les enfants ? */}
+            <div
+              onClick={() => toggleFaq("children")}
+              className="bg-gray-100 rounded-lg p-6 w-full cursor-pointer hover:bg-gray-200 transition duration-300"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold">Est-ce gratuit pour les enfants ?</h3>
+                </div>
+                <span className="text-xl">{openFaq === "children" ? "▲" : "▼"}</span>
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  openFaq === "children" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="text-gray-700 text-sm whitespace-pre-line">
+                  Oui pour les enfants de moins de 3 ans.
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ : Comment contacter un propriétaire ? */}
+            <div
+              onClick={() => toggleFaq("contact")}
+              className="bg-gray-100 rounded-lg p-6 w-full cursor-pointer hover:bg-gray-200 transition duration-300"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold">Comment contacter un propriétaire ?</h3>
+                </div>
+                <span className="text-xl">{openFaq === "contact" ? "▲" : "▼"}</span>
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  openFaq === "contact" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="text-gray-700 text-sm whitespace-pre-line">
+                Pour contacter un propriétaire, connectez-vous sur votre compte Swimmy et cliquez sur le bouton "Contacter le propriétaire" sur la page de la piscine.
+                  {"\n"}puis cliquez sur "Contacter l'hôte" sur la page de l’annonce qui vous
+                  {"\n"}intéresse.
+
+
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ : Accepter des inconnus dans sa piscine, est-ce bien propre ? */}
+            <div
+              onClick={() => toggleFaq("clean")}
+              className="bg-gray-100 rounded-lg p-6 w-full cursor-pointer hover:bg-gray-200 transition duration-300"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold">Accepter des inconnus dans sa piscine, est-ce bien propre ?</h3>
+                </div>
+                <span className="text-xl">{openFaq === "clean" ? "▲" : "▼"}</span>
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  openFaq === "clean" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="text-gray-700 text-sm whitespace-pre-line">
+                  Oui, en tout cas chez Swimmy : nos propriétaires entretiennent leurs piscines principalement au chlore, ce qui se manifeste par une eau claire et saine. Ce traitement permet de détruire toute bactérie présente dans l'eau de la piscine, sans pour autant être nocif pour votre santé. Par ailleurs, le premier facteur de dégradation de la qualité de l'eau d'une piscine (après le manque d'entretien) c'est sa fréquentation : concrètement, les piscines presentes sur Swimmy sont beaucoup moins fréquentées que les piscines publiques. Nos propriétaires mettent dans la plupart des cas une douche à votre disposition avant de plonger dans la piscine.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <button className="text-white px-6 py-3 rounded-lg font-semibold transition"
+              style={{backgroundColor: '#0094ec'}}
+              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+            >
+              Toutes les réponses à vos questions →
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Avantages Section */}
       <section className="grid md:grid-cols-3 gap-8 py-12 w-full">
