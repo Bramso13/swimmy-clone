@@ -122,9 +122,16 @@ export default function Home() {
 
       {/* Carrousel de piscines */}
       <section className="w-full">
-        <h2 className="text-2xl font-bold mb-4" style={{color: '#0094ec'}}>
-          Vos piscines près de chez vous !
-        </h2>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold mb-2">
+            <span className="text-gray-900">Vos piscines</span>
+            <br />
+            <span style={{color: '#0094ec'}}>près de chez vous !</span>
+          </h2>
+          <p className="text-gray-700 mt-4">
+            Rien de plus simple pour passer un bon moment. Laquelle préférez-vous ?
+          </p>
+        </div>
         <div className="flex gap-6 overflow-x-auto pb-2">
           {[1, 2, 3].map((i) => (
             <div
@@ -161,70 +168,68 @@ export default function Home() {
         </div>
       </section>
 
-      <Link
+      <div className="flex justify-center">
+        <Link
           href="/search"
-          className="inline-flex items-center justify-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-md transition-colors duration-200 w-1/3 min-w-fit"
+          className="inline-flex items-center justify-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-md transition-colors duration-200"
           style={{backgroundColor: '#0094ec'}}
-            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+          onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+          onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
         >
           Trouver une piscine près de chez vous
           <svg className="w-24 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </Link>
+      </div>
         
         <section className="py-16 px-8" style={{backgroundColor: '#0094ec'}}>
-          <div className="max-w-6xl mx-auto">
-            {/* Titre principal */}
-            <div className="mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                Un événement à fêter ?
-              </h2>
-              <p className="text-xl text-white">
-                À chaque occasion sa piscine idéale
-              </p>
-            </div>
+          <div className="max-w-4xl mx-auto">
 
             {/* Grille des événements */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+
+
+              <div className="text-white rounded-lg p-6 flex flex-col items-start text-left hover:shadow-lg transition-shadow w-64 h-64">
+                <h2 className="text-4xl font-bold mb-4">Un évenement à fêter ?</h2>
+                <p className="text-white text-xl ">À chaque occasion sa piscine idéale</p>
+              </div>
+
               {/* Pool Party */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow">
+              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">Pool Party</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">🏊‍♂️</div>
               </div>
 
               {/* Team Building */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow">
+              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">Team Building</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">👨‍💼</div>
               </div>
 
               {/* EVJF et EVG */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow">
+              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">EVJF et EVG</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">👑</div>
               </div>
 
               {/* Anniversaire */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow">
+              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">Anniversaire</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">🎂</div>
               </div>
 
               {/* Baby Shower */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow">
+              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">Baby Shower</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">👶</div>
               </div>
 
-              {/* Carte vide pour maintenir la grille */}
-              <div className="bg-white rounded-lg p-6 opacity-0"></div>
             </div>
 
             {/* Texte et bouton */}
@@ -234,10 +239,10 @@ export default function Home() {
               </p>
               <Link
                 href="/search"
-                className="inline-flex items-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-lg transition-colors duration-200"
-                style={{backgroundColor: '#0094ec'}}
+                className=" translate-y-8/5 inline-flex items-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-lg transition-colors duration-200"
+                style={{backgroundColor: '#0067b9'}}
             onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0067b9'}
               >
                 Une piscine pour le plaisir
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
