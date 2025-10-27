@@ -125,10 +125,13 @@ export default function PoolCard({ pool }: { pool: Pool }) {
       {pool.address && (
         <div className="text-xs text-muted-foreground line-clamp-1">{pool.address}</div>
       )}
-      <div className="text-blue-600 font-bold text-sm">{pool.pricePerHour} €/heure</div>
+      <div className="font-bold text-sm" style={{color: '#0094ec'}}>{pool.pricePerHour} €/heure</div>
       <Link
         href={`/pool/${pool.id}`}
-        className="bg-blue-600 text-white px-3 py-1 rounded text-sm text-center mt-1 hover:bg-blue-700 transition"
+        className="text-white px-3 py-1 rounded text-sm text-center mt-1 transition"
+        style={{backgroundColor: '#0094ec'}}
+        onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+        onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
       >
         Voir
       </Link>

@@ -8,7 +8,10 @@ const PoolsPage = () => {
       <div>Liste des piscines (à venir)</div>
       <a
         href="/dashboard/pools/new"
-        className="bg-blue-600 text-white px-4 py-2 rounded"
+        className="text-white px-4 py-2 rounded"
+        style={{backgroundColor: '#0094ec'}}
+        onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+        onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
       >
         Ajouter une piscine
       </a>

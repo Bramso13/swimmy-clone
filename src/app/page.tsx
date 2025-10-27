@@ -26,9 +26,12 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-16">
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-blue-400 text-white">
-        <div className="grid md:grid-cols-2 items-center gap-6 px-6 md:px-10 py-12">
-          <div className="flex flex-col gap-6 items-start">
+      <section className="relative overflow-hidden rounded-2xl text-white" style={{background: 'linear-gradient(to right, #0094ec, #4db8ff)'}}>
+        <div className="flex flex-col gap-6 px-6 md:px-10 py-12 items-center">
+          <div className="flex items-center justify-center w-full max-w-4xl">
+            <SearchBar />
+          </div>
+          <div className="flex flex-col gap-6 items-center text-center w-full">
             <h1 className="text-5xl md:text-6xl font-extrabold leading-tight">
               Le bonheur
               <br />
@@ -38,82 +41,79 @@ export default function Home() {
               Ici, vous pouvez louer une piscine privée partout en France
             </p>
           </div>
-          <div className="flex items-start justify-center md:justify-end">
-            <div className="w-full md:max-w-xl">
-              <SearchBar />
-            </div>
-          </div>
         </div>
       </section>
 
       {/* Swimmy Section */}
-      <section className="py-12 bg-white rounded-lg shadow flex flex-row items-center">
-        <h2 className="text-3xl font-bold text-center mb-8">
-          Swimmy, c’est deux façons de faire{" "}
-          <span className="text-blue-600">des heureux !</span>
-        </h2>
+      <section className="py-12 bg-white rounded-lg shadow w-full -mx-4 px-4">
+        <div className="flex flex-col items-center w-full">
+          <h2 className="text-3xl font-bold text-center mb-8">
+            Swimmy, c'est deux façons de faire{" "}
+            <span style={{color: '#0094ec'}}>des heureux !</span>
+          </h2>
 
-        <div className="flex flex-col gap-6 w-full justify-center items-stretch max-w-4xl">
-          {/* Carte : Je partage ma piscine */}
-          <div
-            onClick={() => toggleCard("share")}
-            className="bg-gray-100 rounded-lg p-6 w-full cursor-pointer hover:bg-gray-200 transition duration-300"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/icons/flippers.png"
-                  alt="Partager piscine"
-                  width={32}
-                  height={32}
-                />
-                <h3 className="text-lg font-semibold">Je partage ma piscine</h3>
-              </div>
-              <span className="text-xl">{openCard === "share" ? "▲" : "▼"}</span>
-            </div>
+          <div className="flex flex-col gap-6 w-full justify-center items-stretch max-w-4xl">
+            {/* Carte : Je partage ma piscine */}
             <div
-              className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                openCard === "share" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
-              }`}
+              onClick={() => toggleCard("share")}
+              className="bg-gray-100 rounded-lg p-6 w-full cursor-pointer hover:bg-gray-200 transition duration-300"
             >
-              <div className="text-gray-700 text-sm whitespace-pre-line">
-                Simple, flexible, sécurisé.
-                {"\n"}Fixez vous-même le prix et le nombre de personnes accueillies.
-                {"\n"}Précisez les règles à respecter.
-                {"\n"}Modifiez vos disponibilités comme vous le souhaitez.
-                {"\n\n"}Ce n’est pas tout : nous avons prévu une assurance en cas de pépin.
-                {"\n"}Un contrat pour éviter les mauvaises surprises.
-                {"\n"}Et une équipe support hautement disponible.
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/icons/flippers.png"
+                    alt="Partager piscine"
+                    width={32}
+                    height={32}
+                  />
+                  <h3 className="text-lg font-semibold">Je partage ma piscine</h3>
+                </div>
+                <span className="text-xl">{openCard === "share" ? "▲" : "▼"}</span>
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  openCard === "share" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="text-gray-700 text-sm whitespace-pre-line">
+                  Simple, flexible, sécurisé.
+                  {"\n"}Fixez vous-même le prix et le nombre de personnes accueillies.
+                  {"\n"}Précisez les règles à respecter.
+                  {"\n"}Modifiez vos disponibilités comme vous le souhaitez.
+                  {"\n\n"}Ce n’est pas tout : nous avons prévu une assurance en cas de pépin.
+                  {"\n"}Un contrat pour éviter les mauvaises surprises.
+                  {"\n"}Et une équipe support hautement disponible.
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Carte : Je vais me baigner */}
-          <div
-            onClick={() => toggleCard("swim")}
-            className="bg-gray-100 rounded-lg p-6 w-full cursor-pointer hover:bg-gray-200 transition duration-300"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/icons/buoy.png"
-                  alt="Je vais me baigner"
-                  width={32}
-                  height={32}
-                />
-                <h3 className="text-lg font-semibold">Je vais me baigner</h3>
-              </div>
-              <span className="text-xl">{openCard === "swim" ? "▲" : "▼"}</span>
-            </div>
+            {/* Carte : Je vais me baigner */}
             <div
-              className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                openCard === "swim" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
-              }`}
+              onClick={() => toggleCard("swim")}
+              className="bg-gray-100 rounded-lg p-6 w-full cursor-pointer hover:bg-gray-200 transition duration-300"
             >
-              <div className="text-gray-700 text-sm whitespace-pre-line">
-                Simple, abordable et très très sympa
-                {"\n"}Passez un bon moment avec ceux que vous aimez. C'est à la carte, selon vos envies et vos humeurs, dans des lieux vérifiés, chez des hôtes sérieux et heureux de vous accueillir.
-                {"\n"}Notre équipe est là pour vous accompagner à chaque étape.
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/icons/buoy.png"
+                    alt="Je vais me baigner"
+                    width={32}
+                    height={32}
+                  />
+                  <h3 className="text-lg font-semibold">Je vais me baigner</h3>
+                </div>
+                <span className="text-xl">{openCard === "swim" ? "▲" : "▼"}</span>
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  openCard === "swim" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="text-gray-700 text-sm whitespace-pre-line">
+                  Simple, abordable et très très sympa
+                  {"\n"}Passez un bon moment avec ceux que vous aimez. C'est à la carte, selon vos envies et vos humeurs, dans des lieux vérifiés, chez des hôtes sérieux et heureux de vous accueillir.
+                  {"\n"}Notre équipe est là pour vous accompagner à chaque étape.
+                </div>
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@ export default function Home() {
 
       {/* Carrousel de piscines */}
       <section className="w-full">
-        <h2 className="text-2xl font-bold mb-4 text-blue-700">
+        <h2 className="text-2xl font-bold mb-4" style={{color: '#0094ec'}}>
           Vos piscines près de chez vous !
         </h2>
         <div className="flex gap-6 overflow-x-auto pb-2">
@@ -144,12 +144,15 @@ export default function Home() {
               <div className="text-sm text-gray-500">
                 {i === 1 ? 'Mikar - Toulon' : i === 2 ? 'La Villa Les Glycines - 20 min de Paris' : 'Sud Gironde'}
               </div>
-              <div className="text-blue-600 font-bold">
+              <div className="font-bold" style={{color: '#0094ec'}}>
                 {i === 1 ? '10 €/heure' : i === 2 ? '20 €/heure' : '12 €/heure'}
               </div>
               <Link
                 href={`/pool/${i}`}
-                className="bg-blue-600 text-white px-3 py-1 rounded text-sm text-center mt-2 hover:bg-blue-700 transition"
+                className="text-white px-3 py-1 rounded text-sm text-center mt-2 transition"
+                style={{backgroundColor: '#0094ec'}}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
               >
                 Voir
               </Link>
@@ -160,7 +163,10 @@ export default function Home() {
 
       <Link
           href="/search"
-          className="inline-flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-medium px-8 py-4 rounded-full shadow-md transition-colors duration-200 w-1/3 min-w-fit"
+          className="inline-flex items-center justify-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-md transition-colors duration-200 w-1/3 min-w-fit"
+          style={{backgroundColor: '#0094ec'}}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
         >
           Trouver une piscine près de chez vous
           <svg className="w-24 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +174,7 @@ export default function Home() {
           </svg>
         </Link>
         
-        <section className="bg-blue-500 py-16 px-8">
+        <section className="py-16 px-8" style={{backgroundColor: '#0094ec'}}>
           <div className="max-w-6xl mx-auto">
             {/* Titre principal */}
             <div className="mb-12">
@@ -228,7 +234,10 @@ export default function Home() {
               </p>
               <Link
                 href="/search"
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-4 rounded-full shadow-lg transition-colors duration-200"
+                className="inline-flex items-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-lg transition-colors duration-200"
+                style={{backgroundColor: '#0094ec'}}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
               >
                 Une piscine pour le plaisir
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,7 +250,7 @@ export default function Home() {
       
 
       {/* Avantages Section */}
-      <section className="grid md:grid-cols-3 gap-8 py-12">
+      <section className="grid md:grid-cols-3 gap-8 py-12 w-full">
         <div className="flex flex-col items-center text-center gap-2">
           <span className="text-3xl">💧</span>
           <h3 className="font-bold text-lg">Réservation instantanée</h3>
@@ -266,14 +275,17 @@ export default function Home() {
       </section>
 
       {/* Call to action */}
-      <section className="flex flex-col items-center gap-4 py-8 bg-blue-50 rounded-lg shadow-inner">
-        <h2 className="text-2xl font-bold text-blue-700">Prêt à plonger ?</h2>
+      <section className="flex flex-col items-center gap-4 py-8 rounded-lg shadow-inner" style={{backgroundColor: '#f0f8ff'}}>
+        <h2 className="text-2xl font-bold" style={{color: '#0094ec'}}>Prêt à plonger ?</h2>
         <p className="text-muted-foreground">
           Inscrivez-vous gratuitement et profitez de l’été dès maintenant.
         </p>
         <Link
           href="/register"
-          className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition"
+          className="text-white px-6 py-2 rounded font-semibold transition"
+          style={{backgroundColor: '#0094ec'}}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
         >
           Créer mon compte
         </Link>

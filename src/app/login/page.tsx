@@ -35,7 +35,7 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh]">
       <div className="w-full max-w-md bg-white dark:bg-black/80 rounded-lg shadow-lg p-8 flex flex-col gap-6 border border-border">
-        <h1 className="text-2xl font-bold text-center text-blue-700 mb-2">
+        <h1 className="text-2xl font-bold text-center mb-2" style={{color: '#0094ec'}}>
           Connexion
         </h1>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -62,7 +62,10 @@ export default function LoginPage() {
           )}
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition w-full disabled:opacity-60"
+            className="text-white px-6 py-2 rounded font-semibold transition w-full disabled:opacity-60"
+            style={{backgroundColor: '#0094ec'}}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
             disabled={isLoading}
           >
             {isLoading ? "Connexion..." : "Se connecter"}
@@ -70,7 +73,7 @@ export default function LoginPage() {
         </form>
         <div className="text-center text-sm text-muted-foreground">
           Pas encore de compte ?{" "}
-          <Link href="/register" className="text-blue-600 hover:underline">
+          <Link href="/register" className="hover:underline" style={{color: '#0094ec'}}>
             Créer un compte
           </Link>
         </div>

@@ -70,7 +70,7 @@ export default function NavBar() {
           </Link>
           {user.role === "owner" && (
             <>
-              <Link href="/dashboard/availability" className="hover:underline text-blue-600 font-semibold">
+              <Link href="/dashboard/availability" className="hover:underline font-semibold" style={{color: '#0094ec'}}>
                 Disponibilité
               </Link>
               <Link href="/dashboard/transactions" className="hover:underline text-emerald-600 font-semibold">
@@ -99,7 +99,10 @@ export default function NavBar() {
           </Link>
           <Link
             href="/login"
-            className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 transition"
+            className="text-white px-4 py-1.5 rounded transition"
+            style={{backgroundColor: '#0094ec'}}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
           >
             Connexion
           </Link>

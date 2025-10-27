@@ -48,7 +48,7 @@ const NewPoolPage = () => {
         {/* Texte à gauche */}
         <div className="flex flex-col gap-6 py-6">
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-            Gagnez de l'argent <span className="text-blue-600">en</span>
+            Gagnez de l'argent <span style={{color: '#0094ec'}}>en</span>
             <br />
             louant votre piscine
           </h1>
@@ -64,7 +64,10 @@ const NewPoolPage = () => {
           <div>
             <button
               onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-full text-base font-semibold hover:bg-blue-700 transition shadow-sm"
+              className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-full text-base font-semibold transition shadow-sm"
+              style={{backgroundColor: '#0094ec'}}
+              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
             >
               Créez votre annonce <span className="text-xl leading-none">+</span>
             </button>
@@ -187,8 +190,9 @@ const NewPoolPage = () => {
                         type="button"
                         onClick={() => setPersons(opt.value)}
                         className={`px-3 py-2 rounded-md border text-sm font-medium transition ${
-                          persons === opt.value ? "bg-blue-600 text-white border-blue-600" : "hover:bg-muted"
+                          persons === opt.value ? "text-white border-2" : "hover:bg-muted"
                         }`}
+                        style={persons === opt.value ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
                       >
                         {opt.label}
                       </button>
@@ -205,8 +209,9 @@ const NewPoolPage = () => {
                         type="button"
                         onClick={() => setRhythm(opt.value)}
                         className={`w-full text-left px-3 py-2 rounded-md border transition ${
-                          rhythm === opt.value ? "bg-blue-50 border-blue-300 dark:bg-blue-950/40" : "hover:bg-muted"
+                          rhythm === opt.value ? "border-2" : "hover:bg-muted"
                         }`}
+                        style={rhythm === opt.value ? {backgroundColor: '#f0f8ff', borderColor: '#0094ec'} : {}}
                       >
                         {opt.label}
                       </button>
@@ -235,7 +240,7 @@ const NewPoolPage = () => {
               <div className="md:pt-8 md:pl-4 border-t md:border-t-0 md:border-l border-border flex md:block items-center justify-between rounded-md">
                 <div>
                   <div className="text-sm text-muted-foreground">Revenu mensuel</div>
-                  <div className="text-4xl md:text-5xl font-extrabold text-blue-700 mt-1">
+                  <div className="text-4xl md:text-5xl font-extrabold mt-1" style={{color: '#0094ec'}}>
                     {revenue.toLocaleString("fr-FR")} €
                   </div>
                 </div>
@@ -284,7 +289,10 @@ const NewPoolPage = () => {
               ) : (
                 <button
                   disabled={submitting}
-                  className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="text-white px-5 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  style={{backgroundColor: '#0094ec'}}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
                   onClick={async () => {
                     setSubmitting(true);
                     try {
