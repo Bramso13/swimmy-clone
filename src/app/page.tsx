@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export default function Home() {
   const [openCard, setOpenCard] = useState<"share" | "swim" | null>(null);
@@ -28,8 +29,28 @@ export default function Home() {
     setOpenFaq((prev) => (prev === faq ? null : faq));
   };
 
+  const handleCreatePoolClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    try {
+      const session = await authClient.getSession();
+      
+      if (session.data?.user) {
+        // Utilisateur connecté, rediriger vers la création de piscine
+        window.location.href = "/dashboard/pools/new";
+      } else {
+        // Utilisateur non connecté, rediriger vers la page de connexion
+        window.location.href = "/login";
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification de l'authentification:", error);
+      // En cas d'erreur, rediriger vers la page de connexion par sécurité
+      window.location.href = "/login";
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-16">
+    <div className="flex flex-col gap-16 bg-gray-100 min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden rounded-2xl text-white" style={{background: 'linear-gradient(to right, #0094ec, #4db8ff)'}}>
         <div className="flex flex-col gap-6 px-6 md:px-10 py-12 items-center">
@@ -50,27 +71,25 @@ export default function Home() {
       </section>
 
       {/* Swimmy Section */}
-      <section className="py-12 bg-white rounded-lg shadow w-full -mx-4 px-4">
-        <div className="flex flex-col items-center w-full">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            Swimmy, c'est deux façons de faire{" "}
-            <span style={{color: '#0094ec'}}>des heureux !</span>
-          </h2>
+      <section className="py-16 bg-gray-100 rounded-lg shadow w-full -mx-4 px-4">
+        <div className="grid md:grid-cols-2 gap-12 w-full items-center max-w-6xl mx-auto">
+          {/* Colonne gauche : Titre */}
+          <div className="text-left">
+            <h2 className="text-4xl md:text-5xl font-bold mb-8">
+              Swimmy, c'est deux façons de faire{" "}
+              <span style={{color: '#0094ec'}}>des heureux !</span>
+            </h2>
+          </div>
 
-          <div className="flex flex-col gap-6 w-full justify-center items-stretch max-w-4xl">
+          {/* Colonne droite : Cartes */}
+          <div className="flex flex-col gap-6">
             {/* Carte : Je partage ma piscine */}
             <div
               onClick={() => toggleCard("share")}
-              className="bg-gray-100 rounded-lg p-6 w-full cursor-pointer hover:bg-gray-200 transition duration-300"
+              className="bg-white rounded-lg p-6 w-full cursor-pointer hover:bg-gray-50 transition duration-300"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <Image
-                    src="/icons/flippers.png"
-                    alt="Partager piscine"
-                    width={32}
-                    height={32}
-                  />
                   <h3 className="text-lg font-semibold">Je partage ma piscine</h3>
                 </div>
                 <span className="text-xl">{openCard === "share" ? "▲" : "▼"}</span>
@@ -80,14 +99,28 @@ export default function Home() {
                   openCard === "share" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
                 }`}
               >
-                <div className="text-gray-700 text-sm whitespace-pre-line">
+                <div className="text-gray-700 text-sm whitespace-pre-line mb-4">
                   Simple, flexible, sécurisé.
                   {"\n"}Fixez vous-même le prix et le nombre de personnes accueillies.
                   {"\n"}Précisez les règles à respecter.
                   {"\n"}Modifiez vos disponibilités comme vous le souhaitez.
-                  {"\n\n"}Ce n’est pas tout : nous avons prévu une assurance en cas de pépin.
+                  {"\n\n"}Ce n'est pas tout : nous avons prévu une assurance en cas de pépin.
                   {"\n"}Un contrat pour éviter les mauvaises surprises.
                   {"\n"}Et une équipe support hautement disponible.
+                </div>
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleCreatePoolClick}
+                    className="inline-flex items-center gap-2 text-white font-medium px-6 py-3 rounded-full shadow-md transition-colors duration-200"
+                    style={{backgroundColor: '#0094ec'}}
+                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+                  >
+                    Louez votre piscine facilement
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -95,16 +128,10 @@ export default function Home() {
             {/* Carte : Je vais me baigner */}
             <div
               onClick={() => toggleCard("swim")}
-              className="bg-gray-100 rounded-lg p-6 w-full cursor-pointer hover:bg-gray-200 transition duration-300"
+              className="bg-white rounded-lg p-6 w-full cursor-pointer hover:bg-gray-50 transition duration-300"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <Image
-                    src="/icons/buoy.png"
-                    alt="Je vais me baigner"
-                    width={32}
-                    height={32}
-                  />
                   <h3 className="text-lg font-semibold">Je vais me baigner</h3>
                 </div>
                 <span className="text-xl">{openCard === "swim" ? "▲" : "▼"}</span>
@@ -114,10 +141,24 @@ export default function Home() {
                   openCard === "swim" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
                 }`}
               >
-                <div className="text-gray-700 text-sm whitespace-pre-line">
+                <div className="text-gray-700 text-sm whitespace-pre-line mb-4">
                   Simple, abordable et très très sympa
                   {"\n"}Passez un bon moment avec ceux que vous aimez. C'est à la carte, selon vos envies et vos humeurs, dans des lieux vérifiés, chez des hôtes sérieux et heureux de vous accueillir.
                   {"\n"}Notre équipe est là pour vous accompagner à chaque étape.
+                </div>
+                <div className="flex justify-center">
+                  <Link
+                    href="/search"
+                    className="inline-flex items-center gap-2 text-white font-medium px-6 py-3 rounded-full shadow-md transition-colors duration-200"
+                    style={{backgroundColor: '#0094ec'}}
+                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+                  >
+                    Vous aussi profitez de Swimmy
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
                 </div>
               </div>
             </div>
