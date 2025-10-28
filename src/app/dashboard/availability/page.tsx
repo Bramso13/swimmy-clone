@@ -78,8 +78,8 @@ export default function AvailabilityPage() {
           setRequests(reqJson.requests || []);
         }
 
-        // Charger les demandes d'approbation de piscines
-        const apprRes = await fetch(`/api/pools/approvals?ownerId=${userData.user.id}`);
+        // Charger les demandes d'approbation de piscines (toutes les pending pour owner)
+        const apprRes = await fetch(`/api/pools/approvals?scope=all&status=pending`);
         if (apprRes.ok) {
           const apprJson = await apprRes.json();
           setPoolApprovals(apprJson.requests || []);

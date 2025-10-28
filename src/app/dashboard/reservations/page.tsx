@@ -11,7 +11,18 @@ const ReservationsPage = () => {
   const [user, setUser] = useState<any>(null);
   const { reservations, fetchReservations, loading, error } = useRenter();
   const [approvals, setApprovals] = useState<any[]>([]);
+  const [approvalsToValidate, setApprovalsToValidate] = useState<any[]>([]);
   const [myRequests, setMyRequests] = useState<any[]>([]);
+
+  const fetchMyApprovals = async (currentUserId?: string) => {
+    try {
+      const res = await fetch('/api/pools/approvals', { cache: 'no-store' });
+      const data = await res.json();
+      const all = Array.isArray(data?.requests) ? data.requests : [];
+      const mine = currentUserId ? all.filter((r: any) => r?.requesterId === currentUserId) : all;
+      setApprovals(mine);
+    } catch {}
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -22,12 +33,12 @@ const ReservationsPage = () => {
         
         if (currentUser) {
           fetchReservations(currentUser.id);
+          await fetchMyApprovals(currentUser.id);
+          // Si owner, charger aussi les demandes à valider
           try {
-            const res = await fetch('/api/pools/approvals', { cache: 'no-store' });
-            const data = await res.json();
-            const all = Array.isArray(data?.requests) ? data.requests : [];
-            const mine = all.filter((r: any) => r?.requesterId === currentUser.id);
-            setApprovals(mine);
+            const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+            const dataAll = await resAll.json();
+            setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
           } catch {}
 
           // Charger mes demandes de réservation (availability requests)
@@ -44,6 +55,40 @@ const ReservationsPage = () => {
 
     checkAuth();
   }, [fetchReservations]);
+
+  // Rafraîchir automatiquement les demandes d'annonce quand l'onglet "demandes" est actif
+  useEffect(() => {
+    if (activeTab !== 'demandes' || !user?.id) return;
+    let cancelled = false;
+
+    const refresh = async () => {
+      await fetchMyApprovals(user.id);
+      try {
+        const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+        const dataAll = await resAll.json();
+        setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
+      } catch {}
+    };
+
+    // Premier chargement + polling léger
+    refresh();
+    const id = setInterval(refresh, 10000); // toutes les 10s
+
+    // Rafraîchit au focus de la fenêtre
+    const onFocus = () => { refresh(); };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', onFocus);
+    }
+
+    return () => {
+      if (cancelled) return;
+      clearInterval(id);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('focus', onFocus);
+      }
+      cancelled = true;
+    };
+  }, [activeTab, user?.id]);
 
   const getFilteredReservations = () => {
     if (!user) return [];
@@ -133,7 +178,7 @@ const ReservationsPage = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-red-500">Erreur: {error}</div>
           </div>
-        ) : activeTab === 'demandes' ? (
+        ) : (activeTab as any) === 'demandes' ? (
           showApprovals ? (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-gray-900">Vos demandes d'annonce</h2>
@@ -225,6 +270,38 @@ const ReservationsPage = () => {
                         <p className="text-gray-500 text-sm">Soumise le {req.createdAt ? new Date(req.createdAt).toLocaleDateString('fr-FR') : '—'}</p>
                       </div>
                       <div className="text-sm px-2 py-1 rounded-full bg-red-100 text-red-800">Refusée</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {activeTab === 'demandes' && approvalsToValidate.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-gray-900">À valider (owners)</h3>
+                {approvalsToValidate.map((req) => (
+                  <div key={req.id} className="border border-gray-200 rounded-lg p-6">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-semibold">{req.title || 'Annonce proposée'}</div>
+                        {req.address && <div className="text-gray-600 text-sm">{req.address}</div>}
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={async () => {
+                          await fetch(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'approved' }) });
+                          // rafraîchir
+                          const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+                          const dataAll = await resAll.json();
+                          setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
+                          await fetchMyApprovals(user?.id);
+                        }} className="px-3 py-1 rounded bg-green-600 text-white text-sm">Approuver</button>
+                        <button onClick={async () => {
+                          await fetch(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected' }) });
+                          const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+                          const dataAll = await resAll.json();
+                          setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
+                          await fetchMyApprovals(user?.id);
+                        }} className="px-3 py-1 rounded bg-red-600 text-white text-sm">Refuser</button>
+                      </div>
                     </div>
                   </div>
                 ))}
