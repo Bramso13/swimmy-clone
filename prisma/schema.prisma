@@ -52,6 +52,8 @@ model Pool {
   photos       String[]
   pricePerHour Float
   availability Json
+  // Flag de disponibilité générale de l'annonce
+  isAvailable  Boolean       @default(true)
   // New metadata fields
   rules        String[]     @default([])
   extras       Json?

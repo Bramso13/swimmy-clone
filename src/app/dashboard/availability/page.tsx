@@ -24,6 +24,8 @@ interface Reservation {
   };
 }
 
+type OwnerAvailTab = "disponibilite" | "piscines";
+
 export default function AvailabilityPage() {
   const [pools, setPools] = useState<Pool[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
@@ -31,6 +33,7 @@ export default function AvailabilityPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<OwnerAvailTab>("disponibilite");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -169,116 +172,168 @@ export default function AvailabilityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <Link
-            href="/dashboard"
-            className="text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block"
-          >
-            ← Retour au tableau de bord
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            📅 Vérifier la disponibilité
+    <div className="flex min-h-screen bg-white">
+      {/* Sidebar à gauche */}
+      <div className="w-80 bg-gray-100 border-r border-gray-300">
+        <div className="p-8">
+          <h1 className="text-3xl font-bold text-gray-800 leading-tight mb-8">
+            <span className="block">Ma</span>
+            <span className="block">disponibilité</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Gérez les demandes de disponibilité envoyées par les utilisateurs
-          </p>
+          <nav className="space-y-1">
+            <button
+              onClick={() => setActiveTab("disponibilite")}
+              className={`w-full text-left py-3 px-4 text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${
+                activeTab === "disponibilite" ? "font-semibold text-gray-900 bg-gray-200" : "font-normal"
+              }`}
+            >
+              Disponibilité
+            </button>
+            <button
+              onClick={() => setActiveTab("piscines")}
+              className={`w-full text-left py-3 px-4 text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${
+                activeTab === "piscines" ? "font-semibold text-gray-900 bg-gray-200" : "font-normal"
+              }`}
+            >
+              Mes piscines
+            </button>
+            <Link href="/dashboard" className="inline-block text-blue-600 mt-6 hover:underline">
+              ← Retour au tableau de bord
+            </Link>
+          </nav>
         </div>
+      </div>
 
-        {/* Bloc demandes d'approbation de piscines */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Demandes d'approbation d'annonces</h2>
-          {poolApprovals.length === 0 ? (
-            <div className="text-gray-600 dark:text-gray-400">Aucune demande pour le moment.</div>
-          ) : (
-            <div className="space-y-3">
-              {poolApprovals.map((p) => (
-                <div key={p.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800 flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="font-semibold">{p.title || "Annonce sans titre"}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">{p.address}</div>
-                    <div className="text-xs text-gray-500">{p.pricePerHour ?? 0}€ / heure</div>
-                    <div className="text-xs">Statut: <span className="font-medium">{p.status}</span></div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={async () => {
-                        await fetch(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved" }) });
-                        setPoolApprovals((prev) => prev.filter((x) => x.id !== p.id));
-                      }}
-                      className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
-                    >
-                      Accepter
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await fetch(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected" }) });
-                        setPoolApprovals((prev) => prev.filter((x) => x.id !== p.id));
-                      }}
-                      className="px-3 py-2 rounded bg-red-600 text-white text-sm"
-                    >
-                      Refuser
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Bloc demandes de disponibilité */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Demandes de disponibilité</h2>
-          {requests.length === 0 ? (
-            <div className="text-gray-600 dark:text-gray-400">Aucune demande pour le moment.</div>
-          ) : (
-            <div className="space-y-3">
-              {requests.map((r) => (
-                <div key={r.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800 flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="font-semibold">{r.pool?.title}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(r.date).toLocaleDateString("fr-FR")} • {r.startTime} → {r.endTime}
+      {/* Contenu principal */}
+      <div className="flex-1 p-8">
+        {activeTab === "disponibilite" ? (
+          <div className="space-y-10">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">Demandes d'approbation d'annonces</h2>
+              {poolApprovals.length === 0 ? (
+                <div className="text-gray-600">Aucune demande pour le moment.</div>
+              ) : (
+                <div className="space-y-3">
+                  {poolApprovals.map((p) => (
+                    <div key={p.id} className="border rounded-lg p-4 bg-white flex items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="font-semibold">{p.title || "Annonce sans titre"}</div>
+                        <div className="text-sm text-gray-600">{p.address}</div>
+                        <div className="text-xs text-gray-500">{p.pricePerHour ?? 0}€ / heure</div>
+                        <div className="text-xs">Statut: <span className="font-medium">{p.status}</span></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={async () => {
+                            await fetch(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved" }) });
+                            setPoolApprovals((prev) => prev.filter((x) => x.id !== p.id));
+                          }}
+                          className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
+                        >
+                          Accepter
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await fetch(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected" }) });
+                            setPoolApprovals((prev) => prev.filter((x) => x.id !== p.id));
+                          }}
+                          className="px-3 py-2 rounded bg-red-600 text-white text-sm"
+                        >
+                          Refuser
+                        </button>
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {r.adults} adultes • {r.children} enfants • {r.babies} bébés
-                    </div>
-                    <div className="text-xs">Statut: <span className="font-medium">{r.status}</span></div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="Message à envoyer…"
-                      onChange={(e) => ((r as any).__msg = e.target.value)}
-                      className="border rounded-md px-2 py-1 text-sm"
-                    />
-                    <button
-                      onClick={async () => {
-                        await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved", message: (r as any).__msg }) });
-                        setRequests((prev) => prev.filter((x) => x.id !== r.id));
-                      }}
-                      className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
-                    >
-                      Oui, disponible
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected", message: (r as any).__msg }) });
-                        setRequests((prev) => prev.filter((x) => x.id !== r.id));
-                      }}
-                      className="px-3 py-2 rounded bg-red-600 text-white text-sm"
-                    >
-                      Non, indisponible
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
 
-        {/* On masque la liste des piscines et réservations pour ne garder que les demandes */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">Demandes de disponibilité</h2>
+              {requests.length === 0 ? (
+                <div className="text-gray-600">Aucune demande pour le moment.</div>
+              ) : (
+                <div className="space-y-3">
+                  {requests.map((r) => (
+                    <div key={r.id} className="border rounded-lg p-4 bg-white flex items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="font-semibold">{r.pool?.title}</div>
+                        <div className="text-sm text-gray-600">
+                          {new Date(r.date).toLocaleDateString("fr-FR")} • {r.startTime} → {r.endTime}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {r.adults} adultes • {r.children} enfants • {r.babies} bébés
+                        </div>
+                        <div className="text-xs">Statut: <span className="font-medium">{r.status}</span></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          placeholder="Message à envoyer…"
+                          onChange={(e) => ((r as any).__msg = e.target.value)}
+                          className="border rounded-md px-2 py-1 text-sm"
+                        />
+                        <button
+                          onClick={async () => {
+                            await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved", message: (r as any).__msg }) });
+                            setRequests((prev) => prev.filter((x) => x.id !== r.id));
+                          }}
+                          className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
+                        >
+                          Oui, disponible
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected", message: (r as any).__msg }) });
+                            setRequests((prev) => prev.filter((x) => x.id !== r.id));
+                          }}
+                          className="px-3 py-2 rounded bg-red-600 text-white text-sm"
+                        >
+                          Non, indisponible
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Mes piscines</h2>
+            {pools.length === 0 ? (
+              <div className="text-gray-600">Vous n'avez pas encore de piscine.</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {pools.map((pool) => (
+                  <div key={pool.id} className="border rounded-lg p-4 bg-white">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="font-semibold text-gray-900">{pool.title}</div>
+                        <div className="text-sm text-gray-600">{pool.address}</div>
+                        <div className="text-xs text-gray-500 mb-3">{pool.pricePerHour}€ / heure</div>
+                        <Link href={`/pool/${pool.id}`} className="text-blue-600 hover:underline text-sm">Voir l'annonce</Link>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-700">Disponible</span>
+                        <input
+                          type="checkbox"
+                          defaultChecked={(pool as any).isAvailable ?? true}
+                          onChange={async (e) => {
+                            const next = e.target.checked;
+                            // Optimistic update
+                            setPools((prev) => prev.map((p) => p.id === pool.id ? ({ ...p, isAvailable: next } as any) : p));
+                            await fetch(`/api/pools/${pool.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isAvailable: next }) });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
