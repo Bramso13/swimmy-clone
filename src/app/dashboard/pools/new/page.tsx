@@ -79,15 +79,26 @@ const NewPoolPage = () => {
           <div className="bg-white dark:bg-black rounded-xl shadow border p-4 md:p-6">
             <div className="grid md:grid-cols-[1fr_auto] gap-4 md:gap-6 items-start">
               <div className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium">Titre</label>
-                    <input value={title} onChange={(e)=>setTitle(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Adresse</label>
-                    <input value={address} onChange={(e)=>setAddress(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
-                  </div>
+                <div>
+                  <label className="text-sm font-medium">Titre de votre annonce</label>
+                  <input 
+                    value={title} 
+                    onChange={(e)=>setTitle(e.target.value)} 
+                    placeholder="Ex: Belle piscine avec jardin à Paris"
+                    className="mt-1 w-full border rounded-md px-3 py-2" 
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Adresse exacte de votre piscine *</label>
+                  <input 
+                    value={address} 
+                    onChange={(e)=>setAddress(e.target.value)} 
+                    placeholder="Ex: 123 Rue de la Paix, 75001 Paris, France"
+                    className="mt-1 w-full border rounded-md px-3 py-2" 
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Indiquez l'adresse complète pour que les locataires puissent vous trouver facilement</p>
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                   <div>
@@ -179,6 +190,15 @@ const NewPoolPage = () => {
                       <option>Corse</option>
                     </select>
                   </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Adresse exacte</label>
+                  <input 
+                    value={address} 
+                    onChange={(e)=>setAddress(e.target.value)} 
+                    placeholder="Ex: 123 Rue de la Paix, 75001 Paris, France"
+                    className="mt-1 w-full border rounded-md px-3 py-2" 
+                  />
                 </div>
 
                 <div>
@@ -294,14 +314,32 @@ const NewPoolPage = () => {
                   onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
                   onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
                   onClick={async () => {
+                    // Validation des champs obligatoires
+                    if (!title.trim()) {
+                      alert("Le titre est obligatoire");
+                      return;
+                    }
+                    if (!address.trim()) {
+                      alert("L'adresse exacte est obligatoire");
+                      return;
+                    }
+                    if (!description.trim()) {
+                      alert("La description est obligatoire");
+                      return;
+                    }
+                    if (!pricePerHour || Number(pricePerHour) <= 0) {
+                      alert("Le prix par heure doit être supérieur à 0");
+                      return;
+                    }
+                    
                     setSubmitting(true);
                     try {
                       const body = {
-                        title,
-                        description,
-                        address,
-                        latitude: Number(latitude),
-                        longitude: Number(longitude),
+                        title: title.trim(),
+                        description: description.trim(),
+                        address: address.trim(),
+                        latitude: Number(latitude) || 0,
+                        longitude: Number(longitude) || 0,
                         photos: photos,
                         pricePerHour: Number(pricePerHour),
                         availability: {},
