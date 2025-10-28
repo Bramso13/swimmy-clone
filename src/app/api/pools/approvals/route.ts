@@ -8,16 +8,9 @@ export async function GET(req: NextRequest) {
     const session = await auth.api.getSession({ headers: req.headers });
     if (!session?.user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-    const { searchParams } = new URL(req.url);
-    const ownerId = searchParams.get("ownerId") || (session.user.id as string);
-
-    // sécuriser: seul l'owner connecté peut voir ses demandes
-    if (ownerId !== session.user.id) {
-      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
-    }
-
+    // Retourner toutes les demandes soumises par l'utilisateur courant (tous statuts)
     const requests = await prisma.poolApprovalRequest.findMany({
-      where: { status: "pending" },
+      where: { requesterId: session.user.id as string },
       orderBy: { createdAt: "desc" },
     });
 

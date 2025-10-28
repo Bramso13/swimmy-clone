@@ -2,12 +2,40 @@
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
 export default function Home() {
   const [openCard, setOpenCard] = useState<"share" | "swim" | null>(null);
   const [openFaq, setOpenFaq] = useState<"children" | "contact" | "clean" | null>(null);
+  const [pools, setPools] = useState<Array<{
+    id: string;
+    title: string;
+    address: string;
+    photos: string[];
+    pricePerHour: number;
+    approved?: boolean;
+  }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/pools", { cache: "no-store" });
+        const data = await res.json();
+        const all = Array.isArray(data?.pools) ? data.pools : [];
+        const approvedOnly = all.filter((p: any) => p?.approved !== false);
+        const top3 = approvedOnly.slice(0, 3);
+        if (!cancelled) setPools(top3);
+      } catch (e) {
+        // ignore, laisser vide si erreur
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleTest = async () => {
     const res = await fetch("/api/test", {
@@ -178,40 +206,54 @@ export default function Home() {
             Rien de plus simple pour passer un bon moment. Laquelle préférez-vous ?
           </p>
         </div>
-        <div className="flex gap-6 overflow-x-auto pb-2">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="min-w-[300px] bg-white border rounded-lg shadow-lg p-4 flex flex-col gap-2"
-            >
-              <Image
-                src={`/images/piscine${i}.jpg`} // Replace with your actual image paths
-                alt={`Piscine populaire ${i}`}
-                width={340}
-                height={180}
-                className="rounded-lg"
-              />
-              <div className="font-semibold text-lg">
-                Belle piscine, terrasse et jardin avec vue mer, à Toulon
-              </div>
-              <div className="text-sm text-gray-500">
-                {i === 1 ? 'Mikar - Toulon' : i === 2 ? 'La Villa Les Glycines - 20 min de Paris' : 'Sud Gironde'}
-              </div>
-              <div className="font-bold" style={{color: '#0094ec'}}>
-                {i === 1 ? '10 €/heure' : i === 2 ? '20 €/heure' : '12 €/heure'}
-              </div>
-              <Link
-                href={`/pool/${i}`}
-                className="text-white px-3 py-1 rounded text-sm text-center mt-2 transition"
-                style={{backgroundColor: '#0094ec'}}
-            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+        {pools.length > 0 ? (
+          <div className="flex flex-wrap justify-center gap-6 pb-2">
+            {pools.map((pool) => (
+              <div
+                key={pool.id}
+                className="min-w-[300px] bg-white border rounded-lg shadow-lg p-4 flex flex-col gap-2"
               >
-                Voir
-              </Link>
-            </div>
-          ))}
-        </div>
+                <Image
+                  src={pool.photos?.[0] || "/next.svg"}
+                  alt={pool.title}
+                  width={340}
+                  height={180}
+                  className="rounded-lg object-cover"
+                  style={{ maxHeight: 160, height: 160, width: '100%', objectFit: 'cover' }}
+                />
+                <div className="font-semibold text-lg line-clamp-2">
+                  {pool.title}
+                </div>
+                <div className="text-sm text-gray-500 line-clamp-1">
+                  {pool.address}
+                </div>
+                <div className="font-bold" style={{color: '#0094ec'}}>
+                  {Math.round(pool.pricePerHour)} €/heure
+                </div>
+                <Link
+                  href={`/pool/${pool.id}`}
+                  className="text-white px-3 py-1 rounded text-sm text-center mt-2 transition"
+                  style={{backgroundColor: '#0094ec'}}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+                >
+                  Voir
+                </Link>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-wrap justify-center gap-6 pb-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="min-w-[300px] bg-white border rounded-lg shadow-lg p-4 flex flex-col gap-2 opacity-70">
+                <div className="w-[340px] h-[160px] bg-gray-200 rounded-lg" />
+                <div className="h-5 bg-gray-200 rounded w-3/4" />
+                <div className="h-4 bg-gray-100 rounded w-1/2" />
+                <div className="h-5 bg-gray-200 rounded w-1/4" />
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <div className="flex justify-center">

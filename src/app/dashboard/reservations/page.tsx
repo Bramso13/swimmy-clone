@@ -4,12 +4,13 @@ import React, { useState, useEffect } from "react";
 import { useRenter } from "@/context/RenterContext";
 import { authClient } from "@/lib/auth-client";
 
-type ReservationStatus = "en-attente" | "a-venir" | "passees" | "autres";
+type ReservationStatus = "en-attente" | "acceptees" | "refusees" | "demandes";
 
 const ReservationsPage = () => {
   const [activeTab, setActiveTab] = useState<ReservationStatus>("en-attente");
   const [user, setUser] = useState<any>(null);
   const { reservations, fetchReservations, loading, error } = useRenter();
+  const [approvals, setApprovals] = useState<any[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -20,6 +21,13 @@ const ReservationsPage = () => {
         
         if (currentUser) {
           fetchReservations(currentUser.id);
+          try {
+            const res = await fetch('/api/pools/approvals', { cache: 'no-store' });
+            const data = await res.json();
+            const all = Array.isArray(data?.requests) ? data.requests : [];
+            const mine = all.filter((r: any) => r?.requesterId === currentUser.id);
+            setApprovals(mine);
+          } catch {}
         }
       } catch (error) {
         console.error("Erreur de vérification d'authentification:", error);
@@ -40,12 +48,10 @@ const ReservationsPage = () => {
       switch (activeTab) {
         case "en-attente":
           return reservation.status === "pending";
-        case "a-venir":
-          return reservation.status === "paid" && startDate > now;
-        case "passees":
-          return endDate < now;
-        case "autres":
-          return !["pending", "paid"].includes(reservation.status);
+        case "acceptees":
+          return reservation.status === "accepted";
+        case "refusees":
+          return reservation.status === "rejected" || reservation.status === "refused";
         default:
           return false;
       }
@@ -56,12 +62,10 @@ const ReservationsPage = () => {
     switch (activeTab) {
       case "en-attente":
         return "Vous n'avez pas de réservations en attente.";
-      case "a-venir":
-        return "Vous n'avez pas de réservations à venir.";
-      case "passees":
-        return "Vous n'avez pas de réservations passées.";
-      case "autres":
-        return "Vous n'avez pas d'autres réservations.";
+      case "acceptees":
+        return "Vous n'avez pas de réservations acceptées.";
+      case "refusees":
+        return "Vous n'avez pas de réservations refusées.";
       default:
         return "Aucune réservation trouvée.";
     }
@@ -69,12 +73,17 @@ const ReservationsPage = () => {
 
   const sidebarItems = [
     { key: "en-attente", label: "En attente" },
-    { key: "a-venir", label: "À venir" },
-    { key: "passees", label: "Passées" },
-    { key: "autres", label: "Autres" },
+    { key: "acceptees", label: "Acceptées" },
+    { key: "refusees", label: "Refusées" },
+    { key: "demandes", label: "Demandes d'annonce" },
   ];
 
   const filteredReservations = getFilteredReservations();
+  const approvalsForTab = approvals.filter((r) => {
+    if (activeTab !== 'demandes') return false;
+    return true; // afficher toutes les demandes dans l'onglet dédié
+  });
+  const showApprovals = approvalsForTab.length > 0;
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -116,6 +125,47 @@ const ReservationsPage = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-red-500">Erreur: {error}</div>
           </div>
+        ) : activeTab === 'demandes' ? (
+          showApprovals ? (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">Vos demandes d'annonce</h2>
+              {approvalsForTab.map((req) => (
+                <div
+                  key={req.id}
+                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {req.title || 'Annonce proposée'}
+                      </h3>
+                      {req.address && (
+                        <p className="text-gray-600">{req.address}</p>
+                      )}
+                      <p className="text-gray-500 text-sm">
+                        Soumise le {req.createdAt ? new Date(req.createdAt).toLocaleDateString('fr-FR') : '—'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      {req.status === 'pending' && (
+                        <div className="text-sm px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">En attente de validation</div>
+                      )}
+                      {req.status === 'approved' && (
+                        <div className="text-sm px-2 py-1 rounded-full bg-green-100 text-green-800">Approuvée</div>
+                      )}
+                      {req.status === 'rejected' && (
+                        <div className="text-sm px-2 py-1 rounded-full bg-red-100 text-red-800">Refusée</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-start justify-start pt-4">
+              <p className="text-gray-500 text-lg">Vous n'avez pas de demandes d'annonce.</p>
+            </div>
+          )
         ) : filteredReservations.length === 0 ? (
           <div className="flex items-start justify-start pt-4">
             <p className="text-gray-500 text-lg">
@@ -149,10 +199,14 @@ const ReservationsPage = () => {
                     <div className={`text-sm px-2 py-1 rounded-full ${
                       reservation.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                       reservation.status === 'paid' ? 'bg-green-100 text-green-800' :
+                      reservation.status === 'accepted' ? 'bg-blue-100 text-blue-800' :
+                      (reservation.status === 'rejected' || reservation.status === 'refused') ? 'bg-red-100 text-red-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
                       {reservation.status === 'pending' ? 'En attente' :
                        reservation.status === 'paid' ? 'Confirmée' :
+                       reservation.status === 'accepted' ? 'Acceptée' :
+                       (reservation.status === 'rejected' || reservation.status === 'refused') ? 'Refusée' :
                        reservation.status}
                     </div>
                   </div>
