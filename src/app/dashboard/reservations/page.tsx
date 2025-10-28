@@ -11,6 +11,7 @@ const ReservationsPage = () => {
   const [user, setUser] = useState<any>(null);
   const { reservations, fetchReservations, loading, error } = useRenter();
   const [approvals, setApprovals] = useState<any[]>([]);
+  const [myRequests, setMyRequests] = useState<any[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -27,6 +28,13 @@ const ReservationsPage = () => {
             const all = Array.isArray(data?.requests) ? data.requests : [];
             const mine = all.filter((r: any) => r?.requesterId === currentUser.id);
             setApprovals(mine);
+          } catch {}
+
+          // Charger mes demandes de réservation (availability requests)
+          try {
+            const resMine = await fetch('/api/availability/requests?mine=true', { cache: 'no-store' });
+            const dataMine = await resMine.json();
+            setMyRequests(Array.isArray(dataMine?.requests) ? dataMine.requests : []);
           } catch {}
         }
       } catch (error) {
@@ -166,7 +174,7 @@ const ReservationsPage = () => {
               <p className="text-gray-500 text-lg">Vous n'avez pas de demandes d'annonce.</p>
             </div>
           )
-        ) : filteredReservations.length === 0 ? (
+        ) : (activeTab === 'en-attente' && myRequests.filter(r => r.status === 'pending').length === 0 && filteredReservations.length === 0) ? (
           <div className="flex items-start justify-start pt-4">
             <p className="text-gray-500 text-lg">
               {getEmptyStateMessage()}
@@ -174,6 +182,54 @@ const ReservationsPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
+            {activeTab === 'en-attente' && (
+              <div className="space-y-3">
+                {myRequests.filter(r => r.status === 'pending').map((req) => (
+                  <div key={req.id} className="border border-gray-200 rounded-lg p-6 bg-yellow-50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Demande de réservation</h3>
+                        <p className="text-gray-600">{req.pool?.title}</p>
+                        <p className="text-gray-500 text-sm">Soumise le {req.createdAt ? new Date(req.createdAt).toLocaleDateString('fr-FR') : '—'}</p>
+                      </div>
+                      <div className="text-sm px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">En attente</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {activeTab === 'acceptees' && (
+              <div className="space-y-3">
+                {myRequests.filter(r => r.status === 'approved' || r.status === 'accepted').map((req) => (
+                  <div key={req.id} className="border border-gray-200 rounded-lg p-6 bg-green-50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Demande de réservation</h3>
+                        <p className="text-gray-600">{req.pool?.title}</p>
+                        <p className="text-gray-500 text-sm">Soumise le {req.createdAt ? new Date(req.createdAt).toLocaleDateString('fr-FR') : '—'}</p>
+                      </div>
+                      <div className="text-sm px-2 py-1 rounded-full bg-green-100 text-green-800">Acceptée</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {activeTab === 'refusees' && (
+              <div className="space-y-3">
+                {myRequests.filter(r => r.status === 'rejected' || r.status === 'refused').map((req) => (
+                  <div key={req.id} className="border border-gray-200 rounded-lg p-6 bg-red-50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Demande de réservation</h3>
+                        <p className="text-gray-600">{req.pool?.title}</p>
+                        <p className="text-gray-500 text-sm">Soumise le {req.createdAt ? new Date(req.createdAt).toLocaleDateString('fr-FR') : '—'}</p>
+                      </div>
+                      <div className="text-sm px-2 py-1 rounded-full bg-red-100 text-red-800">Refusée</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             {filteredReservations.map((reservation) => (
               <div
                 key={reservation.id}

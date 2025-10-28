@@ -43,3 +43,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
+
+// Mise à jour du statut d'une réservation
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const id = body?.id as string | undefined;
+    const status = body?.status as string | undefined;
+
+    if (!id || !status) {
+      return NextResponse.json({ error: "id et status sont requis" }, { status: 400 });
+    }
+
+    const allowed = ["pending", "accepted", "rejected", "paid", "cancelled", "refused"];
+    if (!allowed.includes(status)) {
+      return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
+    }
+
+    const updated = await prisma.reservation.update({
+      where: { id },
+      data: { status },
+      include: { pool: true, transaction: true },
+    });
+
+    return NextResponse.json({ reservation: updated });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}

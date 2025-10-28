@@ -78,6 +78,7 @@ interface RenterContextType {
   // Fonctions pour les réservations
   fetchReservations: (userId?: string) => Promise<void>;
   createReservation: (data: CreateReservationData) => Promise<Reservation | null>;
+  updateReservationStatus: (id: string, status: string) => Promise<Reservation | null>;
   getReservationById: (id: string) => Reservation | undefined;
   getUserReservations: (userId: string) => Reservation[];
 
@@ -188,6 +189,32 @@ export const RenterProvider: React.FC<RenterProviderProps> = ({ children }) => {
     }
   }, []);
 
+  // Fonction pour mettre à jour le statut d'une réservation
+  const updateReservationStatus = useCallback(async (id: string, status: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/reservations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erreur lors de la mise à jour");
+      }
+      const result = await response.json();
+      const updated = result.reservation as Reservation;
+      setReservations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+      return updated;
+    } catch (err: any) {
+      setError(err.message || "Une erreur est survenue");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Fonction pour obtenir une réservation par ID
   const getReservationById = useCallback(
     (id: string) => {
@@ -256,6 +283,7 @@ export const RenterProvider: React.FC<RenterProviderProps> = ({ children }) => {
     searchPools,
     fetchReservations,
     createReservation,
+    updateReservationStatus,
     getReservationById,
     getUserReservations,
     initiatePayment,

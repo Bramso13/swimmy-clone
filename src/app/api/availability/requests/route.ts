@@ -55,8 +55,22 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const ownerId = searchParams.get("ownerId");
+    const mine = searchParams.get("mine") === "true"; // retourner mes propres demandes
 
-    // Vérifier que l'utilisateur est owner et peut voir ces demandes
+    // Si on demande "mine=true", on renvoie les demandes soumises par l'utilisateur connecté
+    if (mine) {
+      const requests = await prisma.availabilityRequest.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        include: {
+          pool: { select: { id: true, title: true, ownerId: true, address: true } },
+          user: { select: { id: true, name: true, email: true } },
+        },
+      });
+      return NextResponse.json({ requests });
+    }
+
+    // Sinon, on liste les demandes reçues par un propriétaire (pending)
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { role: true }
@@ -73,7 +87,7 @@ export async function GET(req: NextRequest) {
 
     const where = ownerId
       ? { pool: { ownerId }, status: "pending" }
-      : { pool: { ownerId: session.user.id }, status: "pending" }; // Par défaut, les demandes de l'utilisateur connecté en statut pending
+      : { pool: { ownerId: session.user.id }, status: "pending" };
 
     const requests = await prisma.availabilityRequest.findMany({
       where,
