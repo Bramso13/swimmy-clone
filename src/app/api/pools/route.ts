@@ -94,7 +94,14 @@ export async function POST(req: NextRequest) {
           pricePerHour,
           availability,
           rules,
-          additional,
+          // On conserve aussi les extras (ex: equipments) dans le snapshot
+          // en les sérialisant dans 'additional' si besoin
+          // mais comme PoolApprovalRequest n'a pas 'extras', on peut les inclure dans 'additional'
+          // sans casser le schéma existant
+          // Note: si tu souhaites une colonne dédiée, on peut étendre le schéma
+          // Ici on merge simplement
+          // @ts-ignore
+          additional: { ...(additional || {}), extras: extras || undefined },
         },
       });
       return NextResponse.json({ approval, message: "Votre annonce a été soumise et attend validation." }, { status: 202 });
@@ -110,9 +117,9 @@ export async function POST(req: NextRequest) {
         photos,
         pricePerHour,
         availability,
-        // rules,
-        // extras,
-        // additional,
+        rules,
+        extras,
+        additional,
         // verified: false,
         ownerId: finalOwnerId || ownerId || null,
       },

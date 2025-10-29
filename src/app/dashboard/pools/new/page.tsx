@@ -33,6 +33,8 @@ const NewPoolPage = () => {
   const [rules, setRules] = useState<string>("");
   const [ownerPresent, setOwnerPresent] = useState(false);
   const [product, setProduct] = useState("Chlore");
+  const [equipmentInput, setEquipmentInput] = useState("");
+  const [equipments, setEquipments] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -89,6 +91,69 @@ const NewPoolPage = () => {
                     required
                   />
                 </div>
+                
+                {/* Équipements */}
+                <div>
+                  <label className="text-sm font-medium">Équipements</label>
+                  <div className="mt-1 flex gap-2">
+                    <input
+                      value={equipmentInput}
+                      onChange={(e)=>{
+                        // Interdire espaces et virgules (mots uniquement)
+                        const v = e.target.value;
+                        if ([...v].some((ch) => ch === ' ' || ch === ',')) return;
+                        setEquipmentInput(v);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const token = equipmentInput.trim();
+                          if (!token) return;
+                          if (!/^[\p{L}0-9_-]+$/u.test(token)) return;
+                          setEquipments((prev)=> Array.from(new Set([...prev, token])));
+                          setEquipmentInput("");
+                        }
+                      }}
+                      placeholder="Ex: Barbecue"
+                      className="flex-1 border rounded-md px-3 py-2"
+                      aria-describedby="equipments-help"
+                    />
+                    <button
+                      type="button"
+                      className="px-3 py-2 rounded-md text-white"
+                      style={{backgroundColor: '#0094ec'}}
+                      onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+                      onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+                      onClick={() => {
+                        const token = equipmentInput.trim();
+                        if (!token) return;
+                        if (!/^[\p{L}0-9_-]+$/u.test(token)) return;
+                        setEquipments((prev)=> Array.from(new Set([...prev, token])));
+                        setEquipmentInput("");
+                      }}
+                    >
+                      Ajouter
+                    </button>
+                  </div>
+                  <p id="equipments-help" className="text-xs text-gray-500 mt-1">Un seul mot par ajout (sans espace ni virgule).</p>
+                  {equipments.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {equipments.map((eq, idx) => (
+                        <span key={idx} className="inline-flex items-center gap-1 text-sm border rounded-full px-3 py-1 bg-white">
+                          {eq}
+                          <button
+                            type="button"
+                            aria-label="Retirer"
+                            className="ml-1 text-red-600"
+                            onClick={() => setEquipments((prev)=> prev.filter((_, i)=> i !== idx))}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div>
                   <label className="text-sm font-medium">Adresse exacte de votre piscine *</label>
                   <input 
@@ -102,17 +167,33 @@ const NewPoolPage = () => {
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium">Latitude</label>
-                    <input value={latitude} onChange={(e)=>setLatitude(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
+                    <label className="text-sm font-medium">Latitude (en mètres)</label>
+                    <input 
+                      type="number"
+                      value={latitude} 
+                      onChange={(e)=>setLatitude(e.target.value)} 
+                      className="mt-1 w-full border rounded-md px-3 py-2" 
+                      required
+                      step="0.01"
+                      min="0"
+                    />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Longitude</label>
-                    <input value={longitude} onChange={(e)=>setLongitude(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
+                    <label className="text-sm font-medium">Longitude (en mètres)</label>
+                    <input 
+                      type="number"
+                      value={longitude} 
+                      onChange={(e)=>setLongitude(e.target.value)} 
+                      className="mt-1 w-full border rounded-md px-3 py-2" 
+                      required
+                      step="0.01"
+                      min="0"
+                    />
                   </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Description</label>
-                  <textarea value={description} onChange={(e)=>setDescription(e.target.value)} rows={3} className="mt-1 w-full border rounded-md px-3 py-2" />
+                  <textarea value={description} onChange={(e)=>setDescription(e.target.value)} rows={3} className="mt-1 w-full border rounded-md px-3 py-2" required />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Téléverser des photos (multiple)</label>
@@ -164,7 +245,15 @@ const NewPoolPage = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Prix à l'heure (€)</label>
-                  <input value={pricePerHour} onChange={(e)=>setPricePerHour(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
+                  <input 
+                    type="number"
+                    value={pricePerHour} 
+                    onChange={(e)=>setPricePerHour(e.target.value)} 
+                    className="mt-1 w-full border rounded-md px-3 py-2" 
+                    required
+                    min="0"
+                    step="0.01"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Vous habitez en</label>
@@ -173,6 +262,7 @@ const NewPoolPage = () => {
                       value={region}
                       onChange={(e) => setRegion(e.target.value)}
                       className="w-full border rounded-md px-3 py-2"
+                      required
                     >
                       <option value="">Choisir votre région...</option>
                       <option>Île-de-France</option>
@@ -315,6 +405,14 @@ const NewPoolPage = () => {
                       alert("L'adresse exacte est obligatoire");
                       return;
                     }
+                    if (latitude === "" || Number(latitude) <= 0) {
+                      alert("La latitude (en mètres) est obligatoire et doit être > 0");
+                      return;
+                    }
+                    if (longitude === "" || Number(longitude) <= 0) {
+                      alert("La longitude (en mètres) est obligatoire et doit être > 0");
+                      return;
+                    }
                     if (!description.trim()) {
                       alert("La description est obligatoire");
                       return;
@@ -337,6 +435,7 @@ const NewPoolPage = () => {
                         availability: {},
                         rules: rules.split(",").map((s)=>s.trim()).filter(Boolean),
                         additional: { ownerPresent, product },
+                        extras: { equipments },
                       };
                       const res = await fetch("/api/pools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
                       const j = await res.json();

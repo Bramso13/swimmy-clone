@@ -17,6 +17,10 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
   }
   const rawPhotos: string[] = Array.isArray(pool.photos) ? (pool.photos as string[]) : [];
   const images: string[] = rawPhotos.filter((src) => typeof src === "string" && src.trim().length > 0);
+  const extras: any = (pool as any).extras || {};
+  const equipments: string[] = Array.isArray(extras?.equipments)
+    ? (extras.equipments as any[]).filter((e) => typeof e === "string" && e.trim().length > 0)
+    : [];
 
   return (
     <main className="mx-auto max-w-6xl p-4 md:p-6">
@@ -51,11 +55,15 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
           <p className="mb-6">{pool.description}</p>
 
           <h3 className="text-lg font-semibold mt-8 mb-3">Équipements</h3>
-          <ul className="grid sm:grid-cols-2 gap-2">
-            {/* Équipements à connecter si dispo dans le modèle */}
-            <li className="flex items-center gap-2">✓ Douche</li>
-            <li className="flex items-center gap-2">✓ Jardin</li>
-          </ul>
+          {equipments.length > 0 ? (
+            <ul className="grid sm:grid-cols-2 gap-2">
+              {equipments.map((eq) => (
+                <li key={eq} className="flex items-center gap-2">✓ {eq}</li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-sm text-muted-foreground">Aucune</div>
+          )}
 
           <h3 className="text-lg font-semibold mt-10 mb-3">Règlement intérieur</h3>
           <ul className="grid sm:grid-cols-2 gap-2">
