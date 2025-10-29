@@ -191,15 +191,7 @@ const NewPoolPage = () => {
                     </select>
                   </div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Adresse exacte</label>
-                  <input 
-                    value={address} 
-                    onChange={(e)=>setAddress(e.target.value)} 
-                    placeholder="Ex: 123 Rue de la Paix, 75001 Paris, France"
-                    className="mt-1 w-full border rounded-md px-3 py-2" 
-                  />
-                </div>
+                
 
                 <div>
                   <label className="text-sm font-medium">Combien de personnes souhaitez-vous accueillir ?</label>
