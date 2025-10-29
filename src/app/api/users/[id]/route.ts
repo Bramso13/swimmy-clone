@@ -58,3 +58,61 @@ export async function GET(
   }
 }
 
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth.api.getSession({ headers: req.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    }
+
+    const current = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } });
+    if (current?.role !== "owner") {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    }
+
+    const body = await req.json();
+    const { name, email, role, avatarUrl, image } = body;
+
+    const updated = await prisma.user.update({
+      where: { id: params.id },
+      data: {
+        ...(name !== undefined ? { name } : {}),
+        ...(email !== undefined ? { email } : {}),
+        ...(role !== undefined ? { role } : {}),
+        ...(avatarUrl !== undefined ? { avatarUrl } : {}),
+        ...(image !== undefined ? { image } : {}),
+      },
+      select: { id: true, email: true, name: true, role: true, avatarUrl: true, image: true, updatedAt: true },
+    });
+
+    return NextResponse.json({ user: updated });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Erreur serveur" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth.api.getSession({ headers: req.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    }
+
+    const current = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } });
+    if (current?.role !== "owner") {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    }
+
+    await prisma.user.delete({ where: { id: params.id } });
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Erreur serveur" }, { status: 500 });
+  }
+}
+

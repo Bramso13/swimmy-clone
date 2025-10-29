@@ -156,15 +156,26 @@ export default function SideMenu() {
                 
                 {/* Option supplémentaire pour les owners/admins */}
                 {user.role === "owner" && (
-                  <li>
-                    <Link
-                      href="/dashboard/availability"
-                      onClick={() => setOpen(false)}
-                      className="block px-4 py-3 hover:bg-muted rounded-md bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
-                    >
-                      📅 Vérifier la disponibilité
-                    </Link>
-                  </li>
+                  <>
+                    <li>
+                      <Link
+                        href="/dashboard/availability"
+                        onClick={() => setOpen(false)}
+                        className="block px-4 py-3 hover:bg-muted rounded-md bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
+                      >
+                        📅 Vérifier la disponibilité
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/dashboard/users"
+                        onClick={() => setOpen(false)}
+                        className="block px-4 py-3 hover:bg-muted rounded-md bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-500"
+                      >
+                        👥 Utilisateurs
+                      </Link>
+                    </li>
+                  </>
                 )}
 
                 {/* Vérifier les commandes (owners) */}

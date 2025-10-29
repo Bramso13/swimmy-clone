@@ -76,6 +76,9 @@ export default function NavBar() {
               <Link href="/dashboard/transactions" className="hover:underline text-emerald-600 font-semibold">
                 Commandes
               </Link>
+              <Link href="/dashboard/users" className="hover:underline font-semibold" style={{color: '#4f46e5'}}>
+                Utilisateurs
+              </Link>
             </>
           )}
           <Link href="/dashboard/messages" className="hover:underline">
