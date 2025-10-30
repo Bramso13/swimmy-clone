@@ -22,6 +22,9 @@ export default function SearchPage() {
     jacuzzi: false,
     showMap: false
   });
+  const [showPrice, setShowPrice] = useState(false);
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
 
   React.useEffect(() => {
     const loadPools = async () => {
@@ -51,6 +54,21 @@ export default function SearchPage() {
   const handleMapToggle = () => {
     setFilters(prev => ({ ...prev, showMap: !prev.showMap }));
   };
+
+  const togglePricePanel = () => setShowPrice((s) => !s);
+
+  const parsedMin = Number(minPrice);
+  const parsedMax = Number(maxPrice);
+  const hasMin = !Number.isNaN(parsedMin) && minPrice !== "";
+  const hasMax = !Number.isNaN(parsedMax) && maxPrice !== "";
+
+  const displayedPools = pools
+    .filter((p: any) => {
+      const price: number = Number(p?.pricePerHour ?? 0);
+      if (hasMin && price < parsedMin) return false;
+      if (hasMax && price > parsedMax) return false;
+      return true;
+    });
 
   if (loading) {
     return (
@@ -148,7 +166,54 @@ export default function SearchPage() {
             />
           </button>
 
-          <button className="rounded-full border px-4 py-2">Prix</button>
+          <div className="relative">
+            <button 
+              onClick={togglePricePanel}
+              className={`rounded-full border px-4 py-2 ${showPrice ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}`}
+            >
+              Prix
+            </button>
+            {showPrice && (
+              <div className="absolute z-10 mt-2 w-64 rounded-lg border bg-white p-3 shadow">
+                <div className="text-sm text-gray-700 mb-2">Prix par heure (€)</div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Min"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    className="w-1/2 rounded border px-2 py-1 text-sm"
+                    min={0}
+                  />
+                  <span className="text-gray-400">—</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Max"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    className="w-1/2 rounded border px-2 py-1 text-sm"
+                    min={0}
+                  />
+                </div>
+                <div className="mt-3 flex justify-end gap-2">
+                  <button
+                    className="text-xs text-gray-600 underline"
+                    onClick={() => { setMinPrice(""); setMaxPrice(""); }}
+                  >
+                    Réinitialiser
+                  </button>
+                  <button
+                    className="rounded bg-blue-600 px-3 py-1 text-xs text-white"
+                    onClick={() => setShowPrice(false)}
+                  >
+                    Appliquer
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           <button className="rounded-full border px-4 py-2">Plus de filtres</button>
         </div>
 
@@ -172,7 +237,7 @@ export default function SearchPage() {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {pools.map((p: any) => (
+        {displayedPools.map((p: any) => (
           <PoolCard key={p.id} pool={p} />
         ))}
       </div>
