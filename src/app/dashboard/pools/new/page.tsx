@@ -21,6 +21,24 @@ const NewPoolPage = () => {
   const [rhythm, setRhythm] = useState(rhythmOptions[0].value);
   const formRef = useRef<HTMLDivElement | null>(null);
 
+  const EQUIPMENT_OPTIONS: string[] = [
+    "Barbecue",
+    "Transats",
+    "Wifi",
+    "Parking",
+    "Douche",
+    "Serviettes",
+    "Vestiaires",
+    "WC",
+    "Frigo",
+    "Plancha",
+    "Jacuzzi",
+    "Spa",
+    "Piscine chauffée",
+    "Couverture",
+    "Éclairage de nuit",
+  ];
+
   // Fields for DB creation
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -96,51 +114,35 @@ const NewPoolPage = () => {
                 {/* Équipements */}
                 <div>
                   <label className="text-sm font-medium">Équipements</label>
-                  <div className="mt-1 flex gap-2">
-                    <input
-                      value={equipmentInput}
-                      onChange={(e)=>{
-                        // Interdire espaces et virgules (mots uniquement)
-                        const v = e.target.value;
-                        if ([...v].some((ch) => ch === ' ' || ch === ',')) return;
-                        setEquipmentInput(v);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          const token = equipmentInput.trim();
-                          if (!token) return;
-                          if (!/^[\p{L}0-9_-]+$/u.test(token)) return;
-                          setEquipments((prev)=> Array.from(new Set([...prev, token])));
-                          setEquipmentInput("");
-                        }
-                      }}
-                      placeholder="Ex: Barbecue"
-                      className="flex-1 border rounded-md px-3 py-2"
-                      aria-describedby="equipments-help"
-                    />
-                    <button
-                      type="button"
-                      className="px-3 py-2 rounded-md text-white"
-                      style={{backgroundColor: '#0094ec'}}
-                      onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-                      onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
-                      onClick={() => {
-                        const token = equipmentInput.trim();
-                        if (!token) return;
-                        if (!/^[\p{L}0-9_-]+$/u.test(token)) return;
-                        setEquipments((prev)=> Array.from(new Set([...prev, token])));
-                        setEquipmentInput("");
-                      }}
-                    >
-                      Ajouter
-                    </button>
+                  <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {EQUIPMENT_OPTIONS.map((opt) => {
+                      const selected = equipments.includes(opt);
+                      return (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() =>
+                            setEquipments((prev) =>
+                              prev.includes(opt)
+                                ? prev.filter((e) => e !== opt)
+                                : [...prev, opt]
+                            )
+                          }
+                          className={`w-full text-left px-3 py-2 rounded-md border text-sm font-medium transition ${
+                            selected ? "text-white border-2" : "hover:bg-muted"
+                          }`}
+                          style={selected ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
                   </div>
-                  <p id="equipments-help" className="text-xs text-gray-500 mt-1">Un seul mot par ajout (sans espace ni virgule).</p>
                   {equipments.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-gray-500">Sélectionnés:</span>
                       {equipments.map((eq, idx) => (
-                        <span key={idx} className="inline-flex items-center gap-1 text-sm border rounded-full px-3 py-1 bg-white">
+                        <span key={idx} className="inline-flex items-center gap-1 text-xs border rounded-full px-2 py-0.5 bg-white">
                           {eq}
                           <button
                             type="button"
@@ -152,6 +154,13 @@ const NewPoolPage = () => {
                           </button>
                         </span>
                       ))}
+                      <button
+                        type="button"
+                        className="text-xs underline text-gray-600"
+                        onClick={() => setEquipments([])}
+                      >
+                        Effacer tout
+                      </button>
                     </div>
                   )}
                 </div>
