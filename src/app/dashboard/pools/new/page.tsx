@@ -31,6 +31,7 @@ const NewPoolPage = () => {
   const [uploading, setUploading] = useState(false);
   const [pricePerHour, setPricePerHour] = useState<string>("");
   const [rules, setRules] = useState<string>("");
+  const [location, setLocation] = useState<"INDOOR" | "OUTDOOR">("OUTDOOR");
   const [ownerPresent, setOwnerPresent] = useState(false);
   const [product, setProduct] = useState("Chlore");
   const [equipmentInput, setEquipmentInput] = useState("");
@@ -194,6 +195,31 @@ const NewPoolPage = () => {
                 <div>
                   <label className="text-sm font-medium">Description</label>
                   <textarea value={description} onChange={(e)=>setDescription(e.target.value)} rows={3} className="mt-1 w-full border rounded-md px-3 py-2" required />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Type d'emplacement</label>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setLocation("OUTDOOR")}
+                      className={`px-3 py-2 rounded-md border text-sm font-medium transition ${
+                        location === "OUTDOOR" ? "text-white border-2" : "hover:bg-muted"
+                      }`}
+                      style={location === "OUTDOOR" ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
+                    >
+                      Extérieur
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLocation("INDOOR")}
+                      className={`px-3 py-2 rounded-md border text-sm font-medium transition ${
+                        location === "INDOOR" ? "text-white border-2" : "hover:bg-muted"
+                      }`}
+                      style={location === "INDOOR" ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
+                    >
+                      Intérieur
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Téléverser des photos (multiple)</label>
@@ -436,6 +462,7 @@ const NewPoolPage = () => {
                         rules: rules.split(",").map((s)=>s.trim()).filter(Boolean),
                         additional: { ownerPresent, product },
                         extras: { equipments },
+                        location,
                       };
                       const res = await fetch("/api/pools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
                       const j = await res.json();

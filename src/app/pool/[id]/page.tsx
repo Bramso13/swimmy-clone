@@ -21,6 +21,10 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
   const equipments: string[] = Array.isArray(extras?.equipments)
     ? (extras.equipments as any[]).filter((e) => typeof e === "string" && e.trim().length > 0)
     : [];
+  const locationLabel = (pool as any).location === "INDOOR" ? "Intérieur" : "Extérieur";
+  const rules: string[] = Array.isArray((pool as any).rules)
+    ? ((pool as any).rules as any[]).filter((e) => typeof e === "string" && e.trim().length > 0)
+    : [];
 
   return (
     <main className="mx-auto max-w-6xl p-4 md:p-6">
@@ -34,6 +38,10 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
             <span>⭐ 4.89 (90)</span>
             <span>•</span>
             <span>Superhôte</span>
+            <span>•</span>
+            <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5">
+              {(pool as any).location === "INDOOR" ? "🏡" : "🌤️"} {locationLabel}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2 text-sm">
@@ -54,6 +62,11 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
           </div>
           <p className="mb-6">{pool.description}</p>
 
+          <h3 className="text-lg font-semibold mt-6 mb-2">Caractéristiques</h3>
+          <div className="text-sm text-muted-foreground mb-6">
+            Type d'emplacement: <span className="font-medium text-black dark:text-white">{locationLabel}</span>
+          </div>
+
           <h3 className="text-lg font-semibold mt-8 mb-3">Équipements</h3>
           {equipments.length > 0 ? (
             <ul className="grid sm:grid-cols-2 gap-2">
@@ -66,11 +79,15 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
           )}
 
           <h3 className="text-lg font-semibold mt-10 mb-3">Règlement intérieur</h3>
-          <ul className="grid sm:grid-cols-2 gap-2">
-            {(((pool as any).rules || []) as string[]).map((e: string) => (
-              <li key={e} className="flex items-center gap-2">{e}</li>
-            ))}
-          </ul>
+          {rules.length > 0 ? (
+            <ul className="grid sm:grid-cols-2 gap-2">
+              {rules.map((e: string) => (
+                <li key={e} className="flex items-center gap-2">{e}</li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-sm text-muted-foreground">Aucune règle</div>
+          )}
         </section>
 
           <aside className="h-max rounded-2xl border shadow-sm p-4 sticky top-20">
@@ -79,17 +96,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
             <BookingForm poolId={pool.id} />
           </aside>
       </div>
-      {/* Règles si disponibles */}
-      {Array.isArray((pool as any).rules) && (pool as any).rules.length > 0 && (
-        <section className="mt-12">
-          <h3 className="text-xl font-semibold mb-4">Informations supplémentaires</h3>
-          <ul className="space-y-2">
-            {((pool as any).rules as string[]).map((r: string) => (
-              <li key={r}>• {r}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {/* Section supplémentaire retirée pour éviter les doublons et grands espaces vides */}
     </main>
   );
 }

@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PoolLocation {
+  INDOOR
+  OUTDOOR
+}
+
 model User {
   id            String        @id @default(uuid())
   email         String        @unique
@@ -58,6 +63,8 @@ model Pool {
   rules        String[]     @default([])
   extras       Json?
   additional   Json?
+  // Intérieur ou extérieur (par défaut: extérieur)
+  location     PoolLocation  @default(OUTDOOR)
   owner        User?         @relation("OwnerPools", fields: [ownerId], references: [id])
   ownerId      String?
   reservations Reservation[]

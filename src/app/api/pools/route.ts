@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
     extras,
     additional,
     ownerId,
+    location,
   } = await req.json();
   // ownerId now optional; proceed without it
  
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
           // Note: si tu souhaites une colonne dédiée, on peut étendre le schéma
           // Ici on merge simplement
           // @ts-ignore
-          additional: { ...(additional || {}), extras: extras || undefined },
+          additional: { ...(additional || {}), extras: extras || undefined, location: location || "OUTDOOR" },
         },
       });
       return NextResponse.json({ approval, message: "Votre annonce a été soumise et attend validation." }, { status: 202 });
@@ -120,6 +121,7 @@ export async function POST(req: NextRequest) {
         rules,
         extras,
         additional,
+        location: (location === "INDOOR" || location === "OUTDOOR") ? location : "OUTDOOR",
         // verified: false,
         ownerId: finalOwnerId || ownerId || null,
       },

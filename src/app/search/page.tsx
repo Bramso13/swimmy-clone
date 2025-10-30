@@ -18,7 +18,7 @@ export default function SearchPage() {
     sortBy: 'closest', // 'closest', 'top', 'instant'
     topSelection: false,
     instant: false,
-    indoor: false,
+    location: 'ALL' as 'ALL' | 'INDOOR' | 'OUTDOOR',
     jacuzzi: false,
     showMap: false
   });
@@ -51,6 +51,10 @@ export default function SearchPage() {
     setFilters(prev => ({ ...prev, [filterName]: !prev[filterName as keyof typeof prev] }));
   };
 
+  const setLocationFilter = (loc: 'ALL' | 'INDOOR' | 'OUTDOOR') => {
+    setFilters(prev => ({ ...prev, location: loc }));
+  };
+
   const handleMapToggle = () => {
     setFilters(prev => ({ ...prev, showMap: !prev.showMap }));
   };
@@ -67,6 +71,10 @@ export default function SearchPage() {
       const price: number = Number(p?.pricePerHour ?? 0);
       if (hasMin && price < parsedMin) return false;
       if (hasMax && price > parsedMax) return false;
+      if (filters.location !== 'ALL') {
+        const loc = (p?.location === 'INDOOR' || p?.location === 'OUTDOOR') ? p.location : 'OUTDOOR';
+        if (loc !== filters.location) return false;
+      }
       return true;
     });
 
@@ -130,23 +138,27 @@ export default function SearchPage() {
             )}
           </button>
 
-          <button 
-            onClick={() => handleFilterChange('indoor')}
-            className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
-              filters.indoor 
-                ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                : 'text-gray-700'
-            }`}
-          >
-            <span>🏡</span>
-            <span>Piscine intérieure / couverte</span>
-            <input 
-              type="checkbox" 
-              checked={filters.indoor}
-              onChange={() => handleFilterChange('indoor')}
-              className="ml-2 h-5 w-5 rounded border" 
-            />
-          </button>
+          <div className="flex items-center gap-2 rounded-full border px-2 py-2">
+            <span className="ml-1 mr-2 text-gray-700">Type</span>
+            <button
+              onClick={() => setLocationFilter('ALL')}
+              className={`rounded-full px-3 py-1 text-sm ${filters.location === 'ALL' ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
+            >
+              Tous
+            </button>
+            <button
+              onClick={() => setLocationFilter('OUTDOOR')}
+              className={`rounded-full px-3 py-1 text-sm ${filters.location === 'OUTDOOR' ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
+            >
+              🌤️ Extérieur
+            </button>
+            <button
+              onClick={() => setLocationFilter('INDOOR')}
+              className={`rounded-full px-3 py-1 text-sm ${filters.location === 'INDOOR' ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
+            >
+              🏡 Intérieur
+            </button>
+          </div>
 
           <button 
             onClick={() => handleFilterChange('jacuzzi')}
