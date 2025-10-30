@@ -226,11 +226,35 @@ export default function SearchPage() {
         </label>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {displayedPools.map((p: any) => (
-          <PoolCard key={p.id} pool={p} />
-        ))}
-      </div>
+      {/* Liste + Carte (optionnelle) */}
+      {filters.showMap ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Colonne liste */}
+          <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {displayedPools.map((p: any) => (
+                <PoolCard key={p.id} pool={p} />
+              ))}
+            </div>
+          </div>
+          {/* Colonne carte */}
+          <div className="h-[70vh] lg:h-[80vh] sticky top-4 rounded overflow-hidden border">
+            <iframe
+              title="Carte des piscines"
+              className="w-full h-full"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-10.5%2C35%2C15.5%2C55&layer=mapnik"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {displayedPools.map((p: any) => (
+            <PoolCard key={p.id} pool={p} />
+          ))}
+        </div>
+      )}
     </main>
   );
 }
