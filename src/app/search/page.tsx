@@ -75,6 +75,12 @@ export default function SearchPage() {
         const loc = (p?.location === 'INDOOR' || p?.location === 'OUTDOOR') ? p.location : 'OUTDOOR';
         if (loc !== filters.location) return false;
       }
+      if (filters.jacuzzi) {
+        const equipments: string[] = Array.isArray(p?.extras?.equipments) ? p.extras.equipments : [];
+        const normalized = equipments.map((e) => String(e).toLowerCase());
+        const hasJacuzzi = normalized.includes('jacuzzi') || normalized.includes('spa');
+        if (!hasJacuzzi) return false;
+      }
       return true;
     });
 
