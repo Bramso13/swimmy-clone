@@ -114,35 +114,7 @@ export default function SearchPage() {
             )}
           </button>
 
-          <button 
-            onClick={() => handleSortChange('top')}
-            className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
-              filters.sortBy === 'top' 
-                ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                : 'text-gray-700'
-            }`}
-          >
-            <span>⭐</span>
-            <span>Top Sélection</span>
-            {filters.sortBy === 'top' && (
-              <span className="ml-1 inline-flex items-center justify-center h-5 w-5 rounded-full bg-blue-600 text-white text-xs">✓</span>
-            )}
-          </button>
-
-          <button 
-            onClick={() => handleSortChange('instant')}
-            className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
-              filters.sortBy === 'instant' 
-                ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                : 'text-gray-700'
-            }`}
-          >
-            <span>⚡</span>
-            <span>Instantanée</span>
-            {filters.sortBy === 'instant' && (
-              <span className="ml-1 inline-flex items-center justify-center h-5 w-5 rounded-full bg-blue-600 text-white text-xs">✓</span>
-            )}
-          </button>
+          
 
           <div className="flex items-center gap-2 rounded-full border px-2 py-2">
             <span className="ml-1 mr-2 text-gray-700">Type</span>
@@ -232,7 +204,7 @@ export default function SearchPage() {
               </div>
             )}
           </div>
-          <button className="rounded-full border px-4 py-2">Plus de filtres</button>
+          
         </div>
 
         <label className="flex items-center gap-3 text-gray-700">
