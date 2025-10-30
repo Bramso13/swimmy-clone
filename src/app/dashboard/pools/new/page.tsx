@@ -20,6 +20,8 @@ const NewPoolPage = () => {
   const [persons, setPersons] = useState<number | null>(null);
   const [rhythm, setRhythm] = useState(rhythmOptions[0].value);
   const formRef = useRef<HTMLDivElement | null>(null);
+  const addrTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const addrAbortRef = useRef<AbortController | null>(null);
 
   const EQUIPMENT_OPTIONS: string[] = [
     "Barbecue",
@@ -56,12 +58,64 @@ const NewPoolPage = () => {
   const [equipments, setEquipments] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState<Array<{ display_name: string; lat: string; lon: string }>>([]);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [addressFocused, setAddressFocused] = useState(false);
 
   const revenue = useMemo(() => {
     const base = persons ? persons * 8 : 0; // simple maquette de calcul
     const factor = rhythmOptions.find((r) => r.value === rhythm)?.factor ?? 1;
     return base * factor;
   }, [persons, rhythm]);
+
+  // Autocomplétion d'adresse via Nominatim
+  React.useEffect(() => {
+    const q = address.trim();
+    if (!q || q.length < 3) {
+      setAddressSuggestions([]);
+      if (addrAbortRef.current) addrAbortRef.current.abort();
+      if (addrTimerRef.current) clearTimeout(addrTimerRef.current);
+      return;
+    }
+    if (addrTimerRef.current) clearTimeout(addrTimerRef.current);
+    addrTimerRef.current = setTimeout(async () => {
+      try {
+        if (addrAbortRef.current) addrAbortRef.current.abort();
+        addrAbortRef.current = new AbortController();
+        setAddressLoading(true);
+        const params = new URLSearchParams({
+          format: "jsonv2",
+          addressdetails: "1",
+          q,
+          limit: "5",
+          countrycodes: "fr",
+        });
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+          signal: addrAbortRef.current.signal,
+          headers: {
+            "Accept-Language": "fr",
+            "User-Agent": "swimmy-clone/1.0 (autocomplete)"
+          }
+        });
+        if (!res.ok) throw new Error("nominatim error");
+        const data = await res.json();
+        const list = Array.isArray(data)
+          ? data.map((d: any) => ({ display_name: String(d?.display_name || ""), lat: String(d?.lat || ""), lon: String(d?.lon || "") }))
+          : [];
+        setAddressSuggestions(list);
+      } catch (e) {
+        if ((e as any)?.name !== "AbortError") {
+          setAddressSuggestions([]);
+        }
+      } finally {
+        setAddressLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (addrTimerRef.current) clearTimeout(addrTimerRef.current);
+    };
+  }, [address]);
 
   return (
     <div className="relative">
@@ -166,13 +220,47 @@ const NewPoolPage = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Adresse exacte de votre piscine *</label>
-                  <input 
-                    value={address} 
-                    onChange={(e)=>setAddress(e.target.value)} 
-                    placeholder="Ex: 123 Rue de la Paix, 75001 Paris, France"
-                    className="mt-1 w-full border rounded-md px-3 py-2" 
-                    required
-                  />
+                  <div className="relative">
+                    <input 
+                      value={address} 
+                      onChange={(e)=>setAddress(e.target.value)} 
+                      onFocus={() => setAddressFocused(true)}
+                      onBlur={() => setTimeout(() => setAddressFocused(false), 150)}
+                      placeholder="Ex: 123 Rue de la Paix, 75001 Paris, France"
+                      className="mt-1 w-full border rounded-md px-3 py-2" 
+                      required
+                      autoComplete="off"
+                    />
+                    {(addressFocused && (addressLoading || addressSuggestions.length > 0)) && (
+                      <div className="absolute z-20 left-0 right-0 mt-1 bg-white border rounded-md shadow">
+                        {addressLoading ? (
+                          <div className="px-3 py-2 text-sm text-gray-500">Recherche…</div>
+                        ) : (
+                          <ul className="max-h-64 overflow-auto">
+                            {addressSuggestions.map((s, idx) => (
+                              <li key={`${s.lat}-${s.lon}-${idx}`}>
+                                <button
+                                  type="button"
+                                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                                  onClick={() => {
+                                    setAddress(s.display_name);
+                                    setLatitude(s.lat);
+                                    setLongitude(s.lon);
+                                    setAddressSuggestions([]);
+                                  }}
+                                >
+                                  {s.display_name}
+                                </button>
+                              </li>
+                            ))}
+                            {addressSuggestions.length === 0 && (
+                              <li className="px-3 py-2 text-sm text-gray-500">Aucun résultat</li>
+                            )}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500 mt-1">Indiquez l'adresse complète pour que les locataires puissent vous trouver facilement</p>
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
