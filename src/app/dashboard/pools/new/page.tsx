@@ -41,6 +41,20 @@ const NewPoolPage = () => {
     "Éclairage de nuit",
   ];
 
+  const RULE_OPTIONS: string[] = [
+    "Convient aux enfants (0-12 ans)",
+    "Pas d’alcool",
+    "Pas de musique",
+    "Pas d’animaux",
+    "Événements autorisés",
+    "Espace fumeur",
+    "Non fumeur",
+    "Naturisme non autorisé",
+    "Musique autorisée / tolérée selon niveau",
+    "Propriétaire présent pendant la location",
+    "Restriction d’âge ou capacité selon enfants très jeunes / enfants ne sachant pas nager",
+  ];
+
   // Fields for DB creation
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -50,7 +64,7 @@ const NewPoolPage = () => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [pricePerHour, setPricePerHour] = useState<string>("");
-  const [rules, setRules] = useState<string>("");
+  const [rules, setRules] = useState<string[]>([]);
   const [location, setLocation] = useState<"INDOOR" | "OUTDOOR">("OUTDOOR");
   const [ownerPresent, setOwnerPresent] = useState(false);
   const [product, setProduct] = useState("Chlore");
@@ -446,8 +460,56 @@ const NewPoolPage = () => {
 
                 {/* Règles et informations supplémentaires */}
                 <div>
-                  <label className="text-sm font-medium">Règlement (séparés par des virgules)</label>
-                  <input value={rules} onChange={(e)=>setRules(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
+                  <label className="text-sm font-medium">Règlement intérieur</label>
+                  <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {RULE_OPTIONS.map((opt) => {
+                      const selected = rules.includes(opt);
+                      return (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() =>
+                            setRules((prev) =>
+                              prev.includes(opt)
+                                ? prev.filter((e) => e !== opt)
+                                : [...prev, opt]
+                            )
+                          }
+                          className={`w-full text-left px-3 py-2 rounded-md border text-sm font-medium transition ${
+                            selected ? "text-white border-2" : "hover:bg-muted"
+                          }`}
+                          style={selected ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {rules.length > 0 && (
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-gray-500">Sélectionnées:</span>
+                      {rules.map((rule, idx) => (
+                        <span key={idx} className="inline-flex items-center gap-1 text-xs border rounded-full px-2 py-0.5 bg-white">
+                          {rule}
+                          <button
+                            type="button"
+                            aria-label="Retirer"
+                            className="ml-1 text-red-600"
+                            onClick={() => setRules((prev)=> prev.filter((_, i)=> i !== idx))}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                      <button
+                        type="button"
+                        className="text-xs underline text-gray-600"
+                        onClick={() => setRules([])}
+                      >
+                        Effacer tout
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                   <div className="flex items-center gap-2">
@@ -501,7 +563,7 @@ const NewPoolPage = () => {
                             setLongitude("");
                             setPhotos([]);
                             setPricePerHour("");
-                            setRules("");
+                            setRules([]);
                           }}
                           className="bg-white dark:bg-gray-800 border border-green-600 text-green-600 px-4 py-2 rounded-md hover:bg-green-50 dark:hover:bg-green-900/20 transition"
                         >
@@ -556,7 +618,7 @@ const NewPoolPage = () => {
                         photos: photos,
                         pricePerHour: Number(pricePerHour),
                         availability: {},
-                        rules: rules.split(",").map((s)=>s.trim()).filter(Boolean),
+                        rules,
                         additional: { ownerPresent, product },
                         extras: { equipments },
                         location,
