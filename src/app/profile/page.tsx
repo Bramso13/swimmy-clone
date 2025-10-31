@@ -152,64 +152,7 @@ const ProfilePage = () => {
         </div>
       )}
 
-      <div className="grid md:grid-cols-3 gap-4">
-        <section
-          id="status"
-          className="rounded-xl border bg-card p-5 hover:shadow-sm transition"
-        >
-          <div className="flex items-start gap-3">
-            <div className="text-2xl">{fullUser?.role === "owner" ? "👑" : "🏊"}</div>
-            <div>
-              <h2 className="font-semibold">Statut du compte</h2>
-              <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                Votre type de compte et ses privilèges.
-              </p>
-            </div>
-          </div>
-          <div className="mt-4">
-            {loadingRole ? (
-              <div className="animate-pulse space-y-2">
-                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              </div>
-            ) : fullUser ? (
-              <div className="space-y-3">
-                <div className={`px-3 py-2 rounded-lg font-semibold text-center ${
-                  fullUser.role === "owner" 
-                    ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/20 dark:text-yellow-400" 
-                    : "bg-blue-100 text-blue-900 dark:bg-blue-900/20 dark:text-blue-400"
-                }`}>
-                  {fullUser.role === "owner" ? "👑 Propriétaire" : "🏊 Locataire"}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {fullUser.role === "owner" ? (
-                    <>
-                      <p className="font-medium mb-1">Vous pouvez :</p>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Proposer vos piscines</li>
-                        <li>Gérer vos réservations</li>
-                        <li>Vérifier la disponibilité</li>
-                        <li>Recevoir des paiements</li>
-                      </ul>
-                    </>
-                  ) : (
-                    <>
-                      <p className="font-medium mb-1">Vous pouvez :</p>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Rechercher des piscines</li>
-                        <li>Réserver des créneaux</li>
-                        <li>Gérer vos réservations</li>
-                      </ul>
-                    </>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">Impossible de charger le statut</p>
-            )}
-          </div>
-        </section>
-
+      <div className="grid md:grid-cols-3 gap-6">
         <section
           id="profile"
           className="rounded-xl border bg-card p-5 hover:shadow-sm transition"
@@ -217,35 +160,14 @@ const ProfilePage = () => {
           <div className="flex items-start gap-3">
             <div className="text-2xl">🛡️</div>
             <div>
-              <h2 className="font-semibold">Mon profil</h2>
+              <h2 className="font-semibold">Mon profil <span>›</span></h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
                 Dites-en un peu plus sur vous pour que les autres utilisateurs vous
                 connaissent.
               </p>
             </div>
           </div>
-          <div className="mt-4 space-y-3">
-            <div>
-              <label className="text-sm font-medium">Photo de profil (URL)</label>
-              <input
-                type="url"
-                placeholder="https://…"
-                value={local.image ?? ""}
-                onChange={(e) => setLocal((p) => ({ ...p, image: e.target.value }))}
-                className="mt-1 w-full border rounded-md px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">À propos de moi</label>
-              <textarea
-                placeholder="Votre présentation"
-                value={local.about ?? ""}
-                onChange={(e) => setLocal((p) => ({ ...p, about: e.target.value }))}
-                className="mt-1 w-full border rounded-md px-3 py-2"
-                rows={3}
-              />
-            </div>
-          </div>
+          
         </section>
 
         <section
@@ -255,21 +177,13 @@ const ProfilePage = () => {
           <div className="flex items-start gap-3">
             <div className="text-2xl">🧑‍💼</div>
             <div>
-              <h2 className="font-semibold">Informations personnelles</h2>
+              <h2 className="font-semibold">Informations personnelles <span>›</span></h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
                 Renseignez vos informations afin que l'on puisse vous contactez.
               </p>
             </div>
           </div>
-          <div className="mt-4">
-            <label className="text-sm font-medium">Date de naissance</label>
-            <input
-              type="date"
-              value={local.dob ?? ""}
-              onChange={(e) => setLocal((p) => ({ ...p, dob: e.target.value }))}
-              className="mt-1 w-full border rounded-md px-3 py-2"
-            />
-          </div>
+          
         </section>
 
         <section
@@ -279,7 +193,7 @@ const ProfilePage = () => {
           <div className="flex items-start gap-3">
             <div className="text-2xl">💳</div>
             <div>
-              <h2 className="font-semibold">Paiements et versements</h2>
+              <h2 className="font-semibold">Paiements et versements <span>›</span></h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
                 Gérez vos moyens de paiements et vos informations de versements.
               </p>
@@ -294,19 +208,11 @@ const ProfilePage = () => {
           <div className="flex items-start gap-3">
             <div className="text-2xl">🧰</div>
             <div>
-              <h2 className="font-semibold">Sécurité</h2>
+              <h2 className="font-semibold">Sécurité <span>›</span></h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
                 Modifiez votre mot de passe si nécessaire.
               </p>
             </div>
-          </div>
-          <div className="mt-4">
-            <button
-              className="border px-3 py-2 rounded-md text-sm hover:bg-muted"
-              onClick={() => alert("Flux de vérification email à brancher")}
-            >
-              Vérifier mon email
-            </button>
           </div>
         </section>
 
@@ -317,7 +223,7 @@ const ProfilePage = () => {
           <div className="flex items-start gap-3">
             <div className="text-2xl">🔍</div>
             <div>
-              <h2 className="font-semibold">Vie privée</h2>
+              <h2 className="font-semibold">Vie privée <span>›</span></h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
                 Modifiez votre consentement concernant nos cookies.
               </p>
