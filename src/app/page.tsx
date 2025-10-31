@@ -420,13 +420,15 @@ export default function Home() {
               </div>
 
               <div className="mt-6 flex justify-center">
-                <button className="text-white px-6 py-3 rounded-full text-sm font-medium transition"
+                <Link
+                  href="/settings"
+                  className="text-white px-6 py-3 rounded-full text-sm font-medium transition"
                   style={{backgroundColor: '#0094ec'}}
                   onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
                   onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
                 >
                   Toutes les réponses à vos questions →
-                </button>
+                </Link>
               </div>
             </div>
 
