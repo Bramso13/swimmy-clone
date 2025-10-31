@@ -130,23 +130,23 @@ export default function SettingsPage() {
             <h2 className="text-2xl font-bold text-center mb-10">Les autres thèmes pour vous aider à mieux comprendre Swimmy</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {/* Comment fonctionne Swimmy */}
-              <div className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
-                   style={{borderColor: '#E5E7EB'}}
-                   onMouseEnter={(e) => {
-                     e.currentTarget.style.borderColor = '#0094EC';
-                     e.currentTarget.style.backgroundColor = '#F0F9FF';
-                   }}
-                   onMouseLeave={(e) => {
-                     e.currentTarget.style.borderColor = '#E5E7EB';
-                     e.currentTarget.style.backgroundColor = 'white';
-                   }}>
+              <Link href="/settings/faq/comment-fonctionne-swimmy" className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
+                    style={{borderColor: '#E5E7EB'}}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = '#0094EC';
+                      (e.currentTarget as HTMLElement).style.backgroundColor = '#F0F9FF';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = '#E5E7EB';
+                      (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
+                    }}>
                 <div className="flex justify-center mb-3">
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
                 <p className="font-medium" style={{color: '#0094EC'}}>Comment fonctionne Swimmy</p>
-              </div>
+              </Link>
 
               {/* Annulation d'une réservation */}
               <div className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"

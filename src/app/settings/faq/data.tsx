@@ -21,6 +21,97 @@ export const faqItems: FaqItem[] = [
     ),
   },
   {
+    slug: "est-ce-gratuit-pour-les-enfants",
+    title: "Est-ce gratuit pour les enfants ? Si oui jusqu'à quel âge ?",
+    excerpt:
+      "Gratuité pour les 0-3 ans, demi-tarif pour les 3-12 ans.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Chez Swimmy, les enfants de 0 à 3 ans sont gratuits. De 3 à 12 ans, un tarif réduit de 50% s'applique par enfant.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "joindre-equipe-swimmy",
+    title: "Comment joindre / contacter / appeler une personne de l'équipe Swimmy ?",
+    excerpt:
+      "Support via messagerie, e‑mail et formulaire de contact.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Utilisez la messagerie depuis votre compte, ou la page contact pour nous écrire. Nous répondons généralement sous 24h ouvrées.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "comment-trouver-une-piscine",
+    title: "Comment trouver une piscine ?",
+    excerpt:
+      "Recherche par ville, filtre par prix, date et nombre de personnes.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Rendez‑vous sur la page de recherche, entrez votre destination et vos filtres, puis contactez l'hôte depuis la fiche piscine.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "reserver-le-jour-meme",
+    title: "Est‑il possible de réserver une piscine le jour même ?",
+    excerpt:
+      "Oui si l'hôte est disponible et accepte rapidement votre demande.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          C'est possible chez certains hôtes. Plus vous précisez vos horaires et le nombre de personnes, plus la réponse sera rapide.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "delai-reponse-proprietaire",
+    title: "Combien de temps le propriétaire a t'il pour me répondre ?",
+    excerpt:
+      "La plupart répondent sous 24h; au‑delà, votre demande expire.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          La majorité des hôtes répondent en moins de 24h. Passé un certain délai, la demande peut expirer automatiquement.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "connaitre-disponibilites",
+    title: "Comment connaître les disponibilités d’une piscine ?",
+    excerpt:
+      "Consultez le calendrier de l'annonce et envoyez un message à l'hôte.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Les disponibilités sont visibles sur la fiche de la piscine. Si un doute subsiste, utilisez le bouton « Envoyer un message ».
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "delai-acceptation-reservation",
+    title: "Jusqu’à quand le propriétaire peut‑il accepter ma réservation ?",
+    excerpt:
+      "L'acceptation est possible tant que la demande est active (calendrier ouvert).",
+    content: (
+      <div className="space-y-6">
+        <p>
+          L'hôte peut accepter tant que la demande n'a pas expiré et que le créneau reste disponible dans son calendrier.
+        </p>
+      </div>
+    ),
+  },
+  {
     slug: "comment-ca-marche",
     title: "Swimmy : comment ça marche ?",
     excerpt:
