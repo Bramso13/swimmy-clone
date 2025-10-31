@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 
 type LocalProfile = {
@@ -153,10 +154,7 @@ const ProfilePage = () => {
       )}
 
       <div className="grid md:grid-cols-3 gap-6">
-        <section
-          id="profile"
-          className="rounded-xl border bg-card p-5 hover:shadow-sm transition"
-        >
+        <Link href="/profile/mon-profil" className="rounded-xl border bg-card p-5 hover:shadow-sm transition block">
           <div className="flex items-start gap-3">
             <div className="text-2xl">🛡️</div>
             <div>
@@ -167,8 +165,7 @@ const ProfilePage = () => {
               </p>
             </div>
           </div>
-          
-        </section>
+        </Link>
 
         <section
           id="personal"
