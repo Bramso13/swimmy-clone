@@ -191,10 +191,7 @@ const ProfilePage = () => {
           </div>
         </Link>
 
-        <section
-          id="security"
-          className="rounded-xl border bg-card p-5 hover:shadow-sm transition"
-        >
+        <Link href="/profile/securite" className="rounded-xl border bg-card p-5 hover:shadow-sm transition block">
           <div className="flex items-start gap-3">
             <div className="text-2xl">🧰</div>
             <div>
@@ -204,7 +201,7 @@ const ProfilePage = () => {
               </p>
             </div>
           </div>
-        </section>
+        </Link>
 
         <section
           id="privacy"
