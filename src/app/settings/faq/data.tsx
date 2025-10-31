@@ -234,6 +234,58 @@ export const faqItems: FaqItem[] = [
     ),
   },
   {
+    slug: "modifier-date-reservation",
+    title: "Comment modifier la date de ma réservation ?",
+    excerpt:
+      "Contactez l'hôte via la messagerie pour convenir d'un nouveau créneau.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Demandez la modification de date à l'hôte depuis la messagerie de votre réservation. La modification est effective une fois acceptée.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "plus-ou-moins-de-personnes",
+    title: "Nous serons plus/moins que prévu ?",
+    excerpt:
+      "Ajustez le nombre de personnes avant l'acceptation, sinon contactez l'hôte.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Avant l'acceptation, renvoyez une demande avec le bon effectif. Après acceptation, informez l'hôte pour ajuster le tarif si nécessaire.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "proprietaire-annule-demande",
+    title: "Que se passe t’il si Le propriétaire annule ma demande de réservation ?",
+    excerpt:
+      "Vous n'êtes pas débité; vous pouvez contacter un autre hôte immédiatement.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Si l'hôte annule, aucun débit n'est effectué. Vous pouvez faire une nouvelle demande auprès d'une autre piscine disponible.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "intemperies-mauvais-temps",
+    title: "Que se passe‑t‑il en cas d’intempéries / mauvais temps ?",
+    excerpt:
+      "Discutez d'un report ou suivez la politique d'annulation de l'hôte.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          En cas d'intempéries, privilégiez un report avec l'hôte. À défaut, appliquez la politique d'annulation indiquée sur l'annonce.
+        </p>
+      </div>
+    ),
+  },
+  {
     slug: "assurance-speciale",
     title: "Dois‑je souscrire à une assurance spéciale ?",
     excerpt:
@@ -261,6 +313,272 @@ export const faqItems: FaqItem[] = [
         <p>
           Pour en savoir plus, n'hésitez pas à consulter nos Conditions d'Utilisation: « https://www.swimmy.fr/terms-of-use »
           Rubrique XVI « Assurance ».
+        </p>
+      </div>
+    ),
+  },
+  // Paiements
+  {
+    slug: "double-reservation-debite-deux-fois",
+    title: "Suis‑je débité deux fois en cas de double réservation le même jour ?",
+    excerpt:
+      "Non, un seul débit est effectué par réservation confirmée.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Deux demandes le même jour n'entraînent pas de double débit. Seule la réservation acceptée par l'hôte et confirmée est débitée.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "moyens-de-paiement-acceptes",
+    title: "Quels sont les moyens de paiement acceptés ?",
+    excerpt:
+      "Cartes Visa, Mastercard, et cartes de débit compatibles via MangoPay.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Nous acceptons les principales cartes (Visa, Mastercard). Les paiements sont sécurisés par MangoPay.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "debite-sans-acceptation-proprietaire",
+    title: "Catastrophe ! J’ai été débité alors que le propriétaire n’a pas accepté ma demande",
+    excerpt:
+      "Il s'agit généralement d'une empreinte bancaire. Elle est automatiquement relâchée.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Lors de la demande, une empreinte peut apparaître sur votre relevé. En l'absence d'acceptation, elle disparaît automatiquement après quelques jours ouvrés.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "quand-serai-je-debite",
+    title: "Quand serai‑je débité ?",
+    excerpt:
+      "Au moment de l'acceptation par l'hôte ou selon la politique de l'annonce.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Le débit réel intervient lors de l'acceptation de votre demande par l'hôte. Avant cela, seule une empreinte peut être visible.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "carte-de-credit-ne-fonctionne-pas",
+    title: "Ma carte de crédit ne fonctionne pas",
+    excerpt:
+      "Vérifiez le 3‑D Secure, le plafond et contactez votre banque si besoin.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Assurez‑vous que votre carte est activée pour les paiements en ligne et à l'étranger, que le plafond n'est pas atteint, et réessayez avec 3‑D Secure.
+        </p>
+      </div>
+    ),
+  },
+  // Compte
+  {
+    slug: "supprimer-mon-compte",
+    title: "Comment supprimer mon compte ?",
+    excerpt:
+      "Vous pouvez demander la suppression depuis vos paramètres ou via le support.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Depuis votre espace, ouvrez Paramètres → Compte → Supprimer mon compte. Conformément au RGPD, vos données seront effacées après traitement.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "compte-bloque-ou-mdp-oublie",
+    title: "Mon compte est bloqué / J’ai oublié mon mot de passe",
+    excerpt:
+      "Utilisez « mot de passe oublié » et suivez le lien 3‑D Secure envoyé par e‑mail.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Cliquez sur « Mot de passe oublié » sur la page de connexion. Si votre compte est bloqué, essayez après 15 minutes ou contactez le support.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "impossible-de-se-connecter",
+    title: "Je ne parviens pas à me connecter à mon compte ?",
+    excerpt:
+      "Vérifiez l’e‑mail, le mot de passe, le 3‑D Secure et videz le cache du navigateur.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Assurez‑vous d’utiliser la bonne adresse e‑mail. Réinitialisez le mot de passe si nécessaire et réessayez en navigation privée.
+        </p>
+      </div>
+    ),
+  },
+  // Gestion d'une location
+  {
+    slug: "retard-que-se-passe-t-il",
+    title: "Que se passe‑t‑il en cas de retard ?",
+    excerpt:
+      "Prévenez l’hôte via la messagerie; le temps réservé reste dû.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Informez l’hôte dès que possible via la messagerie. Selon l’accord, la fin peut être décalée si le calendrier le permet; sinon, le temps initial reste dû.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "demande-reservation-refusee",
+    title: "Que se passe t’il si ma demande de réservation est refusée ?",
+    excerpt:
+      "Aucun débit définitif; essayez avec d’autres piscines disponibles.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          En cas de refus, vous n’êtes pas débité. Vous pouvez contacter un autre hôte immédiatement depuis la page de recherche.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "serai-je-seul-pendant-reservation",
+    title: "Serais‑je seul(e) durant ma réservation ?",
+    excerpt:
+      "Oui, sauf mention contraire de l’hôte (espaces partagés).",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Les réservations sont privées pour votre groupe, à moins que l’annonce n’indique le contraire. L’hôte peut rester présent pour assistance.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "proprietaire-ne-repond-plus",
+    title: "Réservation : le propriétaire ne me répond pas/plus",
+    excerpt:
+      "Relancez via la messagerie; si pas de réponse, contactez le support et tentez une autre annonce.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Les hôtes répondent généralement sous 24h. Passé ce délai, relancez puis contactez notre support; vous pouvez aussi envoyer une demande à un autre hôte.
+        </p>
+      </div>
+    ),
+  },
+  // Sinistre, litige, caution
+  {
+    slug: "sinistre-que-faire",
+    title: "Que se passe‑t‑il en cas de sinistre ?",
+    excerpt:
+      "Informez immédiatement l’hôte, documentez le sinistre et contactez le support.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Prévenez l’hôte dès l’incident et prenez des photos. Ouvrez un ticket auprès du support Swimmy avec le numéro de réservation pour activer la procédure prévue par nos conditions.
+        </p>
+      </div>
+    ),
+  },
+  // Assurance
+  {
+    slug: "location-assuree-probleme",
+    title: "La location est‑elle assurée ? Que se passe‑t‑il en cas de problème ?",
+    excerpt:
+      "Une assurance couvre certains dommages pendant la location, selon conditions.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Swimmy prévoit une couverture pour les dommages à la piscine et installations extérieures selon nos conditions. Elle s’applique aux réservations effectuées et payées sur la plateforme.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "que-faire-declarer-sinistre",
+    title: "Que dois‑je faire en cas de problème ? Comment déclarer un sinistre ?",
+    excerpt:
+      "Documentez, prévenez l’hôte, puis déclarez via le support dans les 48h.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Prenez des photos/vidéos, contactez l’hôte, puis ouvrez une déclaration au support avec votre numéro de réservation et une description précise dans les 48 heures.
+        </p>
+      </div>
+    ),
+  },
+  // Evaluations et commentaires
+  {
+    slug: "quand-et-comment-rediger-evaluation",
+    title: "Quand et comment rédiger une évaluation suite à une location ?",
+    excerpt:
+      "Vous pouvez évaluer après la réservation depuis votre espace comptes > réservations.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Une fois la réservation terminée, rendez‑vous dans « Mes réservations » pour laisser une évaluation détaillée sur l’expérience.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "voir-evaluation-recue",
+    title: "Comment voir l’évaluation que j’ai reçue ?",
+    excerpt:
+      "Elles sont visibles dans votre profil, section évaluations.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Ouvrez votre profil et consultez l’onglet « Évaluations ». Les notes et commentaires y sont listés.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "mauvais-commentaire-que-faire",
+    title: "Que faire en cas de mauvais commentaire ?",
+    excerpt:
+      "Répondez de manière factuelle; contactez le support si la charte n’est pas respectée.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Vous pouvez publier une réponse visible publiquement. Si le commentaire enfreint notre charte, signalez‑le au support.
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "comment-evaluer-une-location",
+    title: "Comment évaluer une location ?",
+    excerpt:
+      "Note sur 5 et commentaire détaillé directement depuis la réservation terminée.",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Après la fin de votre créneau, ouvrez la réservation puis cliquez sur « Laisser une évaluation ».
+        </p>
+      </div>
+    ),
+  },
+  {
+    slug: "commentaire-au-proprietaire-apres-reservation",
+    title: "Comment laisser un commentaire à un propriétaire après une réservation ?",
+    excerpt:
+      "Depuis la réservation terminée, bouton « Laisser un commentaire ».",
+    content: (
+      <div className="space-y-6">
+        <p>
+          Accédez à la réservation concernée, puis suivez le flux d’évaluation pour publier votre commentaire à l’hôte.
         </p>
       </div>
     ),

@@ -149,15 +149,15 @@ export default function SettingsPage() {
               </Link>
 
               {/* Annulation d'une réservation */}
-              <div className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
+              <Link href="/settings/faq/annulation-reservation" className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
                    style={{borderColor: '#E5E7EB'}}
                    onMouseEnter={(e) => {
-                     e.currentTarget.style.borderColor = '#0094EC';
-                     e.currentTarget.style.backgroundColor = '#F0F9FF';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#0094EC';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = '#F0F9FF';
                    }}
                    onMouseLeave={(e) => {
-                     e.currentTarget.style.borderColor = '#E5E7EB';
-                     e.currentTarget.style.backgroundColor = 'white';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#E5E7EB';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
                    }}>
                 <div className="flex justify-center mb-3">
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,18 +165,18 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <p className="font-medium" style={{color: '#0094EC'}}>Annulation d'une réservation</p>
-              </div>
+              </Link>
 
               {/* Paiements */}
-              <div className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
+              <Link href="/settings/faq/paiements" className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
                    style={{borderColor: '#E5E7EB'}}
                    onMouseEnter={(e) => {
-                     e.currentTarget.style.borderColor = '#0094EC';
-                     e.currentTarget.style.backgroundColor = '#F0F9FF';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#0094EC';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = '#F0F9FF';
                    }}
                    onMouseLeave={(e) => {
-                     e.currentTarget.style.borderColor = '#E5E7EB';
-                     e.currentTarget.style.backgroundColor = 'white';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#E5E7EB';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
                    }}>
                 <div className="flex justify-center mb-3">
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,18 +184,18 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <p className="font-medium" style={{color: '#0094EC'}}>Paiements</p>
-              </div>
+              </Link>
 
               {/* Compte */}
-              <div className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
+              <Link href="/settings/faq/compte" className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
                    style={{borderColor: '#E5E7EB'}}
                    onMouseEnter={(e) => {
-                     e.currentTarget.style.borderColor = '#0094EC';
-                     e.currentTarget.style.backgroundColor = '#F0F9FF';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#0094EC';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = '#F0F9FF';
                    }}
                    onMouseLeave={(e) => {
-                     e.currentTarget.style.borderColor = '#E5E7EB';
-                     e.currentTarget.style.backgroundColor = 'white';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#E5E7EB';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
                    }}>
                 <div className="flex justify-center mb-3">
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,18 +203,18 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <p className="font-medium" style={{color: '#0094EC'}}>Compte</p>
-              </div>
+              </Link>
 
               {/* Gestion d'une location */}
-              <div className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
+              <Link href="/settings/faq/gestion-location" className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
                    style={{borderColor: '#E5E7EB'}}
                    onMouseEnter={(e) => {
-                     e.currentTarget.style.borderColor = '#0094EC';
-                     e.currentTarget.style.backgroundColor = '#F0F9FF';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#0094EC';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = '#F0F9FF';
                    }}
                    onMouseLeave={(e) => {
-                     e.currentTarget.style.borderColor = '#E5E7EB';
-                     e.currentTarget.style.backgroundColor = 'white';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#E5E7EB';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
                    }}>
                 <div className="flex justify-center mb-3">
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,18 +222,18 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <p className="font-medium" style={{color: '#0094EC'}}>Gestion d'une location</p>
-              </div>
+              </Link>
 
               {/* Sinistre, litige, caution */}
-              <div className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
+              <Link href="/settings/faq/sinistre-litige-caution" className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
                    style={{borderColor: '#E5E7EB'}}
                    onMouseEnter={(e) => {
-                     e.currentTarget.style.borderColor = '#0094EC';
-                     e.currentTarget.style.backgroundColor = '#F0F9FF';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#0094EC';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = '#F0F9FF';
                    }}
                    onMouseLeave={(e) => {
-                     e.currentTarget.style.borderColor = '#E5E7EB';
-                     e.currentTarget.style.backgroundColor = 'white';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#E5E7EB';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
                    }}>
                 <div className="flex justify-center mb-3">
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,18 +241,18 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <p className="font-medium" style={{color: '#0094EC'}}>Sinistre, litige, caution</p>
-              </div>
+              </Link>
 
               {/* Assurance */}
-              <div className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
+              <Link href="/settings/faq/assurance" className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
                    style={{borderColor: '#E5E7EB'}}
                    onMouseEnter={(e) => {
-                     e.currentTarget.style.borderColor = '#0094EC';
-                     e.currentTarget.style.backgroundColor = '#F0F9FF';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#0094EC';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = '#F0F9FF';
                    }}
                    onMouseLeave={(e) => {
-                     e.currentTarget.style.borderColor = '#E5E7EB';
-                     e.currentTarget.style.backgroundColor = 'white';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#E5E7EB';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
                    }}>
                 <div className="flex justify-center mb-3">
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,18 +260,18 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <p className="font-medium" style={{color: '#0094EC'}}>Assurance</p>
-              </div>
+              </Link>
 
               {/* Evaluations et commentaires */}
-              <div className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
+              <Link href="/settings/faq/evaluations-commentaires" className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
                    style={{borderColor: '#E5E7EB'}}
                    onMouseEnter={(e) => {
-                     e.currentTarget.style.borderColor = '#0094EC';
-                     e.currentTarget.style.backgroundColor = '#F0F9FF';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#0094EC';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = '#F0F9FF';
                    }}
                    onMouseLeave={(e) => {
-                     e.currentTarget.style.borderColor = '#E5E7EB';
-                     e.currentTarget.style.backgroundColor = 'white';
+                     (e.currentTarget as HTMLElement).style.borderColor = '#E5E7EB';
+                     (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
                    }}>
                 <div className="flex justify-center mb-3">
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,7 +279,7 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <p className="font-medium" style={{color: '#0094EC'}}>Evaluations et commentaires</p>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
