@@ -80,9 +80,15 @@ export default function PoolCard({ pool }: { pool: Pool }) {
     }
   };
 
+  const photosCount = Array.isArray(pool.photos) ? pool.photos.length : 0;
+  const locationText = pool.address ?? "";
+
   return (
-    <div className="bg-white border rounded-lg shadow p-3 flex flex-col gap-2">
-      <div className="relative h-36 w-full rounded overflow-hidden border bg-muted">
+    <Link
+      href={`/pool/${pool.id}`}
+      className="block bg-white border rounded-xl shadow hover:shadow-lg transition-shadow overflow-hidden"
+    >
+      <div className="relative h-56 w-full bg-muted">
         {showImage && initialCover ? (
           <Image
             src={initialCover}
@@ -96,6 +102,12 @@ export default function PoolCard({ pool }: { pool: Pool }) {
           <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
             Sans image
           </div>
+        )}
+        {/* Compteur d'images en haut à gauche */}
+        {photosCount > 0 && (
+          <span className="absolute top-2 left-2 text-[11px] px-2 py-1 rounded-full bg-black/60 text-white">
+            1/{photosCount}
+          </span>
         )}
         {/* Bouton favori en haut à droite de l'image */}
         {isAuthenticated && (
@@ -121,20 +133,23 @@ export default function PoolCard({ pool }: { pool: Pool }) {
           </button>
         )}
       </div>
-      <div className="font-semibold text-sm line-clamp-1">{pool.title}</div>
-      {pool.address && (
-        <div className="text-xs text-muted-foreground line-clamp-1">{pool.address}</div>
-      )}
-      <div className="font-bold text-sm" style={{color: '#0094ec'}}>{pool.pricePerHour} €/heure</div>
-      <Link
-        href={`/pool/${pool.id}`}
-        className="text-white px-3 py-1 rounded text-sm text-center mt-1 transition"
-        style={{backgroundColor: '#0094ec'}}
-        onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-        onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
-      >
-        Voir
-      </Link>
-    </div>
+      <div className="p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="font-semibold text-[15px] line-clamp-1">{pool.title}</div>
+            {locationText && (
+              <div className="text-xs text-gray-500 line-clamp-1">{locationText}</div>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-[11px] text-gray-700">
+            <span className="hidden sm:inline">Nouveau</span>
+            <span className="text-blue-500">★</span>
+          </div>
+        </div>
+        <div className="mt-2 font-bold text-sm" style={{color: '#0094ec'}}>
+          {Math.round(Number(pool.pricePerHour || 0))} €/heure
+        </div>
+      </div>
+    </Link>
   );
 }
