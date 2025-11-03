@@ -86,16 +86,19 @@ export default function SearchPage() {
 
   if (loading) {
     return (
-      <main className="max-w-6xl mx-auto p-4">
-        <div className="text-center">Chargement...</div>
+      <main className="w-full p-0">
+        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen px-3 sm:px-4 md:px-6">
+          <div className="text-center">Chargement...</div>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="max-w-6xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-2">Toutes les piscines</h1>
-      <p className="text-gray-600 mb-4">{pools.length} résultat{pools.length > 1 ? 's' : ''}</p>
+    <main className="w-full p-0">
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen px-3 sm:px-4 md:px-6">
+        <h1 className="text-2xl font-bold mb-2">Toutes les piscines</h1>
+        <p className="text-gray-600 mb-4">{pools.length} résultat{pools.length > 1 ? 's' : ''}</p>
       
       <div className="flex items-center justify-between mb-4">
         <div className="flex flex-wrap items-center gap-3">
@@ -255,6 +258,7 @@ export default function SearchPage() {
           ))}
         </div>
       )}
+      </div>
     </main>
   );
 }
