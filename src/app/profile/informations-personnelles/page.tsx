@@ -26,6 +26,7 @@ export default function InformationsPersonnellesPage() {
     language: "fr-FR",
   });
   const [saving, setSaving] = useState(false);
+  const [serverLoaded, setServerLoaded] = useState(false);
 
   useEffect(() => {
     try {
@@ -52,6 +53,29 @@ export default function InformationsPersonnellesPage() {
     } catch {}
   }, [user?.name]);
 
+  // Charger dateOfBirth et name depuis le serveur
+  useEffect(() => {
+    (async () => {
+      try {
+        const userId = user?.id as string | undefined;
+        if (!userId) return;
+        const res = await fetch(`/api/users/${userId}`);
+        if (res.ok) {
+          const j = await res.json();
+          const u = j.user || {};
+          setInfo((p) => ({
+            ...p,
+            dob: u.dateOfBirth ? String(u.dateOfBirth).slice(0,10) : p.dob,
+            firstName: p.firstName ?? (u.name ? String(u.name).split(" ")[0] : undefined),
+            lastName: p.lastName ?? (u.name ? String(u.name).split(" ").slice(1).join(" ") : undefined),
+          }));
+        }
+      } finally {
+        setServerLoaded(true);
+      }
+    })();
+  }, [user?.id]);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
@@ -59,12 +83,31 @@ export default function InformationsPersonnellesPage() {
   }, [info]);
 
   const handleSave = async () => {
-    setSaving(true);
-    // TODO: Sauvegarder via API
-    setTimeout(() => {
+    try {
+      setSaving(true);
+      const userId = user?.id as string | undefined;
+      if (!userId) {
+        alert("Vous devez être connecté");
+        return;
+      }
+      const payload: any = {};
+      if (info.dob) payload.dateOfBirth = info.dob;
+      if (info.firstName || info.lastName) payload.name = `${info.firstName ?? ''} ${info.lastName ?? ''}`.trim();
+      const res = await fetch(`/api/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || 'Enregistrement impossible');
+      }
+      alert('Informations enregistrées');
+    } catch (e: any) {
+      alert(e.message || 'Erreur');
+    } finally {
       setSaving(false);
-      alert("Informations enregistrées");
-    }, 500);
+    }
   };
 
   const handleResendVerification = () => {

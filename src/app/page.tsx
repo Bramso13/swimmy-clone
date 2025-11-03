@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
+import PoolCard from "@/components/PoolCard";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
@@ -207,39 +208,18 @@ export default function Home() {
           </p>
         </div>
         {pools.length > 0 ? (
-          <div className="flex flex-wrap justify-center gap-6 pb-2">
-            {pools.map((pool) => (
-              <div
-                key={pool.id}
-                className="min-w-[300px] bg-white border rounded-lg shadow-lg p-4 flex flex-col gap-2"
-              >
-                <Image
-                  src={pool.photos?.[0] || "/next.svg"}
-                  alt={pool.title}
-                  width={340}
-                  height={180}
-                  className="rounded-lg object-cover"
-                  style={{ maxHeight: 160, height: 160, width: '100%', objectFit: 'cover' }}
-                />
-                <div className="font-semibold text-lg line-clamp-2">
-                  {pool.title}
-                </div>
-                <div className="text-sm text-gray-500 line-clamp-1">
-                  {pool.address}
-                </div>
-                <div className="font-bold" style={{color: '#0094ec'}}>
-                  {Math.round(pool.pricePerHour)} €/heure
-                </div>
-                <Link
-                  href={`/pool/${pool.id}`}
-                  className="text-white px-3 py-1 rounded text-sm text-center mt-2 transition"
-                  style={{backgroundColor: '#0094ec'}}
-                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
-                >
-                  Voir
-                </Link>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-2">
+            {pools.map((p) => (
+              <PoolCard
+                key={p.id}
+                pool={{
+                  id: p.id,
+                  title: p.title,
+                  photos: p.photos || [],
+                  pricePerHour: p.pricePerHour,
+                  address: p.address,
+                }}
+              />
             ))}
           </div>
         ) : (
@@ -271,7 +251,10 @@ export default function Home() {
         </Link>
       </div>
         
-        <section className="py-16 px-8" style={{backgroundColor: '#0094ec'}}>
+        <section
+          className="py-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]"
+          style={{backgroundColor: '#0094ec'}}
+        >
           <div className="max-w-4xl mx-auto">
 
             {/* Grille des événements */}
