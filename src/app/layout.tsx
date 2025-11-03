@@ -36,12 +36,6 @@ export default function RootLayout({
           <nav className="sticky top-0 z-30 w-full bg-white dark:bg-black border-b border-border flex items-center justify-between px-3 md:px-6 py-3 shadow-sm">
             <div className="flex items-center gap-3">
               <SideMenu />
-              <Link
-                href="/"
-                className="font-bold text-xl tracking-tight text-blue-700"
-              >
-                Swimmy<span className="text-blue-400">Clone</span>
-              </Link>
             </div>
             <NavBar />
           </nav>

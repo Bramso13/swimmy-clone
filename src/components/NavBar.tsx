@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
-import SideMenu from "./SideMenu";
 
 export default function NavBar() {
   const [user, setUser] = useState<any>(null);
@@ -59,7 +58,13 @@ export default function NavBar() {
 
   return (
     <div className="flex items-center">
-      <SideMenu />
+      <Link
+        href="/"
+        className="font-bold text-2xl tracking-tight"
+        style={{color: '#0094ec', fontFamily: 'cursive'}}
+      >
+        Swimmy
+      </Link>
     </div>
   );
 }
