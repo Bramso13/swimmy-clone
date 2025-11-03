@@ -18,6 +18,8 @@ model User {
 
   name          String?
   avatarUrl     String?
+  bio           String?
+  dateOfBirth   DateTime?
   role          String        @default("tenant") // 'tenant' ou 'owner'
   mangopayId    String?
   walletId      String?

@@ -10,6 +10,7 @@ const PoolsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pools, setPools] = useState<PoolItem[]>([]);
+  const [rented, setRented] = useState<Array<{ id: string; title: string; renter: string }>>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -23,16 +24,30 @@ const PoolsPage = () => {
           setLoading(false);
           return;
         }
-        const res = await fetch(`/api/pools?ownerId=${encodeURIComponent(userId)}`, { cache: "no-store" });
+        const res = await fetch(`/api/pools?ownerId=${encodeURIComponent(userId)}&includeReservations=true`, { cache: "no-store" });
         if (!res.ok) throw new Error("Impossible de charger vos piscines");
         const data = await res.json();
-        setPools((data.pools || []).map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          photos: p.photos || [],
-          pricePerHour: p.pricePerHour,
-          address: p.address,
-        })));
+        const all: any[] = data.pools || [];
+        const rentedNow: Array<{ id: string; title: string; renter: string }> = [];
+        const available: PoolItem[] = [];
+        for (const p of all) {
+          const accepted = (p.reservations || []).find((r: any) => r.status === 'accepted' || r.status === 'paid');
+          const approvedReq = (p.availabilityRequests || []).find((ar: any) => ar.status === 'approved');
+          if (accepted || approvedReq || p.isAvailable === false) {
+            const who = (accepted?.user?.name || accepted?.user?.email) || (approvedReq?.user?.name || approvedReq?.user?.email) || 'Client';
+            rentedNow.push({ id: p.id, title: p.title, renter: who });
+            continue;
+          }
+          available.push({
+            id: p.id,
+            title: p.title,
+            photos: p.photos || [],
+            pricePerHour: p.pricePerHour,
+            address: p.address,
+          });
+        }
+        setPools(available);
+        setRented(rentedNow);
       } catch (e: any) {
         setError(e.message || "Erreur réseau");
       } finally {
@@ -76,10 +91,22 @@ const PoolsPage = () => {
           </a>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pools.map((pool) => (
-            <PoolCard key={pool.id} pool={pool} />
-          ))}
+        <div>
+          {rented.length > 0 && (
+            <div className="mb-6 rounded-lg border bg-white p-4">
+              <div className="font-semibold mb-2">Actuellement louées</div>
+              <ul className="space-y-1 text-sm text-gray-700">
+                {rented.map((r) => (
+                  <li key={r.id}>• {r.title} — louée par {r.renter}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pools.map((pool) => (
+              <PoolCard key={pool.id} pool={pool} />
+            ))}
+          </div>
         </div>
       )}
     </main>

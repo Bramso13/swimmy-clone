@@ -66,6 +66,14 @@ export async function PATCH(req: NextRequest) {
       include: { pool: true, transaction: true },
     });
 
+    // Mettre à jour la disponibilité de la piscine selon le statut
+    try {
+      if (updated?.poolId && ["accepted", "paid"].includes(status)) {
+        await prisma.pool.update({ where: { id: updated.poolId }, data: { isAvailable: false } });
+      }
+      // IMPORTANT: ne pas réactiver automatiquement; l'owner gère manuellement via la checkbox
+    } catch {}
+
     return NextResponse.json({ reservation: updated });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

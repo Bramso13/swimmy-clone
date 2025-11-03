@@ -15,6 +15,8 @@ type FullUser = {
   name?: string;
   role: string;
   image?: string;
+  bio?: string | null;
+  dateOfBirth?: string | Date | null;
   emailVerified: boolean;
 };
 
@@ -37,7 +39,7 @@ const ProfilePage = () => {
     } catch {}
   }, []);
 
-  // Récupérer les informations complètes de l'utilisateur avec le rôle
+  // Récupérer les informations complètes de l'utilisateur (rôle, image, bio, date)
   useEffect(() => {
     const fetchFullUser = async () => {
       if (!user?.id) {
@@ -77,21 +79,24 @@ const ProfilePage = () => {
         href: "#security",
       });
     }
-    if (!(user?.image || local.image)) {
+    // Photo de profil (on privilégie la donnée serveur)
+    if (!(fullUser?.image || user?.image || local.image)) {
       items.push({
         key: "photo",
         label: "Votre profil (Photo de profil, À propos de vous)",
         href: "#profile",
       });
     }
-    if (!local.about) {
+    // À propos (bio) depuis la BDD
+    if (!fullUser?.bio) {
       items.push({
         key: "about",
         label: "Votre profil (À propos de vous)",
         href: "#profile",
       });
     }
-    if (!local.dob) {
+    // Date de naissance depuis la BDD
+    if (!fullUser?.dateOfBirth) {
       items.push({
         key: "dob",
         label: "Vos informations personnelles (Date de naissance)",
@@ -99,7 +104,7 @@ const ProfilePage = () => {
       });
     }
     return items;
-  }, [user?.emailVerified, user?.image, local.about, local.dob, local.image]);
+  }, [user?.emailVerified, user?.image, local.image, fullUser?.image, fullUser?.bio, fullUser?.dateOfBirth]);
 
   const showAlert = requirements.length > 0;
 

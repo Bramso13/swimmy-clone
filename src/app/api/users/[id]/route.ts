@@ -37,6 +37,8 @@ export async function GET(
         role: true,
         avatarUrl: true,
         image: true,
+        bio: true,
+        dateOfBirth: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -68,24 +70,44 @@ export async function PATCH(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
+    const isSelf = session.user.id === params.id;
     const current = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } });
-    if (current?.role !== "owner") {
+    const isOwner = current?.role === "owner";
+
+    // Autorisations:
+    // - L'utilisateur peut modifier SON propre profil (name, image, avatarUrl)
+    // - Un owner peut modifier des champs supplémentaires (email, role) pour n'importe qui
+    if (!isSelf && !isOwner) {
       return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
 
     const body = await req.json();
-    const { name, email, role, avatarUrl, image } = body;
+    const { name, email, role, avatarUrl, image, bio, dateOfBirth } = body || {};
+
+    const data: any = {};
+    if (name !== undefined) data.name = name;
+    if (avatarUrl !== undefined) data.avatarUrl = avatarUrl;
+    if (image !== undefined) data.image = image;
+    if (bio !== undefined) data.bio = bio;
+    if (dateOfBirth !== undefined) {
+      try {
+        data.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null;
+      } catch {}
+    }
+    // Champs réservés aux owners
+    if (isOwner) {
+      if (email !== undefined) data.email = email;
+      if (role !== undefined) data.role = role;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "Aucun champ modifiable fourni" }, { status: 400 });
+    }
 
     const updated = await prisma.user.update({
       where: { id: params.id },
-      data: {
-        ...(name !== undefined ? { name } : {}),
-        ...(email !== undefined ? { email } : {}),
-        ...(role !== undefined ? { role } : {}),
-        ...(avatarUrl !== undefined ? { avatarUrl } : {}),
-        ...(image !== undefined ? { image } : {}),
-      },
-      select: { id: true, email: true, name: true, role: true, avatarUrl: true, image: true, updatedAt: true },
+      data,
+      select: { id: true, email: true, name: true, role: true, avatarUrl: true, image: true, bio: true, dateOfBirth: true, updatedAt: true },
     });
 
     return NextResponse.json({ user: updated });

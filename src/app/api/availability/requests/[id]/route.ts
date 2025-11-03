@@ -48,7 +48,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const updated = await prisma.availabilityRequest.update({
       where: { id: params.id },
       data: { status },
+      include: { pool: true },
     });
+
+    // Si approuvé, marquer la piscine indisponible
+    if (status === "approved" && updated?.poolId) {
+      try {
+        await prisma.pool.update({ where: { id: updated.poolId }, data: { isAvailable: false } });
+      } catch {}
+    }
 
     // Envoyer un message au demandeur si présent
     if (request.userId) {

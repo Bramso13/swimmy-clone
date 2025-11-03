@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
 
 type LocalProfile = {
   about?: string;
@@ -13,12 +14,38 @@ const STORAGE_KEY = "profile.local";
 export default function MonProfilPage() {
   const [local, setLocal] = useState<LocalProfile>({});
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [serverLoaded, setServerLoaded] = useState(false);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setLocal(JSON.parse(raw));
     } catch {}
+  }, []);
+
+  // Charger depuis le serveur (source de vérité)
+  useEffect(() => {
+    (async () => {
+      try {
+        const session = await authClient.getSession();
+        const userId = session.data?.user?.id as string | undefined;
+        if (!userId) return;
+        const res = await fetch(`/api/users/${userId}`);
+        if (res.ok) {
+          const j = await res.json();
+          const u = j.user || {};
+          setLocal((p) => ({
+            ...p,
+            image: u.image ?? p.image,
+            about: u.bio ?? p.about,
+            dob: u.dateOfBirth ? String(u.dateOfBirth).slice(0, 10) : p.dob,
+          }));
+        }
+      } finally {
+        setServerLoaded(true);
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -42,6 +69,40 @@ export default function MonProfilPage() {
       }
     } finally {
       setUploading(false);
+    }
+  };
+
+  const onSave = async () => {
+    try {
+      setSaving(true);
+      const session = await authClient.getSession();
+      const userId = session.data?.user?.id as string | undefined;
+      if (!userId) {
+        alert("Vous devez être connecté pour enregistrer votre profil.");
+        return;
+      }
+      const payload: any = {};
+      if (local.image) payload.image = local.image;
+      if (local.about !== undefined) payload.bio = local.about;
+      if (local.dob !== undefined) payload.dateOfBirth = local.dob;
+      if (Object.keys(payload).length === 0) {
+        alert("Aucun changement à enregistrer.");
+        return;
+      }
+      const res = await fetch(`/api/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || "Enregistrement impossible");
+      }
+      alert("Profil enregistré avec succès.");
+    } catch (e: any) {
+      alert(e.message || "Erreur lors de l'enregistrement");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -113,11 +174,12 @@ export default function MonProfilPage() {
 
           <div className="mt-6">
             <button
-              disabled={uploading}
+              disabled={uploading || saving}
+              onClick={onSave}
               className="px-8 py-3 rounded-full text-white disabled:opacity-60"
               style={{ backgroundColor: "#0094EC" }}
             >
-              {uploading ? "Enregistrement…" : "Enregistrer"}
+              {uploading || saving ? "Enregistrement…" : "Enregistrer"}
             </button>
           </div>
         </div>

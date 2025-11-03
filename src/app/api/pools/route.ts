@@ -38,6 +38,10 @@ export async function GET(req: NextRequest) {
             },
             orderBy: { startDate: "desc" },
           },
+          availabilityRequests: {
+            include: { user: { select: { id: true, name: true, email: true } } },
+            orderBy: { createdAt: "desc" },
+          },
         }),
       },
     });
