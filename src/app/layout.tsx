@@ -39,7 +39,7 @@ export default function RootLayout({
             </div>
             <NavBar />
           </nav>
-          <main className="flex-1 w-full mx-auto max-w-7xl px-4 py-8">
+          <main className="flex-1 w-full mx-auto max-w-7xl px-4">
             {children}
           </main>
           <footer className="w-full bg-white py-12 px-4">

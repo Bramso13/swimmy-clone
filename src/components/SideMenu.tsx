@@ -138,6 +138,7 @@ export default function SideMenu() {
             {user && !loading && (
               <>
                 {[
+                  { label: "Dashboard", href: "/dashboard" },
                   { label: "Trouver ma piscine", href: "/search" },
                   { label: "Proposer ma piscine", href: "/dashboard/pools/new" },
                   { label: "Messages", href: "/dashboard" },

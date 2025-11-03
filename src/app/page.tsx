@@ -132,8 +132,8 @@ export default function Home() {
       )}
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-2xl text-white" style={{background: 'linear-gradient(to right, #0094ec, #4db8ff)'}}>
-        <div className="flex flex-col gap-6 px-6 md:px-10 py-12 items-center">
+      <section className="overflow-hidden text-white py-12 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{background: 'linear-gradient(to right, #0094ec, #4db8ff)'}}>
+        <div className="flex flex-col gap-6 px-6 md:px-10 items-center">
           <div className="flex items-center justify-center w-full max-w-4xl">
             <SearchBar />
           </div>
