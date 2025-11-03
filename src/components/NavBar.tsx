@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
+import SideMenu from "./SideMenu";
 
 export default function NavBar() {
   const [user, setUser] = useState<any>(null);
@@ -57,60 +58,8 @@ export default function NavBar() {
   }
 
   return (
-    <div className="flex gap-4 items-center">
-      <Link href="/search" className="hover:underline">
-        Rechercher
-      </Link>
-      
-      {user ? (
-        // Menu pour utilisateurs connectés
-        <>
-          <Link href="/dashboard" className="hover:underline">
-            Dashboard
-          </Link>
-          {user.role === "owner" && (
-            <>
-              <Link href="/dashboard/availability" className="hover:underline font-semibold" style={{color: '#0094ec'}}>
-                Disponibilité
-              </Link>
-              <Link href="/dashboard/transactions" className="hover:underline text-emerald-600 font-semibold">
-                Commandes
-              </Link>
-              <Link href="/dashboard/users" className="hover:underline font-semibold" style={{color: '#4f46e5'}}>
-                Utilisateurs
-              </Link>
-            </>
-          )}
-          <Link href="/dashboard/messages" className="hover:underline">
-            Messages
-          </Link>
-          <Link href="/profile" className="hover:underline">
-            Profil
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-1.5 rounded hover:bg-red-700 transition"
-          >
-            Déconnexion
-          </button>
-        </>
-      ) : (
-        // Menu pour utilisateurs non connectés
-        <>
-          <Link href="/register" className="hover:underline">
-            Inscription
-          </Link>
-          <Link
-            href="/login"
-            className="text-white px-4 py-1.5 rounded transition"
-            style={{backgroundColor: '#0094ec'}}
-            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
-          >
-            Connexion
-          </Link>
-        </>
-      )}
+    <div className="flex items-center">
+      <SideMenu />
     </div>
   );
 }

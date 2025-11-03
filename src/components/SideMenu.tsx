@@ -62,14 +62,19 @@ export default function SideMenu() {
       <button
         aria-label="Ouvrir le menu"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
+        className="inline-flex items-center gap-3 rounded-full border px-4 py-2 text-sm font-medium bg-white hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring shadow-sm"
       >
-        {/* simple hamburger */}
-        <span className="relative block w-5 h-4">
-          <span className="absolute inset-x-0 top-0 h-0.5 bg-current"></span>
-          <span className="absolute inset-x-0 top-1/2 -mt-0.5 h-0.5 bg-current"></span>
-          <span className="absolute inset-x-0 bottom-0 h-0.5 bg-current"></span>
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white uppercase" style={{backgroundColor: '#0094ec'}}>
+          {(() => {
+            if (!user) return '≡';
+            const source = String(user?.name || user?.email || '').trim();
+            if (!source) return '≡';
+            const parts = source.split(/\s+/).filter(Boolean);
+            const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || (source.includes('@') ? source[0] : ''));
+            return initials.slice(0, 2).toUpperCase();
+          })()}
         </span>
+        <span className="text-gray-800">Menu</span>
       </button>
 
       {/* overlay */}
