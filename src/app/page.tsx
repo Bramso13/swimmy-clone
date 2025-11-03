@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 import PoolCard from "@/components/PoolCard";
+import SideMenu from "@/components/SideMenu";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
@@ -18,6 +19,7 @@ export default function Home() {
     approved?: boolean;
   }>>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showStickySearch, setShowStickySearch] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,6 +51,16 @@ export default function Home() {
       }
     };
     checkAuth();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Afficher la barre de recherche sticky après 150px de scroll
+      setShowStickySearch(window.scrollY > 150);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleTest = async () => {
@@ -93,6 +105,32 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-16 bg-gray-100 min-h-screen">
+      {/* SearchBar sticky */}
+      {showStickySearch && (
+        <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 py-4 px-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            {/* Menu à gauche */}
+            <div className="flex-shrink-0">
+              <SideMenu />
+            </div>
+            
+            {/* SearchBar au centre */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 max-w-2xl">
+              <SearchBar />
+            </div>
+            
+            {/* Logo Swimmy à droite */}
+            <div className="flex-shrink-0">
+              <Link href="/">
+                <h2 className="text-2xl font-bold" style={{color: '#0094ec', fontFamily: 'cursive'}}>
+                  Swimmy
+                </h2>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Hero Section */}
       <section className="relative overflow-hidden rounded-2xl text-white" style={{background: 'linear-gradient(to right, #0094ec, #4db8ff)'}}>
         <div className="flex flex-col gap-6 px-6 md:px-10 py-12 items-center">

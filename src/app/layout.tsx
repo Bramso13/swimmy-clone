@@ -33,7 +33,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background bg-gray-100 text-foreground min-h-screen flex flex-col`}
       >
         <RenterProvider>
-          <nav className="sticky top-0 z-30 w-full bg-white/80 dark:bg-black/80 backdrop-blur border-b border-border flex items-center justify-between px-3 md:px-6 py-3 shadow-sm">
+          <nav className="sticky top-0 z-30 w-full bg-white dark:bg-black border-b border-border flex items-center justify-between px-3 md:px-6 py-3 shadow-sm">
             <div className="flex items-center gap-3">
               <SideMenu />
               <Link
