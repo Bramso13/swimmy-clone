@@ -17,6 +17,7 @@ export default function Home() {
     pricePerHour: number;
     approved?: boolean;
   }>>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +37,18 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const session = await authClient.getSession();
+        setIsAuthenticated(!!session.data?.user);
+      } catch (error) {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
   }, []);
 
   const handleTest = async () => {
@@ -486,21 +499,23 @@ export default function Home() {
       </section>
 
       {/* Call to action */}
-      <section className="flex flex-col items-center gap-4 py-8 rounded-lg shadow-inner" style={{backgroundColor: '#f0f8ff'}}>
-        <h2 className="text-2xl font-bold" style={{color: '#0094ec'}}>Prêt à plonger ?</h2>
-        <p className="text-muted-foreground">
-          Inscrivez-vous gratuitement et profitez de l’été dès maintenant.
-        </p>
-        <Link
-          href="/register"
-          className="text-white px-6 py-2 rounded font-semibold transition"
-          style={{backgroundColor: '#0094ec'}}
-            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
-        >
-          Créer mon compte
-        </Link>
-      </section>
+      {!isAuthenticated && (
+        <section className="flex flex-col items-center gap-4 py-8 rounded-lg shadow-inner" style={{backgroundColor: '#f0f8ff'}}>
+          <h2 className="text-2xl font-bold" style={{color: '#0094ec'}}>Prêt à plonger ?</h2>
+          <p className="text-muted-foreground">
+            Inscrivez-vous gratuitement et profitez de l'été dès maintenant.
+          </p>
+          <Link
+            href="/register"
+            className="text-white px-6 py-2 rounded font-semibold transition"
+            style={{backgroundColor: '#0094ec'}}
+              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
+              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+          >
+            Créer mon compte
+          </Link>
+        </section>
+      )}
     </div>
   );
 }
