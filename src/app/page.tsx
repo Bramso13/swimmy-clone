@@ -432,6 +432,34 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Louez votre piscine avec Swimmy */}
+      <section className="py-20 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{backgroundColor: '#0094ec'}}>
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+            {/* Texte à gauche */}
+            <div className="text-white text-left w-1/3">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+                Louez votre piscine avec Swimmy
+              </h2>
+              <p className="text-lg text-white/90">
+                Faites des heureux, tout en faisant de votre piscine un revenu.
+              </p>
+            </div>
+            
+            {/* Bouton */}
+            <button
+              onClick={handleCreatePoolClick}
+              className="bg-white text-blue-600 px-8 py-4 rounded-full font-medium transition hover:bg-gray-100 inline-flex items-center gap-2 shadow-lg text-lg"
+            >
+              Louer votre piscine
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Avantages Section */}
       <section className="grid md:grid-cols-3 gap-8 py-12 w-full">
         <div className="flex flex-col items-center text-center gap-2">
