@@ -31,6 +31,8 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
     orderBy: { createdAt: "desc" },
     include: { author: { select: { id: true, name: true, email: true, image: true } } },
   });
+  const ratingCount = comments.length;
+  const ratingAvg = ratingCount > 0 ? (comments.reduce((s: number, c: any) => s + (c.rating || 0), 0) / ratingCount) : 0;
 
   return (
     <main className="mx-auto max-w-6xl p-4 md:p-6">
@@ -41,7 +43,18 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
             {pool.title}
           </h1>
           <div className="mt-2 text-sm text-muted-foreground flex items-center gap-3">
-            <span>⭐ 4.89 (90)</span>
+            <span>
+              {ratingCount > 0 ? (
+                <>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} className={i < Math.round(ratingAvg) ? 'text-yellow-500' : 'text-gray-300'}>★</span>
+                  ))}
+                  <span className="ml-1">{ratingAvg.toFixed(2)} ({ratingCount})</span>
+                </>
+              ) : (
+                <>Aucune note</>
+              )}
+            </span>
             <span>•</span>
             <span>Superhôte</span>
             <span>•</span>
@@ -128,7 +141,11 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <div className="font-semibold">{authorName}</div>
-                      <div className="text-blue-600 text-sm">★★★★★</div>
+                      <div className="text-yellow-500 text-sm">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span key={i} className={i < (c.rating || 0) ? 'text-yellow-500' : 'text-gray-300'}>★</span>
+                        ))}
+                      </div>
                       <div className="text-xs text-muted-foreground">{dateLabel}</div>
                     </div>
                     <p className="mt-2 text-gray-800">{c.content}</p>

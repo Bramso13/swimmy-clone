@@ -31,10 +31,12 @@ export async function POST(req: NextRequest) {
     const session = await auth.api.getSession({ headers: req.headers });
     if (!session?.user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-    const { poolId, reservationId, content } = await req.json();
+    const { poolId, reservationId, content, rating } = await req.json();
     if (!poolId || !content) {
       return NextResponse.json({ error: "poolId et content requis" }, { status: 400 });
     }
+    const parsedRating = typeof rating === 'number' ? Math.round(rating) : 5;
+    const safeRating = Math.min(5, Math.max(1, parsedRating));
 
     // Autorisation: réservation acceptée/payée OU demande de dispo approuvée
     let allowed = false;
@@ -55,6 +57,7 @@ export async function POST(req: NextRequest) {
     const created = await (prisma as any).comment.create({
       data: {
         content,
+        rating: safeRating,
         poolId,
         reservationId: reservationId || null,
         authorId: session.user.id as string,

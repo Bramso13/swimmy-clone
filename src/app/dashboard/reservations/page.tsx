@@ -17,6 +17,7 @@ const ReservationsPage = () => {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [sendingByPool, setSendingByPool] = useState<Record<string, boolean>>({});
   const [feedbackByPool, setFeedbackByPool] = useState<Record<string, { type: 'success' | 'error'; text: string } | undefined>>({});
+  const [ratingByPool, setRatingByPool] = useState<Record<string, number>>({});
 
   const fetchMyApprovals = async (currentUserId?: string) => {
     try {
@@ -127,7 +128,7 @@ const ReservationsPage = () => {
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ poolId, reservationId, content })
+        body: JSON.stringify({ poolId, reservationId, content, rating: ratingByPool[poolId] || 5 })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -139,6 +140,7 @@ const ReservationsPage = () => {
         [poolId]: [data.comment, ...(prev[poolId] || [])]
       }));
       setCommentInputs((prev) => ({ ...prev, [poolId]: '' }));
+      setRatingByPool((prev) => ({ ...prev, [poolId]: 5 }));
       setFeedbackByPool((prev) => ({ ...prev, [poolId]: { type: 'success', text: data?.message || 'Commentaire publié' } }));
     } catch {}
     finally {
@@ -335,6 +337,20 @@ const ReservationsPage = () => {
                             value={commentInputs[req.pool.id] || ''}
                             onChange={(e) => setCommentInputs((prev) => ({ ...prev, [req.pool.id]: e.target.value }))}
                           />
+                          {/* Sélecteur d'étoiles */}
+                          <div className="flex items-center gap-1 pt-2">
+                            {[1,2,3,4,5].map((n) => (
+                              <button
+                                key={n}
+                                type="button"
+                                onClick={() => setRatingByPool((prev) => ({ ...prev, [req.pool.id]: n }))}
+                                className={`text-lg ${ (ratingByPool[req.pool.id] || 5) >= n ? 'text-yellow-500' : 'text-gray-300'}`}
+                                aria-label={`${n} étoile${n>1?'s':''}`}
+                              >
+                                ★
+                              </button>
+                            ))}
+                          </div>
                           <button
                             onClick={() => submitComment(req.pool.id)}
                             disabled={!!sendingByPool[req.pool.id]}

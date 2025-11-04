@@ -223,6 +223,7 @@ model Favorite {
 model Comment {
   id            String       @id @default(uuid())
   content       String
+  rating        Int          @default(5)
   pool          Pool         @relation(fields: [poolId], references: [id], onDelete: Cascade)
   poolId        String
   reservation   Reservation? @relation(fields: [reservationId], references: [id])
