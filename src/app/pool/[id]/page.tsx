@@ -26,36 +26,34 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
     ? ((pool as any).rules as any[]).filter((e) => typeof e === "string" && e.trim().length > 0)
     : [];
 
-  // Helpers icônes simples (emoji) selon le texte
+  // Helpers icônes simples (emoji) selon le texte - identiques à la page de création
   const equipmentIcon = (label: string) => {
     const s = label.toLowerCase();
-    if (s.includes("chauff") || s.includes("heater")) return "🔥"; // piscine chauffée
+    if (s.includes("chauff") || s.includes("heater")) return "🔥";
     if (s.includes("douche") || s.includes("shower")) return "🚿";
-    if (s.includes("toilet") || s.includes("wc")) return "🚻";
-    if (s.includes("barbecue") || s.includes("bbq")) return "🍖";
+    if (s.includes("wc") || s.includes("toilet")) return "🚻";
+    if (s.includes("barbecue") || s.includes("plancha") || s.includes("bbq")) return "🍖";
     if (s.includes("transat") || s.includes("chaise") || s.includes("sunbed")) return "🪑";
     if (s.includes("wifi") || s.includes("wi-fi")) return "📶";
     if (s.includes("parking")) return "🅿️";
-    if (s.includes("eclairage") || s.includes("éclairage") || s.includes("light")) return "💡";
+    if (s.includes("éclairage") || s.includes("eclairage") || s.includes("light")) return "💡";
     if (s.includes("jacuzzi") || s.includes("spa")) return "🛁";
-    if (s.includes("couverture") || s.includes("abris") || s.includes("abri")) return "🛡️";
+    if (s.includes("couverture") || s.includes("abri")) return "🛡️";
     if (s.includes("serviette") || s.includes("towel")) return "🧺";
-    if (s.includes("plongeoir") || s.includes("diving")) return "🤿";
-    if (s.includes("ballon") || s.includes("jeu") || s.includes("games")) return "🏐";
-    if (s.includes("musique") || s.includes("enceinte") || s.includes("speaker")) return "🔊";
-    return "✓"; // défaut
+    if (s.includes("frigo")) return "🧊";
+    if (s.includes("vestiaire")) return "👔";
+    return "🏊"; // emoji par défaut pour les équipements non reconnus
   };
 
   const ruleIcon = (label: string) => {
     const s = label.toLowerCase();
     if (s.includes("non fumeur") || s.includes("no smoke") || s.includes("cig")) return "🚭";
     if (s.includes("animaux") || s.includes("pets")) return "🐾";
-    if (s.includes("alcool") || s.includes("boisson")) return "🍷";
-    if (s.includes("bruit") || s.includes("silence") || s.includes("noise")) return "🔇";
-    if (s.includes("enfant") || s.includes("kids") || s.includes("mineur")) return "👨‍👩‍👧";
-    if (s.includes("chaussure") || s.includes("shoes")) return "👟";
+    if (s.includes("alcool")) return "🍷";
+    if (s.includes("musique") || s.includes("bruit") || s.includes("noise")) return "🔊";
+    if (s.includes("enfant") || s.includes("kids")) return "👨‍👩‍👧";
     if (s.includes("horaire") || s.includes("hours")) return "⏰";
-    if (s.includes("proprete") || s.includes("propreté") || s.includes("clean")) return "🧼";
+    if (s.includes("propret") || s.includes("clean")) return "🧼";
     return "•"; // défaut
   };
 
@@ -119,15 +117,19 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
             Type d'emplacement: <span className="font-medium text-black dark:text-white">{locationLabel}</span>
           </div>
 
-          <h3 className="text-lg font-semibold mt-8 mb-3">Équipements</h3>
+          <h3 className="text-lg font-semibold mt-8 mb-4">Équipements</h3>
           {equipments.length > 0 ? (
-            <ul className="grid sm:grid-cols-2 gap-2">
-              {equipments.map((eq) => (
-                <li key={eq} className="flex items-center gap-2">
-                  <span className="w-5 text-center">{equipmentIcon(eq)}</span>
-                  <span>{eq}</span>
-                </li>
-              ))}
+            <ul className="grid sm:grid-cols-2 gap-3">
+              {equipments.map((eq) => {
+                const icon = equipmentIcon(eq);
+                return (
+                  <li key={eq} className="flex items-center gap-2">
+                    <span className="text-blue-600 font-semibold text-lg">✓</span>
+                    <span className="text-2xl leading-none" style={{ display: 'inline-block' }}>{icon}</span>
+                    <span className="text-gray-800">{eq}</span>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <div className="text-sm text-muted-foreground">Aucune</div>
