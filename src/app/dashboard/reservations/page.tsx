@@ -13,6 +13,8 @@ const ReservationsPage = () => {
   const [approvals, setApprovals] = useState<any[]>([]);
   const [approvalsToValidate, setApprovalsToValidate] = useState<any[]>([]);
   const [myRequests, setMyRequests] = useState<any[]>([]);
+  const [commentsByPool, setCommentsByPool] = useState<Record<string, any[]>>({});
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
 
   const fetchMyApprovals = async (currentUserId?: string) => {
     try {
@@ -89,6 +91,49 @@ const ReservationsPage = () => {
       cancelled = true;
     };
   }, [activeTab, user?.id]);
+
+  // Charger les commentaires pour les piscines visibles dans l'onglet "Acceptées"
+  useEffect(() => {
+    if (activeTab !== 'acceptees') return;
+    const accepted = myRequests.filter(r => r.status === 'approved' || r.status === 'accepted');
+    const uniquePoolIds = Array.from(new Set(accepted.map((r) => r.pool?.id).filter(Boolean)));
+    if (uniquePoolIds.length === 0) return;
+
+    const load = async () => {
+      const entries = await Promise.all(uniquePoolIds.map(async (pid) => {
+        try {
+          const res = await fetch(`/api/comments?poolId=${encodeURIComponent(pid as string)}`, { cache: 'no-store' });
+          const data = await res.json();
+          return [pid as string, Array.isArray(data?.comments) ? data.comments : []] as const;
+        } catch {
+          return [pid as string, []] as const;
+        }
+      }));
+      const map: Record<string, any[]> = {};
+      for (const [pid, list] of entries) map[pid] = list as any[];
+      setCommentsByPool(map);
+    };
+    load();
+  }, [activeTab, myRequests]);
+
+  const submitComment = async (poolId: string, reservationId?: string) => {
+    const content = (commentInputs[poolId] || '').trim();
+    if (!content) return;
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ poolId, reservationId, content })
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      setCommentsByPool((prev) => ({
+        ...prev,
+        [poolId]: [data.comment, ...(prev[poolId] || [])]
+      }));
+      setCommentInputs((prev) => ({ ...prev, [poolId]: '' }));
+    } catch {}
+  };
 
   const getFilteredReservations = () => {
     if (!user) return [];
@@ -255,6 +300,39 @@ const ReservationsPage = () => {
                       </div>
                       <div className="text-sm px-2 py-1 rounded-full bg-green-100 text-green-800">Acceptée</div>
                     </div>
+                    {/* Liste des commentaires de la piscine */}
+                    {req.pool?.id && (
+                      <div className="mt-4 space-y-2">
+                        <div className="text-sm font-semibold text-gray-800">Commentaires</div>
+                        <div className="space-y-2">
+                          {(commentsByPool[req.pool.id] || []).map((c) => (
+                            <div key={c.id} className="text-sm text-gray-800 bg-white border border-gray-200 rounded p-2">
+                              <div className="font-medium">{c.author?.name || c.author?.email || 'Utilisateur'}</div>
+                              <div>{c.content}</div>
+                              <div className="text-xs text-gray-500">{c.createdAt ? new Date(c.createdAt).toLocaleString('fr-FR') : ''}</div>
+                            </div>
+                          ))}
+                          {(!commentsByPool[req.pool.id] || commentsByPool[req.pool.id].length === 0) && (
+                            <div className="text-sm text-gray-500">Aucun commentaire pour cette piscine.</div>
+                          )}
+                        </div>
+                        {/* Formulaire d'ajout */}
+                        <div className="flex items-start gap-2 mt-2">
+                          <textarea
+                            className="flex-1 border border-gray-300 rounded p-2 text-sm"
+                            placeholder="Ajouter un commentaire..."
+                            value={commentInputs[req.pool.id] || ''}
+                            onChange={(e) => setCommentInputs((prev) => ({ ...prev, [req.pool.id]: e.target.value }))}
+                          />
+                          <button
+                            onClick={() => submitComment(req.pool.id, req.id)}
+                            className="px-3 py-2 rounded bg-blue-600 text-white text-sm"
+                          >
+                            Publier
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
