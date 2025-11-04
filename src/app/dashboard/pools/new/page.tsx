@@ -55,6 +55,36 @@ const NewPoolPage = () => {
     "Restriction d’âge ou capacité selon enfants très jeunes / enfants ne sachant pas nager",
   ];
 
+  // Icônes simples (emoji) pour les options
+  const equipmentIcon = (label: string) => {
+    const s = label.toLowerCase();
+    if (s.includes("chauff") || s.includes("heater")) return "🔥";
+    if (s.includes("douche") || s.includes("shower")) return "🚿";
+    if (s.includes("wc") || s.includes("toilet")) return "🚻";
+    if (s.includes("barbecue") || s.includes("plancha") || s.includes("bbq")) return "🍖";
+    if (s.includes("transat") || s.includes("chaise") || s.includes("sunbed")) return "🪑";
+    if (s.includes("wifi") || s.includes("wi-fi")) return "📶";
+    if (s.includes("parking")) return "🅿️";
+    if (s.includes("éclairage") || s.includes("eclairage") || s.includes("light")) return "💡";
+    if (s.includes("jacuzzi") || s.includes("spa")) return "🛁";
+    if (s.includes("couverture") || s.includes("abri")) return "🛡️";
+    if (s.includes("serviette") || s.includes("towel")) return "🧺";
+    if (s.includes("frigo")) return "🧊";
+    return "✓";
+  };
+
+  const ruleIcon = (label: string) => {
+    const s = label.toLowerCase();
+    if (s.includes("non fumeur") || s.includes("no smoke") || s.includes("cig")) return "🚭";
+    if (s.includes("animaux") || s.includes("pets")) return "🐾";
+    if (s.includes("alcool")) return "🍷";
+    if (s.includes("musique") || s.includes("bruit") || s.includes("noise")) return "🔊";
+    if (s.includes("enfant") || s.includes("kids")) return "👨‍👩‍👧";
+    if (s.includes("horaire") || s.includes("hours")) return "⏰";
+    if (s.includes("propret") || s.includes("clean")) return "🧼";
+    return "•";
+  };
+
   // Fields for DB creation
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -201,6 +231,7 @@ const NewPoolPage = () => {
                           }`}
                           style={selected ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
                         >
+                          <span className="mr-2">{equipmentIcon(opt)}</span>
                           {opt}
                         </button>
                       );
@@ -211,7 +242,8 @@ const NewPoolPage = () => {
                       <span className="text-xs text-gray-500">Sélectionnés:</span>
                       {equipments.map((eq, idx) => (
                         <span key={idx} className="inline-flex items-center gap-1 text-xs border rounded-full px-2 py-0.5 bg-white">
-                          {eq}
+                          <span>{equipmentIcon(eq)}</span>
+                          <span>{eq}</span>
                           <button
                             type="button"
                             aria-label="Retirer"
@@ -480,6 +512,7 @@ const NewPoolPage = () => {
                           }`}
                           style={selected ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
                         >
+                          <span className="mr-2">{ruleIcon(opt)}</span>
                           {opt}
                         </button>
                       );
@@ -490,7 +523,8 @@ const NewPoolPage = () => {
                       <span className="text-xs text-gray-500">Sélectionnées:</span>
                       {rules.map((rule, idx) => (
                         <span key={idx} className="inline-flex items-center gap-1 text-xs border rounded-full px-2 py-0.5 bg-white">
-                          {rule}
+                          <span>{ruleIcon(rule)}</span>
+                          <span>{rule}</span>
                           <button
                             type="button"
                             aria-label="Retirer"

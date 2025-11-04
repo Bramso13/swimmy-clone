@@ -26,6 +26,39 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
     ? ((pool as any).rules as any[]).filter((e) => typeof e === "string" && e.trim().length > 0)
     : [];
 
+  // Helpers icônes simples (emoji) selon le texte
+  const equipmentIcon = (label: string) => {
+    const s = label.toLowerCase();
+    if (s.includes("chauff") || s.includes("heater")) return "🔥"; // piscine chauffée
+    if (s.includes("douche") || s.includes("shower")) return "🚿";
+    if (s.includes("toilet") || s.includes("wc")) return "🚻";
+    if (s.includes("barbecue") || s.includes("bbq")) return "🍖";
+    if (s.includes("transat") || s.includes("chaise") || s.includes("sunbed")) return "🪑";
+    if (s.includes("wifi") || s.includes("wi-fi")) return "📶";
+    if (s.includes("parking")) return "🅿️";
+    if (s.includes("eclairage") || s.includes("éclairage") || s.includes("light")) return "💡";
+    if (s.includes("jacuzzi") || s.includes("spa")) return "🛁";
+    if (s.includes("couverture") || s.includes("abris") || s.includes("abri")) return "🛡️";
+    if (s.includes("serviette") || s.includes("towel")) return "🧺";
+    if (s.includes("plongeoir") || s.includes("diving")) return "🤿";
+    if (s.includes("ballon") || s.includes("jeu") || s.includes("games")) return "🏐";
+    if (s.includes("musique") || s.includes("enceinte") || s.includes("speaker")) return "🔊";
+    return "✓"; // défaut
+  };
+
+  const ruleIcon = (label: string) => {
+    const s = label.toLowerCase();
+    if (s.includes("non fumeur") || s.includes("no smoke") || s.includes("cig")) return "🚭";
+    if (s.includes("animaux") || s.includes("pets")) return "🐾";
+    if (s.includes("alcool") || s.includes("boisson")) return "🍷";
+    if (s.includes("bruit") || s.includes("silence") || s.includes("noise")) return "🔇";
+    if (s.includes("enfant") || s.includes("kids") || s.includes("mineur")) return "👨‍👩‍👧";
+    if (s.includes("chaussure") || s.includes("shoes")) return "👟";
+    if (s.includes("horaire") || s.includes("hours")) return "⏰";
+    if (s.includes("proprete") || s.includes("propreté") || s.includes("clean")) return "🧼";
+    return "•"; // défaut
+  };
+
   const comments = await (prisma as any).comment.findMany({
     where: { poolId: id },
     orderBy: { createdAt: "desc" },
@@ -90,7 +123,10 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
           {equipments.length > 0 ? (
             <ul className="grid sm:grid-cols-2 gap-2">
               {equipments.map((eq) => (
-                <li key={eq} className="flex items-center gap-2">✓ {eq}</li>
+                <li key={eq} className="flex items-center gap-2">
+                  <span className="w-5 text-center">{equipmentIcon(eq)}</span>
+                  <span>{eq}</span>
+                </li>
               ))}
             </ul>
           ) : (
@@ -101,7 +137,10 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
           {rules.length > 0 ? (
             <ul className="grid sm:grid-cols-2 gap-2">
               {rules.map((e: string) => (
-                <li key={e} className="flex items-center gap-2">{e}</li>
+                <li key={e} className="flex items-center gap-2">
+                  <span className="w-5 text-center">{ruleIcon(e)}</span>
+                  <span>{e}</span>
+                </li>
               ))}
             </ul>
           ) : (
