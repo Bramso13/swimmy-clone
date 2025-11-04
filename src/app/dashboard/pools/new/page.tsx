@@ -196,10 +196,17 @@ const NewPoolPage = () => {
         {/* Formulaire à droite */}
         <div ref={formRef} className="w-full">
           <div className="bg-white dark:bg-black rounded-xl shadow border p-4 md:p-6">
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-800 font-medium">
+                <span className="text-red-500 font-bold text-base">*</span> Champs obligatoires - Ces informations sont requises pour créer votre annonce
+              </p>
+            </div>
             <div className="grid md:grid-cols-[1fr_auto] gap-4 md:gap-6 items-start">
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Titre de votre annonce</label>
+                  <label className="text-sm font-medium">
+                    Titre de votre annonce <span className="text-red-500 font-bold">*</span>
+                  </label>
                   <input 
                     value={title} 
                     onChange={(e)=>setTitle(e.target.value)} 
@@ -265,7 +272,9 @@ const NewPoolPage = () => {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Adresse exacte de votre piscine *</label>
+                  <label className="text-sm font-medium">
+                    Adresse exacte de votre piscine <span className="text-red-500 font-bold">*</span>
+                  </label>
                   <div className="relative">
                     <input 
                       value={address} 
@@ -311,7 +320,9 @@ const NewPoolPage = () => {
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium">Latitude (en mètres)</label>
+                    <label className="text-sm font-medium">
+                      Latitude (en mètres) <span className="text-red-500 font-bold">*</span>
+                    </label>
                     <input 
                       type="number"
                       value={latitude} 
@@ -323,7 +334,9 @@ const NewPoolPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Longitude (en mètres)</label>
+                    <label className="text-sm font-medium">
+                      Longitude (en mètres) <span className="text-red-500 font-bold">*</span>
+                    </label>
                     <input 
                       type="number"
                       value={longitude} 
@@ -336,7 +349,9 @@ const NewPoolPage = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Description</label>
+                  <label className="text-sm font-medium">
+                    Description <span className="text-red-500 font-bold">*</span>
+                  </label>
                   <textarea value={description} onChange={(e)=>setDescription(e.target.value)} rows={3} className="mt-1 w-full border rounded-md px-3 py-2" required />
                 </div>
                 <div>
@@ -365,7 +380,10 @@ const NewPoolPage = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Téléverser des photos (multiple)</label>
+                  <label className="text-sm font-medium">
+                    Téléverser des photos (multiple) <span className="text-red-500 font-bold">*</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1 mb-1">Au moins une photo est requise</p>
                   <input
                     type="file"
                     accept="image/*"
@@ -413,7 +431,9 @@ const NewPoolPage = () => {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Prix à l'heure (€)</label>
+                  <label className="text-sm font-medium">
+                    Prix à l'heure (€) <span className="text-red-500 font-bold">*</span>
+                  </label>
                   <input 
                     type="number"
                     value={pricePerHour} 
@@ -425,7 +445,9 @@ const NewPoolPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Vous habitez en</label>
+                  <label className="text-sm font-medium">
+                    Vous habitez en <span className="text-red-500 font-bold">*</span>
+                  </label>
                   <div className="mt-1">
                     <select
                       value={region}
@@ -453,7 +475,9 @@ const NewPoolPage = () => {
                 
 
                 <div>
-                  <label className="text-sm font-medium">Combien de personnes souhaitez-vous accueillir ?</label>
+                  <label className="text-sm font-medium">
+                    Combien de personnes souhaitez-vous accueillir ? <span className="text-red-500 font-bold">*</span>
+                  </label>
                   <div className="mt-2 grid grid-cols-3 gap-2">
                     {personsOptions.map((opt) => (
                       <button
@@ -551,8 +575,10 @@ const NewPoolPage = () => {
                     <span>Propriétaire présent</span>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Produit d'entretien</label>
-                    <input value={product} onChange={(e)=>setProduct(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" />
+                    <label className="text-sm font-medium">
+                      Produit d'entretien <span className="text-red-500 font-bold">*</span>
+                    </label>
+                    <input value={product} onChange={(e)=>setProduct(e.target.value)} className="mt-1 w-full border rounded-md px-3 py-2" required />
                   </div>
                 </div>
               </div>
@@ -638,6 +664,22 @@ const NewPoolPage = () => {
                     }
                     if (!pricePerHour || Number(pricePerHour) <= 0) {
                       alert("Le prix par heure doit être supérieur à 0");
+                      return;
+                    }
+                    if (!region || region.trim() === "") {
+                      alert("La région est obligatoire");
+                      return;
+                    }
+                    if (persons === null || persons === undefined) {
+                      alert("Vous devez indiquer combien de personnes vous souhaitez accueillir");
+                      return;
+                    }
+                    if (photos.length === 0) {
+                      alert("Au moins une photo est obligatoire");
+                      return;
+                    }
+                    if (!product || !product.trim()) {
+                      alert("Le produit d'entretien est obligatoire");
                       return;
                     }
                     
