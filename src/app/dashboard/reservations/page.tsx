@@ -15,6 +15,8 @@ const ReservationsPage = () => {
   const [myRequests, setMyRequests] = useState<any[]>([]);
   const [commentsByPool, setCommentsByPool] = useState<Record<string, any[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [sendingByPool, setSendingByPool] = useState<Record<string, boolean>>({});
+  const [feedbackByPool, setFeedbackByPool] = useState<Record<string, { type: 'success' | 'error'; text: string } | undefined>>({});
 
   const fetchMyApprovals = async (currentUserId?: string) => {
     try {
@@ -120,19 +122,28 @@ const ReservationsPage = () => {
     const content = (commentInputs[poolId] || '').trim();
     if (!content) return;
     try {
+      setSendingByPool((prev) => ({ ...prev, [poolId]: true }));
+      setFeedbackByPool((prev) => ({ ...prev, [poolId]: undefined }));
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ poolId, reservationId, content })
       });
-      if (!res.ok) return;
       const data = await res.json();
+      if (!res.ok) {
+        setFeedbackByPool((prev) => ({ ...prev, [poolId]: { type: 'error', text: data?.error || 'Échec de l\'envoi' } }));
+        return;
+      }
       setCommentsByPool((prev) => ({
         ...prev,
         [poolId]: [data.comment, ...(prev[poolId] || [])]
       }));
       setCommentInputs((prev) => ({ ...prev, [poolId]: '' }));
+      setFeedbackByPool((prev) => ({ ...prev, [poolId]: { type: 'success', text: data?.message || 'Commentaire publié' } }));
     } catch {}
+    finally {
+      setSendingByPool((prev) => ({ ...prev, [poolId]: false }));
+    }
   };
 
   const getFilteredReservations = () => {
@@ -325,12 +336,18 @@ const ReservationsPage = () => {
                             onChange={(e) => setCommentInputs((prev) => ({ ...prev, [req.pool.id]: e.target.value }))}
                           />
                           <button
-                            onClick={() => submitComment(req.pool.id, req.id)}
+                            onClick={() => submitComment(req.pool.id)}
+                            disabled={!!sendingByPool[req.pool.id]}
                             className="px-3 py-2 rounded bg-blue-600 text-white text-sm"
                           >
-                            Publier
+                            {sendingByPool[req.pool.id] ? 'Envoi...' : 'Publier'}
                           </button>
                         </div>
+                        {feedbackByPool[req.pool.id] && (
+                          <div className={`text-xs mt-1 ${feedbackByPool[req.pool.id]?.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                            {feedbackByPool[req.pool.id]?.text}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

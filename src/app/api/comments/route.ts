@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { auth } from "../../../../lib/auth";
 
+export const dynamic = "force-dynamic";
+
 // Lister les commentaires d'une piscine
 export async function GET(req: NextRequest) {
   try {
@@ -34,13 +36,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "poolId et content requis" }, { status: 400 });
     }
 
-    // Si un reservationId est fourni, vérifier qu'elle est acceptée
+    // Autorisation: réservation acceptée/payée OU demande de dispo approuvée
+    let allowed = false;
     if (reservationId) {
-      const res = await (prisma as any).reservation.findUnique({ where: { id: reservationId } });
-      if (!res) return NextResponse.json({ error: "Réservation introuvable" }, { status: 404 });
-      if (!(["accepted", "paid"].includes(res.status))) {
-        return NextResponse.json({ error: "La réservation n'est pas acceptée" }, { status: 403 });
-      }
+      const res = await (prisma as any).reservation.findFirst({ where: { id: reservationId, status: { in: ["accepted", "paid"] } } });
+      if (res) allowed = true;
+    }
+    if (!allowed) {
+      const ar = await (prisma as any).availabilityRequest.findFirst({
+        where: { poolId, userId: session.user.id as string, status: "approved" },
+      });
+      if (ar) allowed = true;
+    }
+    if (!allowed) {
+      return NextResponse.json({ error: "Autorisation requise: réservation acceptée ou demande approuvée" }, { status: 403 });
     }
 
     const created = await (prisma as any).comment.create({
@@ -53,7 +62,7 @@ export async function POST(req: NextRequest) {
       include: { author: { select: { id: true, name: true, email: true, image: true } } },
     });
 
-    return NextResponse.json({ comment: created }, { status: 201 });
+    return NextResponse.json({ comment: created, message: "Commentaire publié" }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Erreur serveur" }, { status: 500 });
   }

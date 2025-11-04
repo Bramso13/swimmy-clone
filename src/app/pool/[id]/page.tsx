@@ -26,6 +26,12 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
     ? ((pool as any).rules as any[]).filter((e) => typeof e === "string" && e.trim().length > 0)
     : [];
 
+  const comments = await (prisma as any).comment.findMany({
+    where: { poolId: id },
+    orderBy: { createdAt: "desc" },
+    include: { author: { select: { id: true, name: true, email: true, image: true } } },
+  });
+
   return (
     <main className="mx-auto max-w-6xl p-4 md:p-6">
       {/* Title + actions */}
@@ -96,6 +102,43 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
             <BookingForm poolId={pool.id} />
           </aside>
       </div>
+      {/* Avis / commentaires */}
+      <section className="mt-12">
+        <h3 className="text-xl font-semibold mb-4">Avis des visiteurs</h3>
+        {comments.length === 0 ? (
+          <div className="text-sm text-muted-foreground">Aucun commentaire pour le moment.</div>
+        ) : (
+          <ul className="space-y-6">
+            {comments.map((c: any) => {
+              const authorName = c.author?.name || c.author?.email || "Utilisateur";
+              const created = c.createdAt ? new Date(c.createdAt) : null;
+              const dateLabel = created ? created.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' }) : '';
+              return (
+                <li key={c.id} className="flex gap-3">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border flex items-center justify-center bg-gray-100">
+                    {c.author?.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={c.author.image} alt={authorName} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-sm text-gray-600">
+                        {authorName.substring(0,1).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div className="font-semibold">{authorName}</div>
+                      <div className="text-blue-600 text-sm">★★★★★</div>
+                      <div className="text-xs text-muted-foreground">{dateLabel}</div>
+                    </div>
+                    <p className="mt-2 text-gray-800">{c.content}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
       {/* Section supplémentaire retirée pour éviter les doublons et grands espaces vides */}
     </main>
   );
