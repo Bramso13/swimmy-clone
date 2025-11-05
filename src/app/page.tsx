@@ -318,39 +318,39 @@ export default function Home() {
               </div>
 
               {/* Pool Party */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
+              <Link href="/search?events=1&music=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">Pool Party</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">🏊‍♂️</div>
-              </div>
+              </Link>
 
               {/* Team Building */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
+              <Link href="/search?events=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">Team Building</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">👨‍💼</div>
-              </div>
+              </Link>
 
               {/* EVJF et EVG */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
+              <Link href="/search?events=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">EVJF et EVG</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">👑</div>
-              </div>
+              </Link>
 
               {/* Anniversaire */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
+              <Link href="/search?events=1&music=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">Anniversaire</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">🎂</div>
-              </div>
+              </Link>
 
               {/* Baby Shower */}
-              <div className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
+              <Link href="/search?events=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
                 <h3 className="text-lg font-semibold text-black mb-2">Baby Shower</h3>
                 <div className="text-black text-xl mb-4">→</div>
                 <div className="text-6xl">👶</div>
-              </div>
+              </Link>
 
             </div>
 
