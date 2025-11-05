@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 
-export default function SideMenu() {
+export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: boolean }) {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,9 @@ export default function SideMenu() {
       <button
         aria-label="Ouvrir le menu"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-3 rounded-full border px-4 py-2 text-sm font-medium bg-white hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring shadow-sm"
+        className={`inline-flex items-center gap-3 rounded-full border px-4 py-2 text-sm font-medium bg-white hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring shadow-sm ${
+          isHeaderBlue ? 'border-white/20' : ''
+        }`}
       >
         <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white uppercase" style={{backgroundColor: '#0094ec'}}>
           {(() => {
@@ -74,7 +76,7 @@ export default function SideMenu() {
             return initials.slice(0, 2).toUpperCase();
           })()}
         </span>
-        <span className="text-gray-800">Menu</span>
+        <span className={isHeaderBlue ? 'text-black' : 'text-gray-800'}>Menu</span>
       </button>
 
       {/* overlay */}

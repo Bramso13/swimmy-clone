@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 
-export default function NavBar() {
+export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolean }) {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -61,7 +61,10 @@ export default function NavBar() {
       <Link
         href="/"
         className="font-bold text-2xl tracking-tight"
-        style={{color: '#0094ec', fontFamily: 'cursive'}}
+        style={{
+          color: isHeaderBlue ? '#ffffff' : '#0094ec', 
+          fontFamily: 'cursive'
+        }}
       >
         Swimmy
       </Link>

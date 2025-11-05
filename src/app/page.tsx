@@ -169,9 +169,14 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-16 bg-gray-100 min-h-screen">
       {/* SearchBar sticky */}
-      {showStickySearch && (
-        <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 py-4 px-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div 
+        className={`fixed top-0 left-0 right-0 bg-white shadow-md z-50 py-4 px-4 transition-all duration-300 ease-in-out ${
+          showStickySearch 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 -translate-y-full pointer-events-none'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
             {/* Menu à gauche */}
             <div className="flex-shrink-0">
               <SideMenu />
@@ -192,7 +197,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-      )}
       
       {/* Hero Section */}
       <section className="overflow-hidden text-white py-12 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{background: 'linear-gradient(to right, #0094ec, #4db8ff)'}}>
