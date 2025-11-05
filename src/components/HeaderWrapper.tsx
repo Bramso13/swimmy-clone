@@ -9,11 +9,6 @@ export default function HeaderWrapper() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
-  // Masquer le header sur la page /settings
-  if (pathname?.startsWith('/settings')) {
-    return null;
-  }
-
   useEffect(() => {
     const handleScroll = () => {
       // Le header devient blanc quand on dépasse 150px (quand la searchbar sticky apparaît)
@@ -26,6 +21,11 @@ export default function HeaderWrapper() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Masquer le header sur la page /settings
+  if (pathname?.startsWith('/settings')) {
+    return null;
+  }
 
   return (
     <nav 
