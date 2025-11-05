@@ -17,7 +17,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (!reqRow) return NextResponse.json({ error: "Demande introuvable" }, { status: 404 });
 
     if (status === "approved") {
-      // Créer la Pool depuis le snapshot
+      // Extraire les champs additionnels (ex: extras, location) stockés dans 'additional'
+      let extrasFromRequest: any = undefined;
+      let locationFromRequest: any = undefined;
+      try {
+        const add = (reqRow as any)?.additional ?? null;
+        if (add && typeof add === "object") {
+          extrasFromRequest = (add as any).extras ?? undefined;
+          locationFromRequest = (add as any).location ?? undefined;
+        }
+      } catch {}
+
+      // Créer la Pool depuis le snapshot en re-projetant les extras/locations
       const pool = await prisma.pool.create({
         data: {
           title: reqRow.title ?? "",
@@ -30,6 +41,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           availability: reqRow.availability ?? {},
           rules: reqRow.rules,
           additional: reqRow.additional,
+          extras: extrasFromRequest, // restitue les équipements
+          location: locationFromRequest === "INDOOR" || locationFromRequest === "OUTDOOR" ? locationFromRequest : undefined,
           ownerId: session.user.id as string,
           approved: true,
         },
