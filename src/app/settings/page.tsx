@@ -25,9 +25,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <>
       {/* Header Section - Bleu */}
-      <div className="py-16 px-4" style={{backgroundColor: '#0094EC'}}>
+      <div className="py-8 px-4 flex items-center justify-center min-h-[40vh] w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{backgroundColor: '#0094EC'}}>
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-8">
             Swimmy à la rescousse
@@ -58,8 +58,8 @@ export default function SettingsPage() {
       </div>
 
       {/* Content Section - Blanc */}
-      <div className="bg-white py-16 px-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="bg-white py-16 px-4 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+        <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8">
             {/* Carte Locataire */}
             <div 
@@ -284,6 +284,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

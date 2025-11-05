@@ -1,0 +1,38 @@
+import Link from "next/link";
+
+export default function SettingsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+      {/* Header personnalisé pour la page d'aide */}
+      <nav className="sticky top-0 z-30 w-full bg-white flex items-center justify-center py-6 shadow-sm">
+        <div className="flex items-center justify-between gap-6 max-w-7xl mx-auto w-full px-6">
+          <div className="flex items-center gap-6">
+            <Link href="/settings" className="text-gray-800 hover:text-[#0094ec] transition-colors">
+              FAQ Locataires
+            </Link>
+            <Link href="/settings" className="text-gray-800 hover:text-[#0094ec] transition-colors">
+              FAQ Propriétaires
+            </Link>
+            <Link href="/contact" className="text-gray-800 hover:text-[#0094ec] transition-colors">
+              Contactez-nous
+            </Link>
+            <Link href="/" className="text-gray-800 hover:text-[#0094ec] transition-colors">
+              Revenir sur Swimmy
+            </Link>
+          </div>
+          <Link href="/" className="font-bold text-2xl tracking-tight" style={{color: '#0094ec', fontFamily: 'cursive'}}>
+            Swimmy
+          </Link>
+        </div>
+      </nav>
+      <div className="min-h-screen bg-white">
+        {children}
+      </div>
+    </div>
+  );
+}
+

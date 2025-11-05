@@ -1,11 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import SideMenu from "@/components/SideMenu";
 import NavBar from "@/components/NavBar";
 
 export default function HeaderWrapper() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+
+  // Masquer le header sur la page /settings
+  if (pathname?.startsWith('/settings')) {
+    return null;
+  }
 
   useEffect(() => {
     const handleScroll = () => {
