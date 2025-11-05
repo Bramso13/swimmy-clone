@@ -1,7 +1,58 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 const DashboardPage = () => {
-  // TODO: fetch infos utilisateur, réservations, piscines, solde MangoPay
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const session = await authClient.getSession();
+        const baseUser = session.data?.user || null;
+        if (!baseUser) {
+          window.location.href = "/login";
+          return;
+        }
+        try {
+          const res = await fetch(`/api/users/${baseUser.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            setUser(data.user);
+          } else {
+            setUser(baseUser);
+          }
+        } catch {
+          setUser(baseUser);
+        }
+      } catch (error) {
+        window.location.href = "/login";
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadUser();
+  }, []);
+
+  const userName = user?.name || user?.email || "Utilisateur";
+
+  if (loading) {
+    return (
+      <main className="max-w-6xl mx-auto p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-extrabold tracking-tight mb-2">
+            <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(90deg, #0094ec, #4f46e5)" }}>
+              Mon tableau de bord
+            </span>
+          </h1>
+          <p className="text-sm text-muted-foreground">Chargement...</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="max-w-6xl mx-auto p-6">
       <div className="mb-8">
@@ -10,7 +61,7 @@ const DashboardPage = () => {
             Mon tableau de bord
           </span>
         </h1>
-        <p className="text-sm text-muted-foreground">Bienvenue, [Nom utilisateur]</p>
+        <p className="text-sm text-muted-foreground">Bienvenue, {userName}</p>
       </div>
 
       <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
