@@ -151,7 +151,7 @@ export default function Home() {
       </section>
 
       {/* Swimmy Section */}
-      <section className="py-16 bg-gray-100 rounded-lg shadow w-full -mx-4 px-4">
+      <section className="py-16 bg-gray-100 w-full -mx-4 px-4">
         <div className="grid md:grid-cols-2 gap-12 w-full items-center max-w-6xl mx-auto">
           {/* Colonne gauche : Titre */}
           <div className="text-left">

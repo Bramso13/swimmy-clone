@@ -188,9 +188,9 @@ export default function PoolCard({ pool }: { pool: Pool }) {
       <div className="p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <div className="font-semibold text-[15px] line-clamp-1">{pool.title}</div>
+            <div className="font-semibold text-[17px] md:text-[18px] leading-snug line-clamp-1">{pool.title}</div>
             {locationText && (
-              <div className="text-xs text-gray-500 line-clamp-1">{locationText}</div>
+              <div className="text-sm text-gray-600 line-clamp-1">{locationText}</div>
             )}
           </div>
           <div className="flex items-center gap-1 text-[11px] text-gray-700">
@@ -198,8 +198,16 @@ export default function PoolCard({ pool }: { pool: Pool }) {
             <span className="text-blue-500">★</span>
           </div>
         </div>
-        <div className="mt-2 font-bold text-sm" style={{color: '#0094ec'}}>
-          {Math.round(Number(pool.pricePerHour || 0))} €/heure
+        <div className="mt-3 flex items-baseline gap-2" style={{color: '#0094ec'}}>
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl md:text-4xl font-bold">
+              {Math.round(Number(pool.pricePerHour || 0))}
+            </span>
+            <span className="text-3xl md:text-4xl font-bold">€</span>
+          </div>
+          <span className="text-[11px] md:text-xs uppercase tracking-wide">
+            / heure / personne
+          </span>
         </div>
       </div>
     </Link>
