@@ -6,6 +6,7 @@ import PoolCard from "@/components/PoolCard";
 import SideMenu from "@/components/SideMenu";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import React from "react";
 
 export default function Home() {
   const [openCard, setOpenCard] = useState<"share" | "swim" | null>(null);
@@ -74,6 +75,68 @@ export default function Home() {
     const data = await res.json();
     console.log(data);
   };
+
+  // Carrousel très simple pour afficher un avis à la fois
+  function TestimonialCarousel() {
+    const [items, setItems] = React.useState<Array<{ author: string; date: string; rating: number; content: string; poolTitle?: string }>>([]);
+    const [index, setIndex] = React.useState(0);
+
+    React.useEffect(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          const res = await fetch('/api/comments/recent?limit=10', { cache: 'no-store' });
+          const data = await res.json();
+          const list = Array.isArray(data?.comments) ? data.comments : [];
+          const mapped = list.map((c: any) => ({
+            author: c?.author?.name || c?.author?.email || 'Utilisateur',
+            date: c?.createdAt ? new Date(c.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' }) : '',
+            rating: Math.min(5, Math.max(1, Number(c?.rating || 5))),
+            content: String(c?.content || ''),
+            poolTitle: c?.pool?.title,
+          }));
+          if (!cancelled) setItems(mapped);
+        } catch {}
+      })();
+      return () => { cancelled = true; };
+    }, []);
+
+    const hasItems = items.length > 0;
+    const goPrev = () => setIndex((i) => (i - 1 + (items.length || 1)) % (items.length || 1));
+    const goNext = () => setIndex((i) => (i + 1) % (items.length || 1));
+    const t = hasItems ? items[index] : { author: '—', date: '', rating: 5, content: "Pas encore d'avis" };
+
+    return (
+      <div className="relative">
+        <div className="mx-auto bg-white rounded-2xl shadow p-6 md:p-10 max-w-3xl">
+          <p className="text-lg md:text-xl mb-6">“{t.content}”</p>
+          <div className="flex items-center justify-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-gray-200" />
+            <div className="text-left">
+              <div className="font-semibold">{t.author}</div>
+              <div className="text-xs text-gray-500">{t.date}</div>
+              {t.poolTitle && (<div className="text-xs text-gray-500">sur « {t.poolTitle} »</div>)}
+              <div className="text-yellow-500 text-sm">{"★".repeat(t.rating)}{"☆".repeat(5 - t.rating)}</div>
+            </div>
+          </div>
+        </div>
+        <button
+          aria-label="Précédent"
+          onClick={goPrev}
+          className="absolute left-0 top-1/2 -translate-y-1/2 bg-white rounded-full w-10 h-10 shadow flex items-center justify-center"
+        >
+          ◀
+        </button>
+        <button
+          aria-label="Suivant"
+          onClick={goNext}
+          className="absolute right-0 top-1/2 -translate-y-1/2 bg-white rounded-full w-10 h-10 shadow flex items-center justify-center"
+        >
+          ▶
+        </button>
+      </div>
+    );
+  }
 
   const toggleCard = (card: "share" | "swim") => {
     setOpenCard((prev) => (prev === card ? null : card));
@@ -375,6 +438,15 @@ export default function Home() {
           </div>
         </section>
       
+      {/* Témoignages (carrousel simple) */}
+      <section className="w-full">
+        <div className="max-w-5xl mx-auto text-center px-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-2">Force & baignade !</h2>
+          <p className="text-2xl md:text-3xl mb-6" style={{color: '#0094ec'}}>Notre communauté en redemande</p>
+          <TestimonialCarousel />
+        </div>
+      </section>
+
       {/* Section FAQ et Contact */}
       <section id="faq" className="py-12 w-full -mx-4 px-4">
         <div className="max-w-6xl mx-auto">
@@ -484,7 +556,7 @@ export default function Home() {
       </section>
 
       {/* Louez votre piscine avec Swimmy */}
-      <section className="py-20 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{backgroundColor: '#0094ec'}}>
+      <section className="py-20 w-screen relative mb-12 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{backgroundColor: '#0094ec'}}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
             {/* Texte à gauche */}
@@ -508,31 +580,6 @@ export default function Home() {
               </svg>
             </button>
           </div>
-        </div>
-      </section>
-
-      {/* Avantages Section */}
-      <section className="grid md:grid-cols-3 gap-8 py-12 w-full">
-        <div className="flex flex-col items-center text-center gap-2">
-          <span className="text-3xl">💧</span>
-          <h3 className="font-bold text-lg">Réservation instantanée</h3>
-          <p className="text-muted-foreground">
-            Trouvez une piscine disponible et réservez en quelques clics, sans prise de tête.
-          </p>
-        </div>
-        <div className="flex flex-col items-center text-center gap-2">
-          <span className="text-3xl">🔒</span>
-          <h3 className="font-bold text-lg">Paiement sécurisé</h3>
-          <p className="text-muted-foreground">
-            Vos transactions sont protégées grâce à MangoPay et notre système de vérification.
-          </p>
-        </div>
-        <div className="flex flex-col items-center text-center gap-2">
-          <span className="text-3xl">🌞</span>
-          <h3 className="font-bold text-lg">Expérience premium</h3>
-          <p className="text-muted-foreground">
-            Des piscines vérifiées, des hôtes réactifs, et un support à votre écoute.
-          </p>
         </div>
       </section>
 
