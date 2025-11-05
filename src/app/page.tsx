@@ -376,12 +376,12 @@ export default function Home() {
         </section>
       
       {/* Section FAQ et Contact */}
-      <section id="faq" className="py-12 bg-gray-50 w-full -mx-4 px-4">
+      <section id="faq" className="py-12 w-full -mx-4 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8">
             
             {/* Colonne gauche - FAQ */}
-            <div className="bg-white rounded-lg p-8">
+            <div className="rounded-lg p-8">
               <h2 className="text-3xl text-center font-bold text-black mb-2">
                 Des questions ?
               </h2>
