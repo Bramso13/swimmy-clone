@@ -15,8 +15,8 @@ export default function SettingsPage() {
   };
 
   const handleLocataireClick = () => {
-    // Redirection vers la page de recherche ou FAQ pour locataires
-    router.push("/search");
+    // Redirection vers la page FAQ pour locataires
+    router.push("/settings/locataire");
   };
 
   const handleProprietaireClick = () => {

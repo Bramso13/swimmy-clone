@@ -10,17 +10,17 @@ export default function SettingsLayout({
       {/* Header personnalisé pour la page d'aide */}
       <nav className="sticky top-0 z-30 w-full bg-white flex items-center justify-center py-6 shadow-sm">
         <div className="flex items-center justify-between gap-6 max-w-7xl mx-auto w-full px-6">
-          <div className="flex items-center gap-6">
-            <Link href="/settings" className="text-gray-800 hover:text-[#0094ec] transition-colors">
+          <div className="flex items-center gap-8">
+            <Link href="/settings/locataire" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
               FAQ Locataires
             </Link>
-            <Link href="/settings" className="text-gray-800 hover:text-[#0094ec] transition-colors">
+            <Link href="/settings" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
               FAQ Propriétaires
             </Link>
-            <Link href="/contact" className="text-gray-800 hover:text-[#0094ec] transition-colors">
+            <Link href="/contact" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
               Contactez-nous
             </Link>
-            <Link href="/" className="text-gray-800 hover:text-[#0094ec] transition-colors">
+            <Link href="/" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
               Revenir sur Swimmy
             </Link>
           </div>
