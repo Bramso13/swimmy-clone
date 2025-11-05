@@ -20,8 +20,8 @@ export default function SettingsPage() {
   };
 
   const handleProprietaireClick = () => {
-    // Redirection vers le dashboard ou FAQ pour propriétaires
-    router.push("/dashboard/pools/new");
+    // Redirection vers la page FAQ pour propriétaires
+    router.push("/settings/proprietaire");
   };
 
   return (

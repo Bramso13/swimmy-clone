@@ -14,7 +14,7 @@ export default function SettingsLayout({
             <Link href="/settings/locataire" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
               FAQ Locataires
             </Link>
-            <Link href="/settings" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
+            <Link href="/settings/proprietaire" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
               FAQ Propriétaires
             </Link>
             <Link href="/contact" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
