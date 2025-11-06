@@ -143,7 +143,7 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
                   { label: "Dashboard", href: "/dashboard" },
                   { label: "Trouver ma piscine", href: "/search" },
                   { label: "Proposer ma piscine", href: "/dashboard/pools/new" },
-                  { label: "Messages", href: "/dashboard" },
+                  { label: "Messages", href: "/dashboard/messages" },
                   { label: "Reservations", href: "/dashboard/reservations" },
                   { label: "Favoris", href: "/dashboard" },
                   { label: "Compte", href: "/profile" },
