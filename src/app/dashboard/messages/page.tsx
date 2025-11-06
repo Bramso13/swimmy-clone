@@ -46,6 +46,8 @@ export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
@@ -157,6 +159,48 @@ export default function MessagesPage() {
       alert(e.message || "Erreur lors de l'envoi");
     } finally {
       setSending(false);
+    }
+  };
+
+  const handlePickImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedConversation) return;
+    try {
+      setUploadingImage(true);
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || "Upload échoué");
+      const imageUrl = j.url as string;
+      // Envoyer le message image (contenu = URL)
+      const sendRes = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipientId: selectedConversation, content: imageUrl }),
+      });
+      const sendJ = await sendRes.json();
+      if (!sendRes.ok) throw new Error(sendJ.error || "Envoi image échoué");
+      // Refresh messages & conversations
+      const [messagesRes, convRes] = await Promise.all([
+        fetch(`/api/messages/${selectedConversation}`),
+        fetch("/api/messages"),
+      ]);
+      const [messagesData, convData] = await Promise.all([
+        messagesRes.json(),
+        convRes.json(),
+      ]);
+      if (messagesRes.ok) setMessages(messagesData.messages || []);
+      if (convRes.ok) setConversations(convData.conversations || []);
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de l'envoi de l'image");
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -294,6 +338,8 @@ export default function MessagesPage() {
                     const isFromMe = msg.senderId === currentUserId;
                     const sender = isFromMe ? msg.sender : msg.recipient;
                     const displayName = sender.name || sender.email || "Utilisateur";
+                    const content = msg.content || "";
+                    const isImage = (content.startsWith("/") || content.startsWith("http")) && /\.(png|jpe?g|gif|webp|svg)$/i.test(content);
 
                     return (
                       <div
@@ -311,25 +357,40 @@ export default function MessagesPage() {
                           {!isFromMe && (
                             <div className="text-xs text-gray-500 mb-1 px-2">{displayName}</div>
                           )}
-                          <div
-                            className={`rounded-lg px-4 py-2 ${
-                              isFromMe
-                                ? "bg-blue-500 text-white"
-                                : "bg-white text-gray-900 border border-gray-200"
-                            }`}
-                          >
-                            <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                          {isImage ? (
+                            <div className={`${isFromMe ? "text-right" : "text-left"}`}>
+                              <a href={content} target="_blank" rel="noreferrer">
+                                <img
+                                  src={content}
+                                  alt="image"
+                                  className="rounded-lg max-w-[280px] md:max-w-xs lg:max-w-sm object-cover border border-gray-200 bg-white"
+                                />
+                              </a>
+                              <div className={`text-xs mt-1 ${isFromMe ? "text-blue-300" : "text-gray-400"}`}>
+                                {new Date(msg.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                              </div>
+                            </div>
+                          ) : (
                             <div
-                              className={`text-xs mt-1 ${
-                                isFromMe ? "text-blue-100" : "text-gray-400"
+                              className={`rounded-lg px-4 py-2 ${
+                                isFromMe
+                                  ? "bg-blue-500 text-white"
+                                  : "bg-white text-gray-900 border border-gray-200"
                               }`}
                             >
-                              {new Date(msg.createdAt).toLocaleTimeString("fr-FR", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                              <div
+                                className={`text-xs mt-1 ${
+                                  isFromMe ? "text-blue-100" : "text-gray-400"
+                                }`}
+                              >
+                                {new Date(msg.createdAt).toLocaleTimeString("fr-FR", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                         {isFromMe && (
                           <img
@@ -348,7 +409,22 @@ export default function MessagesPage() {
 
             {/* Zone de saisie */}
             <div className="p-4 border-t border-gray-200 bg-white">
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <button
+                  onClick={handlePickImage}
+                  disabled={uploadingImage || sending}
+                  title="Ajouter une image"
+                  className="px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {uploadingImage ? "..." : "📎"}
+                </button>
                 <input
                   type="text"
                   value={newMessage}
