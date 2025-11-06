@@ -20,15 +20,26 @@ export default function SecuritePage() {
       alert("Le mot de passe doit contenir au moins 8 caractères");
       return;
     }
-    setSaving(true);
-    // TODO: Appeler l'API pour changer le mot de passe
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      setSaving(true);
+      const res = await fetch("/api/users/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(j.error || "Impossible de changer le mot de passe");
+      }
       alert("Mot de passe mis à jour avec succès");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    }, 500);
+    } catch (e: any) {
+      alert(e?.message || "Erreur lors de la mise à jour");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
