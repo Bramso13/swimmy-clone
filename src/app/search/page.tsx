@@ -138,7 +138,13 @@ export default function SearchPage() {
     const timer = window.setTimeout(async () => {
       setLocationLoading(true);
       try {
-        const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=6`, {
+        const params = new URLSearchParams({
+          q: query,
+          limit: "12",
+          autocomplete: "1",
+          type: "housenumber,street,locality,municipality",
+        });
+        const res = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) {
@@ -157,9 +163,14 @@ export default function SearchPage() {
               if (!coords || typeof coords[0] !== "number" || typeof coords[1] !== "number") {
                 return null;
               }
+              const props = feature?.properties ?? {};
+              const formatted = [props?.housenumber, props?.street, props?.locality, props?.postcode, props?.city]
+                .map((part: any) => (typeof part === 'string' ? part : ''))
+                .filter(Boolean)
+                .join(', ');
               return {
                 label,
-                context: feature?.properties?.context,
+                context: formatted || (typeof props?.context === 'string' ? props.context : undefined),
                 longitude: coords[0],
                 latitude: coords[1],
               };
@@ -203,6 +214,9 @@ export default function SearchPage() {
       const first = locationSuggestions[0];
       if (first) {
         handleLocationSelect(first);
+      } else {
+        // Pas de suggestion valide -> alerte visuelle rapide
+        setLocationSuggestions([]);
       }
     }
   };
