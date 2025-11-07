@@ -34,9 +34,10 @@ export default function SearchPage() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [locationQuery, setLocationQuery] = useState<string>("");
-  const [locationSuggestions, setLocationSuggestions] = useState<Array<{ label: string; city?: string; context?: string }>>([]);
+  const [locationSuggestions, setLocationSuggestions] = useState<Array<{ label: string; context?: string; latitude: number; longitude: number }>>([]);
   const [locationLoading, setLocationLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [selectedLocationCoords, setSelectedLocationCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const locationRef = React.useRef<HTMLDivElement | null>(null);
   const locationInputRef = React.useRef<HTMLInputElement | null>(null);
   const EQUIPMENT_OPTIONS: string[] = [
@@ -150,13 +151,20 @@ export default function SearchPage() {
             .map((feature: any) => {
               const label = String(feature?.properties?.label ?? "");
               if (!label) return null;
+              const coords = Array.isArray(feature?.geometry?.coordinates)
+                ? feature.geometry.coordinates
+                : null;
+              if (!coords || typeof coords[0] !== "number" || typeof coords[1] !== "number") {
+                return null;
+              }
               return {
                 label,
-                city: feature?.properties?.city || feature?.properties?.name,
                 context: feature?.properties?.context,
+                longitude: coords[0],
+                latitude: coords[1],
               };
             })
-            .filter((item): item is { label: string; city?: string; context?: string } => Boolean(item))
+            .filter((item): item is { label: string; context?: string; latitude: number; longitude: number } => Boolean(item))
         );
       } catch (error) {
         if (controller.signal.aborted) {
@@ -176,9 +184,16 @@ export default function SearchPage() {
     };
   }, [locationQuery, locationOpen]);
 
-  const handleLocationSelect = (label: string) => {
-    setSelectedLocation(label);
-    setLocationQuery(label);
+  const handleLocationSelect = (suggestion: { label: string; latitude: number; longitude: number } | null) => {
+    if (!suggestion) {
+      setSelectedLocation("");
+      setSelectedLocationCoords(null);
+      setLocationQuery("");
+    } else {
+      setSelectedLocation(suggestion.label);
+      setSelectedLocationCoords({ latitude: suggestion.latitude, longitude: suggestion.longitude });
+      setLocationQuery(suggestion.label);
+    }
     setLocationOpen(false);
   };
 
@@ -187,9 +202,7 @@ export default function SearchPage() {
       event.preventDefault();
       const first = locationSuggestions[0];
       if (first) {
-        handleLocationSelect(first.label);
-      } else if (locationQuery.trim()) {
-        handleLocationSelect(locationQuery.trim());
+        handleLocationSelect(first);
       }
     }
   };
@@ -248,17 +261,6 @@ export default function SearchPage() {
         const loc = (p?.location === 'INDOOR' || p?.location === 'OUTDOOR') ? p.location : 'OUTDOOR';
         if (loc !== filters.location) return false;
       }
-      if (selectedLocation) {
-        const normalized = selectedLocation.toLowerCase();
-        const poolAddress = [p?.address, p?.city, p?.extras?.address, p?.extras?.city]
-          .flat()
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        if (!poolAddress.includes(normalized)) {
-          return false;
-        }
-      }
       if (filters.jacuzzi) {
         const equipments: string[] = Array.isArray(p?.extras?.equipments) ? p.extras.equipments : [];
         const normalized = equipments.map((e) => String(e).toLowerCase());
@@ -289,6 +291,35 @@ export default function SearchPage() {
         if (!allSelectedPresent) return false;
       }
       return true;
+    })
+    .map((p: any) => {
+      const hasPoolCoords = typeof p?.latitude === 'number' && typeof p?.longitude === 'number';
+      const hasSelectedCoords = selectedLocationCoords && typeof selectedLocationCoords.latitude === 'number' && typeof selectedLocationCoords.longitude === 'number';
+      let distanceKm: number | null = null;
+      if (hasPoolCoords && hasSelectedCoords) {
+        const toRad = (value: number) => (value * Math.PI) / 180;
+        const R = 6371; // rayon de la Terre en km
+        const dLat = toRad(p.latitude - selectedLocationCoords!.latitude);
+        const dLon = toRad(p.longitude - selectedLocationCoords!.longitude);
+        const lat1 = toRad(selectedLocationCoords!.latitude);
+        const lat2 = toRad(p.latitude);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        distanceKm = Math.round((R * c) * 10) / 10;
+      }
+      return { ...p, distanceKm };
+    })
+    .sort((a: any, b: any) => {
+      if (selectedLocationCoords) {
+        const aHas = typeof a.distanceKm === 'number';
+        const bHas = typeof b.distanceKm === 'number';
+        if (aHas && bHas) {
+          return a.distanceKm - b.distanceKm;
+        }
+        if (aHas) return -1;
+        if (bHas) return 1;
+      }
+      return 0;
     });
 
   if (loading) {
@@ -358,12 +389,12 @@ export default function SearchPage() {
                       )}
                       {locationSuggestions.map((suggestion) => (
                         <button
-                          key={suggestion.label}
+                          key={`${suggestion.label}-${suggestion.latitude}-${suggestion.longitude}`}
                           type="button"
                           className="flex w-full flex-col items-start gap-0.5 rounded-lg px-3 py-2 text-left hover:bg-blue-50"
                           onMouseDown={(event) => {
                             event.preventDefault();
-                            handleLocationSelect(suggestion.label);
+                            handleLocationSelect(suggestion);
                           }}
                         >
                           <span className="text-sm font-medium text-gray-900">{suggestion.label}</span>

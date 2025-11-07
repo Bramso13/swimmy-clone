@@ -11,6 +11,7 @@ export type Pool = {
   photos: string[];
   pricePerHour: number;
   address?: string;
+  distanceKm?: number | null;
 };
 
 function isValidSrc(src?: string) {
@@ -85,6 +86,10 @@ export default function PoolCard({ pool }: { pool: Pool }) {
 
   const photosCount = validPhotos.length;
   const locationText = pool.address ?? "";
+  const distanceKm = typeof pool.distanceKm === "number" ? pool.distanceKm : null;
+  const distanceLabel = distanceKm !== null
+    ? `${distanceKm.toLocaleString("fr-FR", { minimumFractionDigits: distanceKm < 10 ? 1 : 0, maximumFractionDigits: 1 })} km`
+    : null;
 
   const goPrev = (e?: React.MouseEvent) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -189,9 +194,6 @@ export default function PoolCard({ pool }: { pool: Pool }) {
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <div className="font-semibold text-[17px] md:text-[18px] leading-snug line-clamp-1">{pool.title}</div>
-            {locationText && (
-              <div className="text-sm text-gray-600 line-clamp-1">{locationText}</div>
-            )}
           </div>
           <div className="flex items-center gap-1 text-[11px] text-gray-700">
             <span className="hidden sm:inline">Nouveau</span>
@@ -209,6 +211,13 @@ export default function PoolCard({ pool }: { pool: Pool }) {
             / heure / personne
           </span>
         </div>
+        {(locationText || distanceLabel) && (
+          <div className="mt-3 text-sm text-gray-600 line-clamp-2">
+            {locationText}
+            {locationText && distanceLabel ? " • " : ""}
+            {distanceLabel}
+          </div>
+        )}
       </div>
     </Link>
   );
