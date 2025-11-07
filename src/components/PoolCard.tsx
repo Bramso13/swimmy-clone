@@ -12,6 +12,10 @@ export type Pool = {
   pricePerHour: number;
   address?: string;
   distanceKm?: number | null;
+  badge?: string | null;
+  description?: string | null;
+  equipments?: string[];
+  rules?: string[];
 };
 
 function isValidSrc(src?: string) {
@@ -90,6 +94,10 @@ export default function PoolCard({ pool }: { pool: Pool }) {
   const distanceLabel = distanceKm !== null
     ? `${distanceKm.toLocaleString("fr-FR", { minimumFractionDigits: distanceKm < 10 ? 1 : 0, maximumFractionDigits: 1 })} km`
     : null;
+  const badge = pool.badge ?? null;
+  const description = pool.description ?? "";
+  const equipments = Array.isArray(pool.equipments) ? pool.equipments : [];
+  const rules = Array.isArray(pool.rules) ? pool.rules : [];
 
   const goPrev = (e?: React.MouseEvent) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -196,8 +204,14 @@ export default function PoolCard({ pool }: { pool: Pool }) {
             <div className="font-semibold text-[17px] md:text-[18px] leading-snug line-clamp-1">{pool.title}</div>
           </div>
           <div className="flex items-center gap-1 text-[11px] text-gray-700">
-            <span className="hidden sm:inline">Nouveau</span>
-            <span className="text-blue-500">★</span>
+            {badge ? (
+              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{badge}</span>
+            ) : (
+              <>
+                <span className="hidden sm:inline">Nouveau</span>
+                <span className="text-blue-500">★</span>
+              </>
+            )}
           </div>
         </div>
         <div className="mt-3 flex items-baseline gap-2" style={{color: '#0094ec'}}>
@@ -219,6 +233,39 @@ export default function PoolCard({ pool }: { pool: Pool }) {
             {distanceLabel && (
               <p className="text-sm font-medium text-gray-800">{distanceLabel}</p>
             )}
+          </div>
+        )}
+        {description && (
+          <p className="mt-3 text-sm text-gray-700 line-clamp-3">{description}</p>
+        )}
+        {equipments.length > 0 && (
+          <div className="mt-3">
+            <div className="text-xs font-semibold uppercase text-gray-500 mb-1">Équipements</div>
+            <div className="flex flex-wrap gap-2">
+              {equipments.slice(0, 4).map((eq) => (
+                <span key={eq} className="text-xs rounded-full border px-2 py-0.5 text-gray-600">
+                  {eq}
+                </span>
+              ))}
+              {equipments.length > 4 && (
+                <span className="text-xs text-gray-500">+{equipments.length - 4}</span>
+              )}
+            </div>
+          </div>
+        )}
+        {rules.length > 0 && (
+          <div className="mt-3">
+            <div className="text-xs font-semibold uppercase text-gray-500 mb-1">Règles</div>
+            <div className="flex flex-wrap gap-2">
+              {rules.slice(0, 3).map((rule) => (
+                <span key={rule} className="text-xs rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">
+                  {rule}
+                </span>
+              ))}
+              {rules.length > 3 && (
+                <span className="text-xs text-gray-500">+{rules.length - 3}</span>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -1,20 +1,20 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import PoolCard, { type Pool as PoolCardType } from "@/components/PoolCard";
 
 type PoolItem = PoolCardType & {
-  address?: string;
   isRented?: boolean;
   renterName?: string | null;
+  editHref?: string;
 };
 
-type ApprovalItem = {
-  id: string;
-  title: string;
+type ApprovalItem = PoolItem & {
+  requestId: string;
+  poolId?: string | null;
   status: string;
-  address?: string | null;
   createdAt?: string;
 };
 
@@ -48,17 +48,29 @@ const PoolsPage = () => {
           const approvedReq = (p.availabilityRequests || []).find((ar: any) => ar.status === 'approved');
           const renterName = (accepted?.user?.name || accepted?.user?.email) || (approvedReq?.user?.name || approvedReq?.user?.email) || null;
           const isRented = Boolean(accepted || approvedReq || p.isAvailable === false);
+          const extras = p?.extras && typeof p.extras === 'object' ? p.extras : {};
+          const equipments = Array.isArray((extras as any)?.equipments)
+            ? (extras as any).equipments.filter((e: any) => typeof e === 'string' && e.trim().length > 0)
+            : [];
+          const rulesList = Array.isArray(p?.rules)
+            ? (p.rules as any[]).filter((e) => typeof e === 'string' && e.trim().length > 0)
+            : [];
           if (isRented && renterName) {
             rentedNow.push({ id: p.id, title: p.title, renter: renterName });
           }
           allItems.push({
             id: p.id,
             title: p.title,
-            photos: p.photos || [],
-            pricePerHour: p.pricePerHour,
-            address: p.address,
+            photos: Array.isArray(p.photos) ? p.photos : [],
+            pricePerHour: typeof p.pricePerHour === 'number' ? p.pricePerHour : Number(p.pricePerHour || 0),
+            address: p.address || undefined,
+            description: typeof p.description === 'string' ? p.description : '',
+            equipments,
+            rules: rulesList,
+            badge: p.approved === false ? 'En attente' : null,
             isRented,
             renterName,
+            editHref: `/dashboard/pools/${p.id}/edit`,
           });
         }
         setPools(allItems);
@@ -71,11 +83,29 @@ const PoolsPage = () => {
             const approvalsData = await approvalsRes.json();
             const mapped: ApprovalItem[] = Array.isArray(approvalsData?.requests)
               ? approvalsData.requests.map((req: any) => ({
-                  id: req.id,
-                  title: req.title || "Piscine sans titre",
+                  requestId: req.id,
+                  poolId: req.poolId ?? null,
                   status: req.status || "pending",
-                  address: req.address || null,
                   createdAt: req.createdAt || undefined,
+                  id: req.poolId ?? req.id,
+                  title: req.title || "Piscine sans titre",
+                  address: req.address || undefined,
+                  photos: Array.isArray(req.photos) ? req.photos : [],
+                  pricePerHour: typeof req.pricePerHour === "number" ? req.pricePerHour : Number(req.pricePerHour || 0),
+                  description: typeof req.description === 'string' ? req.description : '',
+                  badge: req.status === 'pending' ? 'En attente' : req.status === 'approved' ? 'Validée' : 'Refusée',
+                  equipments: (() => {
+                    const direct = Array.isArray(req.extras?.equipments) ? req.extras.equipments : null;
+                    const additionalExtras = req.additional && typeof req.additional === 'object' && Array.isArray(req.additional?.extras?.equipments)
+                      ? req.additional.extras.equipments
+                      : null;
+                    const source = direct || additionalExtras || [];
+                    return source.filter((e: any) => typeof e === 'string' && e.trim().length > 0);
+                  })(),
+                  rules: Array.isArray(req.rules) ? req.rules.filter((r: any) => typeof r === 'string' && r.trim().length > 0) : [],
+                  isRented: false,
+                  renterName: null,
+                  editHref: req.poolId ? `/dashboard/pools/${req.poolId}/edit` : undefined,
                 }))
               : [];
             setApprovalRequests(mapped);
@@ -137,35 +167,28 @@ const PoolsPage = () => {
                   <p className="text-sm text-gray-600">Ces annonces sont encore en attente d'approbation par l'équipe Swimmy.</p>
                 </div>
               </div>
-              <div className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {approvalRequests.map((req) => (
-                  <div key={req.id} className="rounded-lg border border-dashed px-3 py-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <div className="font-medium text-gray-900">{req.title}</div>
-                        {req.address && <div className="text-sm text-gray-600">{req.address}</div>}
-                      </div>
-                      <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-                          req.status === "pending"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : req.status === "approved"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-red-100 text-red-600"
-                        }`}
-                      >
-                        {req.status === "pending"
-                          ? "En attente"
-                          : req.status === "approved"
-                          ? "Validée"
-                          : "Refusée"}
-                      </span>
+                  <div key={req.requestId} className="space-y-2">
+                    <PoolCard pool={req} />
+                    <div className="flex flex-wrap items-center gap-2">
+                      {req.editHref ? (
+                        <Link
+                          href={req.editHref}
+                          className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                        >
+                          {req.status === 'approved' ? "Modifier" : "Modifier la demande"}
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-gray-500">En attente de validation</span>
+                      )}
                     </div>
-                    {req.createdAt && (
-                      <div className="mt-1 text-xs text-gray-500">
-                        Soumise le {new Date(req.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
-                      </div>
-                    )}
+                    <div className="text-xs text-gray-500">
+                      Statut : {req.status === 'pending' ? 'En attente' : req.status === 'approved' ? 'Validée' : 'Refusée'}
+                      {req.createdAt && (
+                        <> — Soumise le {new Date(req.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}</>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -185,12 +208,35 @@ const PoolsPage = () => {
             {pools.map((pool) => (
               <div key={pool.id} className="space-y-2">
                 <PoolCard pool={pool} />
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href={pool.editHref || `/dashboard/pools/${pool.id}/edit`}
+                    className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  >
+                    Modifier
+                  </Link>
+                </div>
                 {pool.isRented && (
                   <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm text-yellow-800">
                     Actuellement indisponible
                     {pool.renterName ? ` — louée par ${pool.renterName}` : ''}
                   </div>
                 )}
+              </div>
+            ))}
+            {approvalRequests.map((req) => (
+              <div key={`grid-${req.requestId}`} className="space-y-2">
+                <PoolCard pool={req} />
+                <div className="flex flex-wrap items-center gap-2">
+                  {req.editHref && (
+                    <Link
+                      href={req.editHref}
+                      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                    >
+                      {req.status === 'approved' ? "Modifier" : "Modifier la demande"}
+                    </Link>
+                  )}
+                </div>
               </div>
             ))}
           </div>
