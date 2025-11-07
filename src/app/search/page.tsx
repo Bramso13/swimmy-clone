@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import PoolCard from "@/components/PoolCard";
+import SideMenu from "@/components/SideMenu";
 
 async function getPools() {
   const base =
@@ -31,6 +32,13 @@ export default function SearchPage() {
   const [maxPrice, setMaxPrice] = useState<string>("");
   // Plus de filtres
   const [moreOpen, setMoreOpen] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [locationQuery, setLocationQuery] = useState<string>("");
+  const [locationSuggestions, setLocationSuggestions] = useState<Array<{ label: string; city?: string; context?: string }>>([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const locationRef = React.useRef<HTMLDivElement | null>(null);
+  const locationInputRef = React.useRef<HTMLInputElement | null>(null);
   const EQUIPMENT_OPTIONS: string[] = [
     "Barbecue",
     "Transats",
@@ -86,6 +94,106 @@ export default function SearchPage() {
     loadPools();
   }, []);
 
+  React.useEffect(() => {
+    if (!locationOpen) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (locationRef.current && !locationRef.current.contains(event.target as Node)) {
+        setLocationOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [locationOpen]);
+
+  React.useEffect(() => {
+    if (!locationOpen) {
+      return;
+    }
+
+    if (locationInputRef.current) {
+      locationInputRef.current.focus();
+      locationInputRef.current.select();
+    }
+  }, [locationOpen]);
+
+  React.useEffect(() => {
+    if (!locationOpen) {
+      return;
+    }
+
+    const query = locationQuery.trim();
+    if (query.length < 2) {
+      setLocationSuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setLocationLoading(true);
+      try {
+        const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=6`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          throw new Error("Adresse API error");
+        }
+        const data = await res.json();
+        const features = Array.isArray(data?.features) ? data.features : [];
+        setLocationSuggestions(
+          features
+            .map((feature: any) => {
+              const label = String(feature?.properties?.label ?? "");
+              if (!label) return null;
+              return {
+                label,
+                city: feature?.properties?.city || feature?.properties?.name,
+                context: feature?.properties?.context,
+              };
+            })
+            .filter((item): item is { label: string; city?: string; context?: string } => Boolean(item))
+        );
+      } catch (error) {
+        if (controller.signal.aborted) {
+          return;
+        }
+        console.error("Erreur auto-complétion adresse:", error);
+      } finally {
+        if (!controller.signal.aborted) {
+          setLocationLoading(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [locationQuery, locationOpen]);
+
+  const handleLocationSelect = (label: string) => {
+    setSelectedLocation(label);
+    setLocationQuery(label);
+    setLocationOpen(false);
+  };
+
+  const handleLocationKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const first = locationSuggestions[0];
+      if (first) {
+        handleLocationSelect(first.label);
+      } else if (locationQuery.trim()) {
+        handleLocationSelect(locationQuery.trim());
+      }
+    }
+  };
+
   // Pré-charger des filtres via l'URL (ex: /search?events=1&music=1)
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -140,6 +248,17 @@ export default function SearchPage() {
         const loc = (p?.location === 'INDOOR' || p?.location === 'OUTDOOR') ? p.location : 'OUTDOOR';
         if (loc !== filters.location) return false;
       }
+      if (selectedLocation) {
+        const normalized = selectedLocation.toLowerCase();
+        const poolAddress = [p?.address, p?.city, p?.extras?.address, p?.extras?.city]
+          .flat()
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        if (!poolAddress.includes(normalized)) {
+          return false;
+        }
+      }
       if (filters.jacuzzi) {
         const equipments: string[] = Array.isArray(p?.extras?.equipments) ? p.extras.equipments : [];
         const normalized = equipments.map((e) => String(e).toLowerCase());
@@ -185,6 +304,116 @@ export default function SearchPage() {
   return (
     <main className="w-full p-0">
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen px-3 sm:px-4 md:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 py-4">
+          <div className="flex items-center gap-3">
+            <SideMenu />
+            <button
+              type="button"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-lg shadow-sm"
+              aria-label="Choisir la langue"
+            >
+              🇫🇷
+            </button>
+          </div>
+          <div className="flex-1 min-w-[260px] flex justify-center">
+            <div className="flex w-full max-w-3xl items-center gap-3 rounded-full border border-gray-200 bg-white px-6 py-3 shadow-sm">
+              <div ref={locationRef} className="relative">
+                <button
+                  type="button"
+                  className="rounded-full bg-gray-100 px-4 py-1 text-sm font-semibold text-gray-900"
+                  onClick={() => {
+                    setLocationQuery(selectedLocation);
+                    setLocationOpen((prev) => !prev);
+                  }}
+                >
+                  {selectedLocation || 'France'}
+                </button>
+                {locationOpen && (
+                  <div className="absolute left-0 top-full z-50 mt-3 w-72 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
+                    <label className="mb-2 block text-xs font-semibold text-gray-500" htmlFor="search-location-input">
+                      Rechercher un lieu
+                    </label>
+                    <input
+                      id="search-location-input"
+                      ref={locationInputRef}
+                      value={locationQuery}
+                      onChange={(e) => setLocationQuery(e.target.value)}
+                      onKeyDown={handleLocationKeyDown}
+                      placeholder="Ville, code postal, adresse"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+                    />
+                    <div className="mt-3 max-h-60 overflow-y-auto">
+                      {locationLoading && (
+                        <div className="py-2 text-sm text-gray-500">Chargement...</div>
+                      )}
+                      {!locationLoading && locationSuggestions.length === 0 && locationQuery.trim().length < 2 && (
+                        <div className="py-2 text-sm text-gray-500">
+                          Saisissez au moins 2 lettres
+                        </div>
+                      )}
+                      {!locationLoading && locationSuggestions.length === 0 && locationQuery.trim().length >= 2 && (
+                        <div className="py-2 text-sm text-gray-500">
+                          Aucun résultat
+                        </div>
+                      )}
+                      {locationSuggestions.map((suggestion) => (
+                        <button
+                          key={suggestion.label}
+                          type="button"
+                          className="flex w-full flex-col items-start gap-0.5 rounded-lg px-3 py-2 text-left hover:bg-blue-50"
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleLocationSelect(suggestion.label);
+                          }}
+                        >
+                          <span className="text-sm font-medium text-gray-900">{suggestion.label}</span>
+                          {suggestion.context && (
+                            <span className="text-xs text-gray-500">{suggestion.context}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <span className="h-6 w-px bg-gray-200" aria-hidden="true" />
+              <button type="button" className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                Ajoutez une date
+              </button>
+              <span className="h-6 w-px bg-gray-200" aria-hidden="true" />
+              <button type="button" className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                Ajoutez des baigneurs
+              </button>
+              <div className="ml-auto">
+                <button
+                  type="button"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-white shadow"
+                  style={{ backgroundColor: "#0094ec" }}
+                  aria-label="Rechercher"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <circle cx="11" cy="11" r="7" />
+                    <line x1="20" y1="20" x2="16.65" y2="16.65" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="flex-shrink-0">
+            <span className="text-2xl font-bold" style={{ color: "#0094ec", fontFamily: "cursive" }}>
+              Swimmy
+            </span>
+          </div>
+        </div>
         <h1 className="text-2xl font-bold mb-2">Toutes les piscines</h1>
         <p className="text-gray-600 mb-4">{pools.length} résultat{pools.length > 1 ? 's' : ''}</p>
       
