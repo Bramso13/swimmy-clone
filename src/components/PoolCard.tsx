@@ -212,10 +212,13 @@ export default function PoolCard({ pool }: { pool: Pool }) {
           </span>
         </div>
         {(locationText || distanceLabel) && (
-          <div className="mt-3 text-sm text-gray-600 line-clamp-2">
-            {locationText}
-            {locationText && distanceLabel ? " • " : ""}
-            {distanceLabel}
+          <div className="mt-3 space-y-1">
+            {locationText && (
+              <p className="text-sm text-gray-600 line-clamp-2">{locationText}</p>
+            )}
+            {distanceLabel && (
+              <p className="text-sm font-medium text-gray-800">{distanceLabel}</p>
+            )}
           </div>
         )}
       </div>
