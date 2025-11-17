@@ -62,7 +62,7 @@ export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolea
         href="/"
         className="font-bold text-2xl tracking-tight"
         style={{
-          color: isHeaderBlue ? '#ffffff' : '#0094ec', 
+          color: isHeaderBlue ? '#ffffff' : '#08436A',
           fontFamily: 'cursive'
         }}
       >

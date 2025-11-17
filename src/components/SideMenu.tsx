@@ -66,7 +66,7 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
           isHeaderBlue ? 'border-white/20' : ''
         }`}
       >
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white uppercase" style={{backgroundColor: '#0094ec'}}>
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white uppercase" style={{ backgroundColor: '#08436A' }}>
           {(() => {
             if (!user) return '≡';
             const source = String(user?.name || user?.email || '').trim();

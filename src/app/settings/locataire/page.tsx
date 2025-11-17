@@ -102,7 +102,7 @@ export default function LocatairePage() {
     <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Breadcrumb */}
       <div className="mb-8">
-        <Link href="/settings" className="text-[#0094ec] hover:underline">
+        <Link href="/settings" className="text-[var(--brand-blue)] hover:underline">
           La foire aux questions
         </Link>
         <span className="mx-2 text-gray-500">›</span>
@@ -132,10 +132,10 @@ export default function LocatairePage() {
               <div key={item.slug} className="border-b border-gray-200 pb-4">
                 <Link
                   href={`/settings/faq/${item.slug}`}
-                  className="flex items-start gap-3 group hover:text-[#0094ec] transition-colors"
+                  className="flex items-start gap-3 group hover:text-[var(--brand-blue)] transition-colors"
                 >
-                  <span className="text-[#0094ec] mt-1">★</span>
-                  <span className="text-gray-900 group-hover:text-[#0094ec]">
+                  <span className="text-[var(--brand-blue)] mt-1">★</span>
+                  <span className="text-gray-900 group-hover:text-[var(--brand-blue)]">
                     {item.title}
                   </span>
                 </Link>
@@ -145,7 +145,7 @@ export default function LocatairePage() {
           <div className="mt-6">
             <Link
               href="/settings"
-              className="text-[#0094ec] hover:underline text-sm"
+              className="text-[var(--brand-blue)] hover:underline text-sm"
             >
               Afficher les 10 articles →
             </Link>
@@ -162,7 +162,7 @@ export default function LocatairePage() {
               <div key={item.slug} className="border-b border-gray-200 pb-4">
                 <Link
                   href={`/settings/faq/${item.slug}`}
-                  className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                 >
                   {item.title}
                 </Link>
@@ -186,7 +186,7 @@ export default function LocatairePage() {
                 <div key={item.slug} className="border-b border-gray-200 pb-4">
                   <Link
                     href={`/settings/faq/${item.slug}`}
-                    className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                    className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                   >
                     {item.title}
                   </Link>
@@ -205,7 +205,7 @@ export default function LocatairePage() {
                 <div key={item.slug} className="border-b border-gray-200 pb-4">
                   <Link
                     href={`/settings/faq/${item.slug}`}
-                    className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                    className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                   >
                     {item.title}
                   </Link>
@@ -227,7 +227,7 @@ export default function LocatairePage() {
                 <div key={item.slug} className="border-b border-gray-200 pb-4">
                   <Link
                     href={`/settings/faq/${item.slug}`}
-                    className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                    className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                   >
                     {item.title}
                   </Link>
@@ -246,7 +246,7 @@ export default function LocatairePage() {
                 <div key={item.slug} className="border-b border-gray-200 pb-4">
                   <Link
                     href={`/settings/faq/${item.slug}`}
-                    className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                    className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                   >
                     {item.title}
                   </Link>
@@ -269,7 +269,7 @@ export default function LocatairePage() {
               <div key={item.slug} className="border-b border-gray-200 pb-4">
                 <Link
                   href={`/settings/faq/${item.slug}`}
-                  className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                 >
                   {item.title}
                 </Link>
@@ -288,7 +288,7 @@ export default function LocatairePage() {
               <div key={item.slug} className="border-b border-gray-200 pb-4">
                 <Link
                   href={`/settings/faq/${item.slug}`}
-                  className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                 >
                   {item.title}
                 </Link>

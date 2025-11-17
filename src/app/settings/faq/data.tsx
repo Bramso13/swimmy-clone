@@ -6,6 +6,9 @@ export interface FaqItem {
   content: React.ReactNode;
 }
 
+const BRAND_BLUE = "var(--brand-blue)";
+const BRAND_BLUE_SOFT = "#E3ECF2";
+
 export const faqItems: FaqItem[] = [
   {
     slug: "age-minimum-inscription",
@@ -163,7 +166,7 @@ export const faqItems: FaqItem[] = [
       "En synthèse : le virus ne semble pas survivre dans une eau correctement traitée au chlore…",
     content: (
       <div className="space-y-6">
-        <div className="border-l-4 p-6" style={{ backgroundColor: "#e6f4ff", borderColor: "#0094EC" }}>
+        <div className="border-l-4 p-6" style={{ backgroundColor: BRAND_BLUE_SOFT, borderColor: BRAND_BLUE }}>
           <p className="font-semibold mb-3">En synthèse :</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>

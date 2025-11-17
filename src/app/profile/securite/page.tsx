@@ -45,7 +45,7 @@ export default function SecuritePage() {
   return (
     <main className="mx-auto max-w-5xl">
       {/* Header bleu */}
-      <div className="py-8 px-6" style={{ backgroundColor: "#0094EC" }}>
+      <div className="py-8 px-6" style={{ backgroundColor: "var(--brand-blue)" }}>
         <div className="max-w-5xl mx-auto text-white">
           <div className="text-sm opacity-90 mb-2">
             <Link href="/profile" className="underline">Mon compte</Link> <span className="mx-1">›</span> Sécurité

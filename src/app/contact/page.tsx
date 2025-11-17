@@ -82,9 +82,9 @@ export default function ContactPage() {
               <button
                 type="submit"
                 className="w-full text-white py-3 px-6 rounded-lg font-medium transition"
-                style={{backgroundColor: '#0094ec'}}
-                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+                style={{ backgroundColor: 'var(--brand-blue)' }}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = 'color-mix(in srgb, var(--brand-blue) 85%, black)'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'var(--brand-blue)'}
               >
                 Envoyer le message
               </button>

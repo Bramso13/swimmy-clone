@@ -214,7 +214,7 @@ export default function PoolCard({ pool }: { pool: Pool }) {
             )}
           </div>
         </div>
-        <div className="mt-3 flex items-baseline gap-2" style={{color: '#0094ec'}}>
+        <div className="mt-3 flex items-baseline gap-2" style={{ color: 'var(--brand-blue)' }}>
           <div className="flex items-baseline gap-1">
             <span className="text-3xl md:text-4xl font-bold">
               {Math.round(Number(pool.pricePerHour || 0))}

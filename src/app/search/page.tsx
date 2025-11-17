@@ -12,6 +12,13 @@ async function getPools() {
   return j.pools ?? [];
 }
 
+type LocationSuggestion = {
+  label: string;
+  context?: string;
+  latitude: number;
+  longitude: number;
+};
+
 export default function SearchPage() {
   const [pools, setPools] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +41,7 @@ export default function SearchPage() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [locationQuery, setLocationQuery] = useState<string>("");
-  const [locationSuggestions, setLocationSuggestions] = useState<Array<{ label: string; context?: string; latitude: number; longitude: number }>>([]);
+  const [locationSuggestions, setLocationSuggestions] = useState<LocationSuggestion[]>([]);
   const [locationLoading, setLocationLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [selectedLocationCoords, setSelectedLocationCoords] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -175,7 +182,7 @@ export default function SearchPage() {
                 latitude: coords[1],
               };
             })
-            .filter((item): item is { label: string; context?: string; latitude: number; longitude: number } => Boolean(item))
+            .filter((item: LocationSuggestion | null): item is LocationSuggestion => Boolean(item))
         );
       } catch (error) {
         if (controller.signal.aborted) {
@@ -195,7 +202,7 @@ export default function SearchPage() {
     };
   }, [locationQuery, locationOpen]);
 
-  const handleLocationSelect = (suggestion: { label: string; latitude: number; longitude: number } | null) => {
+  const handleLocationSelect = (suggestion: LocationSuggestion | null) => {
     if (!suggestion) {
       setSelectedLocation("");
       setSelectedLocationCoords(null);
@@ -433,7 +440,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   className="flex h-11 w-11 items-center justify-center rounded-full text-white shadow"
-                  style={{ backgroundColor: "#0094ec" }}
+                  style={{ backgroundColor: "var(--brand-blue)" }}
                   aria-label="Rechercher"
                 >
                   <svg
@@ -454,7 +461,7 @@ export default function SearchPage() {
             </div>
           </div>
           <div className="flex-shrink-0">
-            <span className="text-2xl font-bold" style={{ color: "#0094ec", fontFamily: "cursive" }}>
+            <span className="text-2xl font-bold" style={{ color: "var(--brand-blue)", fontFamily: "cursive" }}>
               Swimmy
             </span>
           </div>
@@ -721,7 +728,7 @@ export default function SearchPage() {
               <button className="rounded-full border px-4 py-2" onClick={() => { setSelectedEquipments([]); setFilters((f)=>({ ...f, superhost:false, events:false, music:false, pets:false })); setMinPrice(''); setMaxPrice(''); }}>Remettre à zéro</button>
               <div className="flex items-center gap-2">
                 <button className="rounded-full border px-4 py-2" onClick={() => setMoreOpen(false)}>Annuler</button>
-                <button className="rounded-full px-5 py-2 text-white" style={{backgroundColor:'#0094ec'}} onClick={() => setMoreOpen(false)}>Valider</button>
+                <button className="rounded-full px-5 py-2 text-white" style={{ backgroundColor: 'var(--brand-blue)' }} onClick={() => setMoreOpen(false)}>Valider</button>
               </div>
             </div>
           </div>

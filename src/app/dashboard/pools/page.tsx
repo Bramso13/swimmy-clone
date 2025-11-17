@@ -131,9 +131,9 @@ const PoolsPage = () => {
         <a
           href="/dashboard/pools/new"
           className="text-white px-4 py-2 rounded"
-          style={{backgroundColor: '#0094ec'}}
-          onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-          onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+          style={{ backgroundColor: '#08436A' }}
+          onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#062F4B'}
+          onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#08436A'}
         >
           Ajouter une piscine
         </a>
@@ -150,9 +150,9 @@ const PoolsPage = () => {
           <a
             href="/dashboard/pools/new"
             className="inline-block text-white px-4 py-2 rounded"
-            style={{backgroundColor: '#0094ec'}}
-            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+            style={{ backgroundColor: '#08436A' }}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#062F4B'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#08436A'}
           >
             Ajouter ma première piscine
           </a>

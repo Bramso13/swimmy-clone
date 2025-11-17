@@ -117,7 +117,7 @@ export default function UsersPage() {
           placeholder="Rechercher par nom ou email"
           className="flex-1 border rounded px-3 py-2"
         />
-        <button type="submit" className="px-4 py-2 rounded text-white" style={{ backgroundColor: '#0094ec' }}>
+        <button type="submit" className="px-4 py-2 rounded text-white" style={{ backgroundColor: 'var(--brand-blue)' }}>
           Rechercher
         </button>
       </form>

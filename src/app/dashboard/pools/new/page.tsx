@@ -2,6 +2,10 @@
 import React, { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+const BRAND_BLUE = "var(--brand-blue)";
+const BRAND_BLUE_HOVER = "color-mix(in srgb, var(--brand-blue) 85%, black)";
+const BRAND_BLUE_SOFT = "#E3ECF2";
+
 const personsOptions = [
   { label: "1 à 5", value: 5 },
   { label: "5 à 10", value: 10 },
@@ -167,7 +171,7 @@ const NewPoolPage = () => {
         {/* Texte à gauche */}
         <div className="flex flex-col gap-6 py-6">
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-            Gagnez de l'argent <span style={{color: '#0094ec'}}>en</span>
+            Gagnez de l'argent <span style={{ color: BRAND_BLUE }}>en</span>
             <br />
             louant votre piscine
           </h1>
@@ -184,9 +188,9 @@ const NewPoolPage = () => {
             <button
               onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}
               className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-full text-base font-semibold transition shadow-sm"
-              style={{backgroundColor: '#0094ec'}}
-              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+              style={{ backgroundColor: BRAND_BLUE }}
+              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
+              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
             >
               Créez votre annonce <span className="text-xl leading-none">+</span>
             </button>
@@ -236,7 +240,7 @@ const NewPoolPage = () => {
                           className={`w-full text-left px-3 py-2 rounded-md border text-sm font-medium transition ${
                             selected ? "text-white border-2" : "hover:bg-muted"
                           }`}
-                          style={selected ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
+                          style={selected ? { backgroundColor: BRAND_BLUE, borderColor: BRAND_BLUE } : {}}
                         >
                           <span className="mr-2">{equipmentIcon(opt)}</span>
                           {opt}
@@ -360,20 +364,20 @@ const NewPoolPage = () => {
                     <button
                       type="button"
                       onClick={() => setLocation("OUTDOOR")}
-                      className={`px-3 py-2 rounded-md border text-sm font-medium transition ${
-                        location === "OUTDOOR" ? "text-white border-2" : "hover:bg-muted"
-                      }`}
-                      style={location === "OUTDOOR" ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
+                    className={`px-3 py-2 rounded-md border text-sm font-medium transition ${
+                      location === "OUTDOOR" ? "text-white border-2" : "hover:bg-muted"
+                    }`}
+                    style={location === "OUTDOOR" ? { backgroundColor: BRAND_BLUE, borderColor: BRAND_BLUE } : {}}
                     >
                       Extérieur
                     </button>
                     <button
                       type="button"
                       onClick={() => setLocation("INDOOR")}
-                      className={`px-3 py-2 rounded-md border text-sm font-medium transition ${
-                        location === "INDOOR" ? "text-white border-2" : "hover:bg-muted"
-                      }`}
-                      style={location === "INDOOR" ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
+                    className={`px-3 py-2 rounded-md border text-sm font-medium transition ${
+                      location === "INDOOR" ? "text-white border-2" : "hover:bg-muted"
+                    }`}
+                    style={location === "INDOOR" ? { backgroundColor: BRAND_BLUE, borderColor: BRAND_BLUE } : {}}
                     >
                       Intérieur
                     </button>
@@ -484,10 +488,10 @@ const NewPoolPage = () => {
                         key={opt.label}
                         type="button"
                         onClick={() => setPersons(opt.value)}
-                        className={`px-3 py-2 rounded-md border text-sm font-medium transition ${
-                          persons === opt.value ? "text-white border-2" : "hover:bg-muted"
-                        }`}
-                        style={persons === opt.value ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
+                    className={`px-3 py-2 rounded-md border text-sm font-medium transition ${
+                      persons === opt.value ? "text-white border-2" : "hover:bg-muted"
+                    }`}
+                    style={persons === opt.value ? { backgroundColor: BRAND_BLUE, borderColor: BRAND_BLUE } : {}}
                       >
                         {opt.label}
                       </button>
@@ -503,10 +507,10 @@ const NewPoolPage = () => {
                         key={opt.value}
                         type="button"
                         onClick={() => setRhythm(opt.value)}
-                        className={`w-full text-left px-3 py-2 rounded-md border transition ${
-                          rhythm === opt.value ? "border-2" : "hover:bg-muted"
-                        }`}
-                        style={rhythm === opt.value ? {backgroundColor: '#f0f8ff', borderColor: '#0094ec'} : {}}
+                    className={`w-full text-left px-3 py-2 rounded-md border transition ${
+                      rhythm === opt.value ? "border-2" : "hover:bg-muted"
+                    }`}
+                    style={rhythm === opt.value ? { backgroundColor: BRAND_BLUE_SOFT, borderColor: BRAND_BLUE } : {}}
                       >
                         {opt.label}
                       </button>
@@ -534,7 +538,7 @@ const NewPoolPage = () => {
                           className={`w-full text-left px-3 py-2 rounded-md border text-sm font-medium transition ${
                             selected ? "text-white border-2" : "hover:bg-muted"
                           }`}
-                          style={selected ? {backgroundColor: '#0094ec', borderColor: '#0094ec'} : {}}
+                          style={selected ? { backgroundColor: BRAND_BLUE, borderColor: BRAND_BLUE } : {}}
                         >
                           <span className="mr-2">{ruleIcon(opt)}</span>
                           {opt}
@@ -587,7 +591,7 @@ const NewPoolPage = () => {
               <div className="md:pt-8 md:pl-4 border-t md:border-t-0 md:border-l border-border flex md:block items-center justify-between rounded-md">
                 <div>
                   <div className="text-sm text-muted-foreground">Revenu mensuel</div>
-                  <div className="text-4xl md:text-5xl font-extrabold mt-1" style={{color: '#0094ec'}}>
+                  <div className="text-4xl md:text-5xl font-extrabold mt-1" style={{ color: BRAND_BLUE }}>
                     {revenue.toLocaleString("fr-FR")} €
                   </div>
                 </div>
@@ -637,9 +641,9 @@ const NewPoolPage = () => {
                 <button
                   disabled={submitting}
                   className="text-white px-5 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  style={{backgroundColor: '#0094ec'}}
-                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+                  style={{ backgroundColor: BRAND_BLUE }}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
                   onClick={async () => {
                     // Validation des champs obligatoires
                     if (!title.trim()) {

@@ -76,6 +76,17 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --brand-blue: #08436A;
+  --color-blue-50: var(--brand-blue);
+  --color-blue-100: var(--brand-blue);
+  --color-blue-200: var(--brand-blue);
+  --color-blue-300: var(--brand-blue);
+  --color-blue-400: var(--brand-blue);
+  --color-blue-500: var(--brand-blue);
+  --color-blue-600: var(--brand-blue);
+  --color-blue-700: var(--brand-blue);
+  --color-blue-800: var(--brand-blue);
+  --color-blue-900: var(--brand-blue);
 }
 
 .dark {

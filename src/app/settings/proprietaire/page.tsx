@@ -48,7 +48,7 @@ export default function ProprietairePage() {
     <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Breadcrumb */}
       <div className="mb-8">
-        <Link href="/settings" className="text-[#0094ec] hover:underline">
+        <Link href="/settings" className="text-[var(--brand-blue)] hover:underline">
           La foire aux questions
         </Link>
         <span className="mx-2 text-gray-500">›</span>
@@ -80,7 +80,7 @@ export default function ProprietairePage() {
                 <div key={item.slug} className="border-b border-gray-200 pb-4">
                   <Link
                     href={`/settings/faq/${item.slug}`}
-                    className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                    className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                   >
                     {titre}
                   </Link>
@@ -112,10 +112,10 @@ export default function ProprietairePage() {
                 <div key={q.slug} className="border-b border-gray-200 pb-4">
                   <Link
                     href={`/settings/faq/${q.slug}`}
-                    className="flex items-start gap-3 group hover:text-[#0094ec] transition-colors"
+                    className="flex items-start gap-3 group hover:text-[var(--brand-blue)] transition-colors"
                   >
-                    {q.hasStar && <span className="text-[#0094ec] mt-1">★</span>}
-                    <span className="text-gray-900 group-hover:text-[#0094ec]">
+                    {q.hasStar && <span className="text-[var(--brand-blue)] mt-1">★</span>}
+                    <span className="text-gray-900 group-hover:text-[var(--brand-blue)]">
                       {q.titre}
                     </span>
                   </Link>
@@ -190,10 +190,10 @@ export default function ProprietairePage() {
               <div className="border-b border-gray-200 pb-4">
                 <Link
                   href="/settings/faq/annuler-une-reservation"
-                  className="flex items-start gap-3 group hover:text-[#0094ec] transition-colors"
+                  className="flex items-start gap-3 group hover:text-[var(--brand-blue)] transition-colors"
                 >
-                  <span className="text-[#0094ec] mt-1">★</span>
-                  <span className="text-gray-900 group-hover:text-[#0094ec]">
+                  <span className="text-[var(--brand-blue)] mt-1">★</span>
+                  <span className="text-gray-900 group-hover:text-[var(--brand-blue)]">
                     Comment annuler une réservation ?
                   </span>
                 </Link>
@@ -201,7 +201,7 @@ export default function ProprietairePage() {
               <div className="border-b border-gray-200 pb-4">
                 <Link
                   href="/settings/faq/intemperies-mauvais-temps"
-                  className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                 >
                   Que faire si la météo est mauvaise ?
                 </Link>
@@ -223,7 +223,7 @@ export default function ProprietairePage() {
               <div className="border-b border-gray-200 pb-4">
                 <Link
                   href="/settings/faq/compte-bloque-ou-mdp-oublie"
-                  className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                 >
                   Mon compte est bloqué / j'ai oublié mon mot de passe
                 </Link>
@@ -246,10 +246,10 @@ export default function ProprietairePage() {
               <div className="border-b border-gray-200 pb-4">
                 <Link
                   href="/settings/faq/assurance-speciale"
-                  className="flex items-start gap-3 group hover:text-[#0094ec] transition-colors"
+                  className="flex items-start gap-3 group hover:text-[var(--brand-blue)] transition-colors"
                 >
-                  <span className="text-[#0094ec] mt-1">★</span>
-                  <span className="text-gray-900 group-hover:text-[#0094ec]">
+                  <span className="text-[var(--brand-blue)] mt-1">★</span>
+                  <span className="text-gray-900 group-hover:text-[var(--brand-blue)]">
                     Dois-je souscrire à une assurance spéciale ?
                   </span>
                 </Link>
@@ -302,7 +302,7 @@ export default function ProprietairePage() {
               <div className="border-b border-gray-200 pb-4">
                 <Link
                   href="/settings/faq/voir-evaluation-recue"
-                  className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                 >
                   Comment voir l'évaluation que j'ai reçue ?
                 </Link>
@@ -310,7 +310,7 @@ export default function ProprietairePage() {
               <div className="border-b border-gray-200 pb-4">
                 <Link
                   href="/settings/faq/mauvais-commentaire-que-faire"
-                  className="block text-gray-900 hover:text-[#0094ec] transition-colors"
+                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
                 >
                   Que faire en cas de mauvais commentaire ?
                 </Link>

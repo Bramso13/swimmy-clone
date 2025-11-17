@@ -32,7 +32,7 @@ export default function HeaderWrapper() {
       className={`sticky top-0 z-30 w-full dark:bg-black flex items-center justify-between px-3 md:px-6 py-3 shadow-sm transition-all duration-300 ${
         isScrolled ? 'bg-white' : ''
       }`}
-      style={!isScrolled ? { background: 'linear-gradient(to right, #0094ec, #4db8ff)' } : {}}
+      style={!isScrolled ? { background: 'linear-gradient(to right, #08436A, #0A5B87)' } : {}}
     >
       <div className="flex items-center gap-3">
         <SideMenu isHeaderBlue={!isScrolled} />

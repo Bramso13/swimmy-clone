@@ -346,7 +346,7 @@ export default function EditPoolPage({ params }: { params: { id: string } }) {
             type="submit"
             disabled={saving}
             className="rounded-full px-5 py-2 text-sm font-semibold text-white"
-            style={{ backgroundColor: saving ? "#7cc7f1" : "#0094ec" }}
+            style={{ backgroundColor: saving ? "#4D6A80" : "#08436A" }}
           >
             {saving ? "Enregistrement..." : "Enregistrer"}
           </button>

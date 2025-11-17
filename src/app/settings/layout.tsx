@@ -11,20 +11,20 @@ export default function SettingsLayout({
       <nav className="sticky top-0 z-30 w-full bg-white flex items-center justify-center py-6 shadow-sm">
         <div className="flex items-center justify-between gap-6 max-w-7xl mx-auto w-full px-6">
           <div className="flex items-center gap-8">
-            <Link href="/settings/locataire" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
+            <Link href="/settings/locataire" className="text-gray-800 hover:text-[var(--brand-blue)] transition-colors text-base font-medium">
               FAQ Locataires
             </Link>
-            <Link href="/settings/proprietaire" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
+            <Link href="/settings/proprietaire" className="text-gray-800 hover:text-[var(--brand-blue)] transition-colors text-base font-medium">
               FAQ Propriétaires
             </Link>
-            <Link href="/contact" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
+            <Link href="/contact" className="text-gray-800 hover:text-[var(--brand-blue)] transition-colors text-base font-medium">
               Contactez-nous
             </Link>
-            <Link href="/" className="text-gray-800 hover:text-[#0094ec] transition-colors text-base font-medium">
+            <Link href="/" className="text-gray-800 hover:text-[var(--brand-blue)] transition-colors text-base font-medium">
               Revenir sur Swimmy
             </Link>
           </div>
-          <Link href="/" className="font-bold text-2xl tracking-tight" style={{color: '#0094ec', fontFamily: 'cursive'}}>
+          <Link href="/" className="font-bold text-2xl tracking-tight" style={{ color: 'var(--brand-blue)', fontFamily: 'cursive' }}>
             Swimmy
           </Link>
         </div>

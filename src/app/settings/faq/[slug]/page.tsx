@@ -24,7 +24,7 @@ export default function FaqDetailPage({ params }: { params: { slug: string } }) 
         {item.content}
       </div>
       <div className="mt-10">
-        <Link href="/settings" className="inline-block px-4 py-2 rounded text-white" style={{backgroundColor: '#0094EC'}}>
+        <Link href="/settings" className="inline-block px-4 py-2 rounded text-white" style={{ backgroundColor: 'var(--brand-blue)' }}>
           ← Retour à l'aide
         </Link>
       </div>

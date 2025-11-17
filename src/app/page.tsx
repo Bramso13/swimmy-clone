@@ -8,6 +8,11 @@ import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import React from "react";
 
+const BRAND_BLUE = "#08436A";
+const BRAND_BLUE_HOVER = "#06324B";
+const BRAND_BLUE_GRADIENT = "#0A5B87";
+const BRAND_BLUE_SOFT = "#E3ECF2";
+
 export default function Home() {
   const [openCard, setOpenCard] = useState<"share" | "swim" | null>(null);
   const [openFaq, setOpenFaq] = useState<"children" | "contact" | "clean" | null>(null);
@@ -190,7 +195,7 @@ export default function Home() {
             {/* Logo Swimmy à droite */}
             <div className="flex-shrink-0">
               <Link href="/">
-                <h2 className="text-2xl font-bold" style={{color: '#0094ec', fontFamily: 'cursive'}}>
+                <h2 className="text-2xl font-bold" style={{ color: BRAND_BLUE, fontFamily: 'cursive' }}>
                   Swimmy
                 </h2>
               </Link>
@@ -199,7 +204,10 @@ export default function Home() {
         </div>
       
       {/* Hero Section */}
-      <section className="overflow-hidden text-white py-12 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{background: 'linear-gradient(to right, #0094ec, #4db8ff)'}}>
+      <section
+        className="overflow-hidden text-white py-12 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]"
+        style={{ background: `linear-gradient(to right, ${BRAND_BLUE}, ${BRAND_BLUE_GRADIENT})` }}
+      >
         <div className="flex flex-col gap-6 px-6 md:px-10 items-center">
           <div className="flex items-center justify-center w-full max-w-4xl">
             <SearchBar />
@@ -224,7 +232,7 @@ export default function Home() {
           <div className="text-left">
             <h2 className="text-4xl md:text-5xl font-bold mb-8">
               Swimmy, c'est deux façons de faire{" "}
-              <span style={{color: '#0094ec'}}>des heureux !</span>
+              <span style={{ color: BRAND_BLUE }}>des heureux !</span>
             </h2>
           </div>
 
@@ -259,9 +267,9 @@ export default function Home() {
                   <button
                     onClick={handleCreatePoolClick}
                     className="inline-flex items-center gap-2 text-white font-medium px-6 py-3 rounded-full shadow-md transition-colors duration-200"
-                    style={{backgroundColor: '#0094ec'}}
-                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+                    style={{ backgroundColor: BRAND_BLUE }}
+                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
+                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
                   >
                     Louez votre piscine facilement
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,9 +305,9 @@ export default function Home() {
                   <Link
                     href="/search"
                     className="inline-flex items-center gap-2 text-white font-medium px-6 py-3 rounded-full shadow-md transition-colors duration-200"
-                    style={{backgroundColor: '#0094ec'}}
-                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+                    style={{ backgroundColor: BRAND_BLUE }}
+                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
+                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
                   >
                     Vous aussi profitez de Swimmy
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,7 +327,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-bold mb-2">
             <span className="text-gray-900">Vos piscines</span>
             <br />
-            <span style={{color: '#0094ec'}}>près de chez vous !</span>
+            <span style={{ color: BRAND_BLUE }}>près de chez vous !</span>
           </h2>
           <p className="text-gray-700 mt-4">
             Rien de plus simple pour passer un bon moment. Laquelle préférez-vous ?
@@ -358,9 +366,9 @@ export default function Home() {
         <Link
           href="/search"
           className="inline-flex items-center justify-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-md transition-colors duration-200"
-          style={{backgroundColor: '#0094ec'}}
-          onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-          onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+          style={{ backgroundColor: BRAND_BLUE }}
+          onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
+          onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
         >
           Trouver une piscine près de chez vous
           <svg className="w-24 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -371,7 +379,7 @@ export default function Home() {
         
         <section
           className="py-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]"
-          style={{backgroundColor: '#0094ec'}}
+          style={{ backgroundColor: BRAND_BLUE }}
         >
           <div className="max-w-4xl mx-auto">
 
@@ -429,9 +437,9 @@ export default function Home() {
               <Link
                 href="/search"
                 className=" translate-y-8/5 inline-flex items-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-lg transition-colors duration-200"
-                style={{backgroundColor: '#0067b9'}}
-            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0067b9'}
+                style={{ backgroundColor: BRAND_BLUE }}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
               >
                 Une piscine pour le plaisir
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -446,7 +454,7 @@ export default function Home() {
       <section className="w-full">
         <div className="max-w-5xl mx-auto text-center px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-2">Force & baignade !</h2>
-          <p className="text-2xl md:text-3xl mb-6" style={{color: '#0094ec'}}>Notre communauté en redemande</p>
+          <p className="text-2xl md:text-3xl mb-6" style={{ color: BRAND_BLUE }}>Notre communauté en redemande</p>
           <TestimonialCarousel />
         </div>
       </section>
@@ -461,7 +469,7 @@ export default function Home() {
               <h2 className="text-3xl text-center font-bold text-black mb-2">
                 Des questions ?
               </h2>
-              <h3 className="text-4xl text-center font-bold mb-8" style={{color: '#0094ec'}}>
+              <h3 className="text-4xl text-center font-bold mb-8" style={{ color: BRAND_BLUE }}>
                 Swimmy a tout prévu
               </h3>
 
@@ -533,9 +541,9 @@ export default function Home() {
                 <Link
                   href="/settings"
                   className="text-white px-6 py-3 rounded-full text-sm font-medium transition"
-                  style={{backgroundColor: '#0094ec'}}
-                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+                  style={{ backgroundColor: BRAND_BLUE }}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
                 >
                   Toutes les réponses à vos questions →
                 </Link>
@@ -543,7 +551,7 @@ export default function Home() {
             </div>
 
             {/* Colonne droite - Contact */}
-            <div className="bg-blue-500 rounded-lg p-8 relative overflow-hidden flex flex-col items-center justify-center" style={{backgroundColor: '#0094ec'}}>
+            <div className="bg-blue-500 rounded-lg p-8 relative overflow-hidden flex flex-col items-center justify-center" style={{ backgroundColor: BRAND_BLUE }}>
               <h2 className="text-2xl font-bold text-white text-center mb-8">
                 Plus simple en direct ?
               </h2>
@@ -560,7 +568,7 @@ export default function Home() {
       </section>
 
       {/* Louez votre piscine avec Swimmy */}
-      <section className="py-20 w-screen relative mb-12 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{backgroundColor: '#0094ec'}}>
+      <section className="py-20 w-screen relative mb-12 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{ backgroundColor: BRAND_BLUE }}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
             {/* Texte à gauche */}
@@ -589,17 +597,17 @@ export default function Home() {
 
       {/* Call to action */}
       {!isAuthenticated && (
-        <section className="flex flex-col items-center gap-4 py-8 rounded-lg shadow-inner" style={{backgroundColor: '#f0f8ff'}}>
-          <h2 className="text-2xl font-bold" style={{color: '#0094ec'}}>Prêt à plonger ?</h2>
+        <section className="flex flex-col items-center gap-4 py-8 rounded-lg shadow-inner" style={{ backgroundColor: BRAND_BLUE_SOFT }}>
+          <h2 className="text-2xl font-bold" style={{ color: BRAND_BLUE }}>Prêt à plonger ?</h2>
           <p className="text-muted-foreground">
             Inscrivez-vous gratuitement et profitez de l'été dès maintenant.
           </p>
           <Link
             href="/register"
             className="text-white px-6 py-2 rounded font-semibold transition"
-            style={{backgroundColor: '#0094ec'}}
-              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+            style={{ backgroundColor: BRAND_BLUE }}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
           >
             Créer mon compte
           </Link>

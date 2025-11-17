@@ -142,7 +142,7 @@ export default function SearchBar() {
                 type="button"
                 onClick={() => setOpen("none")}
                 className="px-6 py-2 rounded-lg text-white text-sm font-medium"
-                style={{backgroundColor: '#0094ec'}}
+                style={{ backgroundColor: 'var(--brand-blue)' }}
               >
                 Suivant
               </button>
@@ -215,9 +215,9 @@ export default function SearchBar() {
         <button
           type="submit"
           className="w-10 h-10 rounded-full text-white flex items-center justify-center"
-          style={{backgroundColor: '#0094ec'}}
-          onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-          onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+          style={{ backgroundColor: 'var(--brand-blue)' }}
+          onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = 'color-mix(in srgb, var(--brand-blue) 85%, black)'}
+          onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'var(--brand-blue)'}
           aria-label="Rechercher"
         >
           🔍

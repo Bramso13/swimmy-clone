@@ -35,7 +35,7 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh]">
       <div className="w-full max-w-md bg-white dark:bg-black/80 rounded-lg shadow-lg p-8 flex flex-col gap-6 border border-border">
-        <h1 className="text-2xl font-bold text-center mb-2" style={{color: '#0094ec'}}>
+        <h1 className="text-2xl font-bold text-center mb-2" style={{ color: 'var(--brand-blue)' }}>
           Connexion
         </h1>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -63,9 +63,9 @@ export default function LoginPage() {
           <button
             type="submit"
             className="text-white px-6 py-2 rounded font-semibold transition w-full disabled:opacity-60"
-            style={{backgroundColor: '#0094ec'}}
-            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#0078c4'}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#0094ec'}
+            style={{ backgroundColor: 'var(--brand-blue)' }}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = 'color-mix(in srgb, var(--brand-blue) 85%, black)'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'var(--brand-blue)'}
             disabled={isLoading}
           >
             {isLoading ? "Connexion..." : "Se connecter"}
@@ -73,7 +73,7 @@ export default function LoginPage() {
         </form>
         <div className="text-center text-sm text-muted-foreground">
           Pas encore de compte ?{" "}
-          <Link href="/register" className="hover:underline" style={{color: '#0094ec'}}>
+          <Link href="/register" className="hover:underline" style={{ color: 'var(--brand-blue)' }}>
             Créer un compte
           </Link>
         </div>
