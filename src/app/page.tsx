@@ -205,118 +205,107 @@ export default function Home() {
       
       {/* Hero Section */}
       <section
-        className="overflow-hidden text-white py-12 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]"
+        className="overflow-hidden text-white py-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]"
         style={{ background: `linear-gradient(to right, ${BRAND_BLUE}, ${BRAND_BLUE_GRADIENT})` }}
       >
-        <div className="flex flex-col gap-6 px-6 md:px-10 items-center">
-          <div className="flex items-center justify-center w-full max-w-4xl">
-            <SearchBar />
+        <div className="max-w-6xl mx-auto px-6 md:px-10 flex flex-col items-center text-center gap-8">
+          <p className="text-sm uppercase tracking-[0.4em] text-white/70">YoumPool · Tunisie</p>
+          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
+            🏖 YoumPool — La piscine privée, enfin accessible à tous en Tunisie 🇹🇳
+          </h1>
+          <p className="text-white/90 text-lg max-w-3xl">
+            Le bonheur se partage… et se savoure les pieds dans l’eau ! Réservez une piscine privée à l’heure, pour vos enfants, vos proches ou simplement pour souffler loin des hôtels hors de prix.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/search"
+              className="inline-flex items-center gap-2 rounded-full bg-white text-[var(--brand-blue)] font-semibold px-6 py-3 shadow-lg"
+            >
+              🔍 Je réserve ma piscine
+            </Link>
+            <button
+              onClick={handleCreatePoolClick}
+              className="inline-flex items-center gap-2 rounded-full border border-white/40 text-white font-semibold px-6 py-3 hover:bg-white/10"
+            >
+              🏠 Proposer ma piscine
+            </button>
           </div>
-          <div className="flex flex-col gap-6 items-center text-center w-full">
-            <h1 className="text-5xl md:text-6xl font-extrabold leading-tight">
-              Le bonheur
-              <br />
-              se partage
-            </h1>
-            <p className="text-white/90 max-w-xl text-lg">
-              Ici, vous pouvez louer une piscine privée partout en France
-            </p>
+          <div className="w-full max-w-3xl">
+            <SearchBar />
           </div>
         </div>
       </section>
 
-      {/* Swimmy Section */}
-      <section className="py-16 bg-gray-100 w-full -mx-4 px-4">
-        <div className="grid md:grid-cols-2 gap-12 w-full items-center max-w-6xl mx-auto">
-          {/* Colonne gauche : Titre */}
-          <div className="text-left">
-            <h2 className="text-4xl md:text-5xl font-bold mb-8">
-              Swimmy, c'est deux façons de faire{" "}
-              <span style={{ color: BRAND_BLUE }}>des heureux !</span>
+      {/* Pourquoi YoumPool */}
+      <section className="py-16 bg-white w-full -mx-4 px-4">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+          <div className="space-y-6">
+            <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+              Marre de chercher une piscine l’été ?<br /> YoumPool change la donne.
             </h2>
+            <p className="text-gray-700 text-lg">
+              Finies les chambres d’hôtel hors de prix pour simplement piquer une tête. Réservez une piscine privée près de chez vous,
+              à l’heure, pour faire plaisir à vos enfants, à vos proches ou juste pour souffler.
+            </p>
+            <ul className="space-y-3 text-gray-700">
+              <li>• Localisation facile via votre ville ou quartier.</li>
+              <li>• Créneaux disponibles en temps réel.</li>
+              <li>• Tarifs transparents, sans mauvaise surprise.</li>
+            </ul>
+            <p className="text-gray-700">
+              YoumPool est la première plateforme de location de piscines privées en Tunisie. Simple pour les familles, rentable pour les propriétaires.
+            </p>
           </div>
-
-          {/* Colonne droite : Cartes */}
-          <div className="flex flex-col gap-6">
-            {/* Carte : Je partage ma piscine */}
-            <div
-              onClick={() => toggleCard("share")}
-              className="bg-white rounded-lg p-6 w-full cursor-pointer hover:bg-gray-50 transition duration-300"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-semibold">Je partage ma piscine</h3>
+          <div className="bg-gray-50 rounded-2xl p-8 space-y-6 shadow-sm">
+            <div>
+              <p className="text-sm font-semibold uppercase text-gray-500">Deux façons de faire des heureux</p>
+              <h3 className="text-2xl font-bold mt-2">Choisissez votre camp</h3>
+            </div>
+            <div className="space-y-4">
+              <div className="rounded-xl border border-gray-200 bg-white p-5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xl font-semibold">🧺 Je veux me baigner</h4>
+                  <Link href="/search" className="text-[var(--brand-blue)] text-sm font-semibold">Voir les piscines →</Link>
                 </div>
-                <span className="text-xl">{openCard === "share" ? "▲" : "▼"}</span>
+                <p className="text-gray-600 mt-2">
+                  Cherchez, réservez et plongez dans la piscine de vos rêves, pour un moment inoubliable en famille.
+                </p>
               </div>
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  openCard === "share" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="text-gray-700 text-sm whitespace-pre-line mb-4">
-                  Simple, flexible, sécurisé.
-                  {"\n"}Fixez vous-même le prix et le nombre de personnes accueillies.
-                  {"\n"}Précisez les règles à respecter.
-                  {"\n"}Modifiez vos disponibilités comme vous le souhaitez.
-                  {"\n\n"}Ce n'est pas tout : nous avons prévu une assurance en cas de pépin.
-                  {"\n"}Un contrat pour éviter les mauvaises surprises.
-                  {"\n"}Et une équipe support hautement disponible.
+              <div className="rounded-xl border border-gray-200 bg-white p-5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xl font-semibold">🏠 Je veux louer ma piscine</h4>
+                  <button onClick={handleCreatePoolClick} className="text-[var(--brand-blue)] text-sm font-semibold">Je propose →</button>
                 </div>
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleCreatePoolClick}
-                    className="inline-flex items-center gap-2 text-white font-medium px-6 py-3 rounded-full shadow-md transition-colors duration-200"
-                    style={{ backgroundColor: BRAND_BLUE }}
-                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
-                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
-                  >
-                    Louez votre piscine facilement
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </button>
-                </div>
+                <p className="text-gray-600 mt-2">
+                  Rentabilisez votre piscine privée pendant l’été et accueillez des familles en quête de fraîcheur.
+                </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Carte : Je vais me baigner */}
-            <div
-              onClick={() => toggleCard("swim")}
-              className="bg-white rounded-lg p-6 w-full cursor-pointer hover:bg-gray-50 transition duration-300"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-semibold">Je vais me baigner</h3>
-                </div>
-                <span className="text-xl">{openCard === "swim" ? "▲" : "▼"}</span>
+      {/* Vos prochaines baignades */}
+      <section className="py-16 bg-gray-50 w-full -mx-4 px-4">
+        <div className="max-w-6xl mx-auto text-center space-y-10">
+          <div className="space-y-4">
+            <p className="text-sm font-semibold tracking-[0.3em] text-gray-500 uppercase">Vos prochaines baignades</p>
+            <h2 className="text-3xl md:text-4xl font-bold">💧 Tout est pensé pour réserver sans stress</h2>
+            <p className="text-gray-600 max-w-3xl mx-auto">
+              Localisation instantanée, créneaux mis à jour et tarifs transparents : choisissez, réservez, profitez.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { title: "Localisation facile", desc: "Cherchez par ville, quartier ou spot préféré. Les piscines autour de vous s’affichent immédiatement." },
+              { title: "Créneaux en temps réel", desc: "Consultez les disponibilités heure par heure et bloquez votre plage privée en quelques clics." },
+              { title: "Tarifs transparents", desc: "Pas de surprise : vous connaissez le prix avant même de poser votre serviette." },
+            ].map((item) => (
+              <div key={item.title} className="bg-white rounded-2xl p-6 text-left shadow-sm border border-gray-100">
+                <h3 className="text-xl font-semibold mb-2 text-[var(--brand-blue)]">{item.title}</h3>
+                <p className="text-gray-600">{item.desc}</p>
               </div>
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  openCard === "swim" ? "max-h-[1000px] opacity-100 mt-4" : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="text-gray-700 text-sm whitespace-pre-line mb-4">
-                  Simple, abordable et très très sympa
-                  {"\n"}Passez un bon moment avec ceux que vous aimez. C'est à la carte, selon vos envies et vos humeurs, dans des lieux vérifiés, chez des hôtes sérieux et heureux de vous accueillir.
-                  {"\n"}Notre équipe est là pour vous accompagner à chaque étape.
-                </div>
-                <div className="flex justify-center">
-                  <Link
-                    href="/search"
-                    className="inline-flex items-center gap-2 text-white font-medium px-6 py-3 rounded-full shadow-md transition-colors duration-200"
-                    style={{ backgroundColor: BRAND_BLUE }}
-                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
-                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
-                  >
-                    Vous aussi profitez de Swimmy
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -381,81 +370,106 @@ export default function Home() {
           className="py-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]"
           style={{ backgroundColor: BRAND_BLUE }}
         >
-          <div className="max-w-4xl mx-auto">
-
-            {/* Grille des événements */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-
-
-              <div className="text-white rounded-lg p-6 flex flex-col items-start text-left hover:shadow-lg transition-shadow w-64 h-64">
-                <h2 className="text-4xl font-bold mb-4">Un évenement à fêter ?</h2>
-                <p className="text-white text-xl ">À chaque occasion sa piscine idéale</p>
-              </div>
-
-              {/* Pool Party */}
-              <Link href="/search?events=1&music=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
-                <h3 className="text-lg font-semibold text-black mb-2">Pool Party</h3>
-                <div className="text-black text-xl mb-4">→</div>
-                <div className="text-6xl">🏊‍♂️</div>
-              </Link>
-
-              {/* Team Building */}
-              <Link href="/search?events=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
-                <h3 className="text-lg font-semibold text-black mb-2">Team Building</h3>
-                <div className="text-black text-xl mb-4">→</div>
-                <div className="text-6xl">👨‍💼</div>
-              </Link>
-
-              {/* EVJF et EVG */}
-              <Link href="/search?events=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
-                <h3 className="text-lg font-semibold text-black mb-2">EVJF et EVG</h3>
-                <div className="text-black text-xl mb-4">→</div>
-                <div className="text-6xl">👑</div>
-              </Link>
-
-              {/* Anniversaire */}
-              <Link href="/search?events=1&music=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
-                <h3 className="text-lg font-semibold text-black mb-2">Anniversaire</h3>
-                <div className="text-black text-xl mb-4">→</div>
-                <div className="text-6xl">🎂</div>
-              </Link>
-
-              {/* Baby Shower */}
-              <Link href="/search?events=1" className="bg-white rounded-lg p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow w-64 h-64">
-                <h3 className="text-lg font-semibold text-black mb-2">Baby Shower</h3>
-                <div className="text-black text-xl mb-4">→</div>
-                <div className="text-6xl">👶</div>
-              </Link>
-
-            </div>
-
-            {/* Texte et bouton */}
-            <div className="text-center">
-              <p className="text-white text-xl mb-8">
-                Toutes les excuses sont bonnes pour piquer une tête.
+          <div className="max-w-5xl mx-auto text-white space-y-10 px-6">
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold">🎉 Toutes les occasions sont bonnes pour piquer une tête</h2>
+              <p className="text-white/80">
+                Choisissez un créneau, prévenez vos amis, on s’occupe du reste.
               </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {[
+                { label: "🎂 Anniversaire d’enfant", href: "/search?events=1&kids=1" },
+                { label: "👰 EVJF / EVG", href: "/search?events=1" },
+                { label: "🏖 Sortie en famille", href: "/search?family=1" },
+                { label: "🤽‍♀ Team Building", href: "/search?events=1&teams=1" },
+                { label: "👶 Baby Shower", href: "/search?events=1&baby=1" },
+                { label: "🔥 Juste pour faire plaisir", href: "/search" },
+              ].map((item) => (
+                <Link key={item.label} href={item.href} className="bg-white/15 hover:bg-white/25 rounded-2xl px-5 py-6 text-center text-white font-semibold transition">
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            <div className="text-center">
               <Link
                 href="/search"
-                className=" translate-y-8/5 inline-flex items-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-lg transition-colors duration-200"
-                style={{ backgroundColor: BRAND_BLUE }}
-                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE_HOVER}
-                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = BRAND_BLUE}
+                className="inline-flex items-center gap-2 text-white font-medium px-8 py-4 rounded-full shadow-lg transition-colors duration-200"
+                style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
               >
-                Une piscine pour le plaisir
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                Je trouve ma piscine idéale →
               </Link>
             </div>
           </div>
         </section>
       
+      {/* Sécurité */}
+      <section className="py-16 bg-gray-100 w-full -mx-4 px-4">
+        <div className="max-w-5xl mx-auto space-y-8 text-center">
+          <div>
+            <p className="text-sm font-semibold tracking-[0.3em] text-gray-500 uppercase">Sécurité & sérénité</p>
+            <h2 className="text-3xl md:text-4xl font-bold mt-3">🧼 On a tout prévu pour que vous plongiez sereinement</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 text-left">
+            {[
+              { title: "Propriétaires vérifiés", desc: "Chaque hôte est vérifié avant de publier sa piscine." },
+              { title: "Conditions d’hygiène claires", desc: "L’eau et les équipements répondent à un niveau d’exigence précis." },
+              { title: "Politique d’annulation transparente", desc: "Annulez sans stress en respectant les conditions de l’hôte." },
+              { title: "Assistance 7J/7", desc: "Une équipe disponible par téléphone ou WhatsApp pour vous aider." },
+            ].map((item) => (
+              <div key={item.title} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 className="text-xl font-semibold text-[var(--brand-blue)]">{item.title}</h3>
+                <p className="text-gray-600 mt-2">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Témoignages (carrousel simple) */}
-      <section className="w-full">
-        <div className="max-w-5xl mx-auto text-center px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-2">Force & baignade !</h2>
-          <p className="text-2xl md:text-3xl mb-6" style={{ color: BRAND_BLUE }}>Notre communauté en redemande</p>
-          <TestimonialCarousel />
+      <section className="w-full py-16">
+        <div className="max-w-5xl mx-auto text-center px-4 space-y-10">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">💬 Ils en parlent mieux que nous</h2>
+            <p className="text-gray-600">Des familles, des propriétaires, la même envie de profiter de l’été.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6 text-left">
+            <div className="border rounded-2xl p-6 shadow-sm">
+              <p className="text-lg italic text-gray-800">
+                « Enfin un moyen simple de profiter d’une piscine à Hammamet sans devoir payer un hôtel ! Mes enfants ont adoré. »
+              </p>
+              <p className="mt-4 font-semibold text-[var(--brand-blue)]">— Leïla, Tunis</p>
+            </div>
+            <div className="border rounded-2xl p-6 shadow-sm">
+              <p className="text-lg italic text-gray-800">
+                « J’ai loué ma piscine via YoumPool tout l’été. C’est fluide, sécurisé, et ça m’a permis de rencontrer des familles adorables. »
+              </p>
+              <p className="mt-4 font-semibold text-[var(--brand-blue)]">— Nabil, propriétaire à La Marsa</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Offre spéciale */}
+      <section className="py-16 bg-white w-full -mx-4 px-4">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
+          <p className="text-sm font-semibold tracking-[0.3em] text-gray-500 uppercase">Offre spéciale lancement</p>
+          <h2 className="text-3xl md:text-4xl font-bold">🔥 -20% sur votre première réservation</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Utilisez le code <span className="font-semibold text-[var(--brand-blue)]">YOUMPOOL20</span> lors de votre prochaine réservation.
+            Nombre de piscines limité pendant l’été, ne laissez pas passer les meilleurs spots !
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/search" className="px-6 py-3 rounded-full bg-[var(--brand-blue)] text-white font-semibold shadow">
+              🔵 Je réserve ma piscine
+            </Link>
+            <button onClick={handleCreatePoolClick} className="px-6 py-3 rounded-full border border-[var(--brand-blue)] text-[var(--brand-blue)] font-semibold">
+              🔵 Proposer ma piscine
+            </button>
+            <Link href="/register" className="px-6 py-3 rounded-full bg-gray-100 text-gray-900 font-semibold">
+              🔵 Créer mon compte gratuitement
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -488,8 +502,8 @@ export default function Home() {
                       openFaq === "children" ? "max-h-[1000px] opacity-100 mt-3" : "max-h-0 opacity-0"
                     }`}
                   >
-                    <div className="text-gray-700 text-xs">
-                      Oui pour les enfants de moins de 3 ans.
+                    <div className="text-gray-700 text-sm">
+                      Chaque piscine fixe ses règles, mais beaucoup offrent l’entrée gratuite pour les tout-petits. Vérifiez la fiche avant de réserver.
                     </div>
                   </div>
                 </div>
@@ -508,10 +522,8 @@ export default function Home() {
                       openFaq === "contact" ? "max-h-[1000px] opacity-100 mt-3" : "max-h-0 opacity-0"
                     }`}
                   >
-                    <div className="text-gray-700 text-xs whitespace-pre-line">
-                      Pour contacter un propriétaire, connectez-vous sur votre compte Swimmy et cliquez sur le bouton "Contacter le propriétaire" sur la page de la piscine.
-                      {"\n"}puis cliquez sur "Contacter l'hôte" sur la page de l'annonce qui vous
-                      {"\n"}intéresse.
+                    <div className="text-gray-700 text-sm whitespace-pre-line">
+                      Une fois votre réservation confirmée, vous recevez ses coordonnées (appel, WhatsApp, e-mail) pour organiser votre arrivée ou poser vos questions.
                     </div>
                   </div>
                 </div>
@@ -530,8 +542,8 @@ export default function Home() {
                       openFaq === "clean" ? "max-h-[1000px] opacity-100 mt-3" : "max-h-0 opacity-0"
                     }`}
                   >
-                    <div className="text-gray-700 text-xs">
-                      Oui, en tout cas chez Swimmy : nos propriétaires entretiennent leurs piscines principalement au chlore, ce qui se manifeste par une eau claire et saine. Ce traitement permet de détruire toute bactérie présente dans l'eau de la piscine, sans pour autant être nocif pour votre santé. Par ailleurs, le premier facteur de dégradation de la qualité de l'eau d'une piscine (après le manque d'entretien) c'est sa fréquentation : concrètement, les piscines presentes sur Swimmy sont beaucoup moins fréquentées que les piscines publiques. Nos propriétaires mettent dans la plupart des cas une douche à votre disposition avant de plonger dans la piscine.
+                    <div className="text-gray-700 text-sm">
+                      Oui. Nos propriétaires suivent un cahier des charges hygiène et nous restons disponibles 7J/7. En cas de souci, contactez-nous et nous intervenons rapidement.
                     </div>
                   </div>
                 </div>
