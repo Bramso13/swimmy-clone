@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolean }) {
   const [user, setUser] = useState<any>(null);
@@ -60,15 +61,15 @@ export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolea
 
   return (
     <div className="flex items-center">
-      <Link
-        href="/"
-        className="font-bold text-2xl tracking-tight"
-        style={{
-          color: isHeaderBlue ? '#ffffff' : '#08436A',
-          fontFamily: 'cursive'
-        }}
-      >
-        YoumPool
+      <Link href="/" className="flex items-center gap-2" aria-label="Accueil YoumPool">
+        <Image
+          src="/yoompool-logo.svg"
+          alt="Logo YoumPool"
+          width={150}
+          height={54}
+          priority
+          style={{ filter: isHeaderBlue ? "brightness(0) invert(1)" : "none", height: "auto" }}
+        />
       </Link>
     </div>
   );

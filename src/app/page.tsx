@@ -1,6 +1,6 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import SearchBar from "@/components/SearchBar";
 import PoolCard from "@/components/PoolCard";
 import SideMenu from "@/components/SideMenu";
@@ -195,11 +195,9 @@ export default function Home() {
             </div>
             
             {/* Logo YoumPool à droite */}
-            <div className="flex-shrink-0">
-              <Link href="/">
-                <h2 className="text-2xl font-bold" style={{ color: BRAND_BLUE, fontFamily: 'cursive' }}>
-                  YoumPool
-                </h2>
+            <div className="flex-shrink-0 flex items-center">
+              <Link href="/" aria-label="Accueil YoumPool">
+                <Image src="/yoompool-logo.svg" alt="Logo YoumPool" width={150} height={54} priority />
               </Link>
             </div>
           </div>
@@ -213,7 +211,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 md:px-10 flex flex-col items-center text-center gap-8">
           <p className="text-sm uppercase tracking-[0.4em] text-white/70">YoumPool · Tunisie</p>
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-            🏖 YoumPool — La piscine privée, enfin accessible à tous en Tunisie 🇹🇳
+            🏖 YoumPool — La piscine privée, enfin accessible à tous en Tunisie
           </h1>
           <p className="text-white/90 text-lg max-w-3xl">
             Le bonheur se partage… et se savoure les pieds dans l’eau ! Réservez une piscine privée à l’heure, pour vos enfants, vos proches ou simplement pour souffler loin des hôtels hors de prix.

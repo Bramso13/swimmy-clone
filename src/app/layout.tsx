@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import Image from "next/image";
 import { RenterProvider } from "@/context/RenterContext";
 import HeaderWrapper from "@/components/HeaderWrapper";
 
@@ -41,9 +42,9 @@ export default function RootLayout({
               <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
                 {/* Logo et tagline */}
                 <div className="md:col-span-1">
-                  <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--brand-blue)', fontFamily: 'cursive' }}>
-                    YoumPool
-                  </h2>
+                  <div className="mb-2">
+                    <Image src="/yoompool-logo.svg" alt="Logo YoumPool" width={160} height={58} priority />
+                  </div>
                   <p className="text-sm" style={{ color: 'var(--brand-blue)' }}>
                     Le premier site de location de piscines privées en France.
                   </p>

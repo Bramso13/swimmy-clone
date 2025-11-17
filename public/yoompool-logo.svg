@@ -1,0 +1,23 @@
+<svg width="320" height="140" viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo YoomPool">
+  <defs>
+    <linearGradient id="outerDrop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0D6AA2"/>
+      <stop offset="100%" stop-color="#064B76"/>
+    </linearGradient>
+    <linearGradient id="innerWave" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#58C4FF"/>
+      <stop offset="100%" stop-color="#0E8BD0"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="140" fill="none"/>
+  <g transform="translate(20 10)">
+    <path d="M88 92c0 24.3-19.7 44-44 44S0 116.3 0 92c0-17.3 12.8-37.2 38.5-59.3C47.1 26 55.2 19 63.9 11.4c1.7-1.4 4.1-1.4 5.8 0C78.4 19 86.5 26 95.1 32.7 120.8 54.8 133.6 74.7 133.6 92 133.6 116.3 113.9 136 89.6 136S45.6 116.3 45.6 92" fill="url(#outerDrop)"/>
+    <path d="M64 58c-12.8 0-23.6 3.3-32.6 10v15.2c9-5.9 19.8-9.1 32.6-9.1s23.6 3.2 32.6 9.1V68c-9-6.7-19.8-10-32.6-10Z" fill="url(#innerWave)"/>
+    <path d="M64 32 40 51v32h12V62h24v21h12V51L64 32Z" fill="#F3891A"/>
+  </g>
+  <g fill="#0A4E7D" font-family="Poppins, 'Segoe UI', Arial, sans-serif" font-weight="700">
+    <text font-size="58" x="150" y="75">Yoom</text>
+    <text font-size="58" x="150" y="130">Pool</text>
+  </g>
+</svg>
+
