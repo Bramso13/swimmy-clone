@@ -6,7 +6,7 @@ import { faqItems } from "../faq/data";
 export default function ProprietairePage() {
   // Questions pour "Gérer les demandes de location"
   const gererDemandesSlugs = [
-    "joindre-equipe-swimmy",
+    "joindre-equipe-YoumPool",
     "comment-ca-marche",
     "delai-reponse-proprietaire",
     "delai-acceptation-reservation",
@@ -162,7 +162,7 @@ export default function ProprietairePage() {
               </div>
               <div className="border-b border-gray-200 pb-4">
                 <span className="text-gray-900">
-                  Quelle est la commission de Swimmy ?
+                  Quelle est la commission de YoumPool ?
                 </span>
               </div>
               <div className="border-b border-gray-200 pb-4">
@@ -256,7 +256,7 @@ export default function ProprietairePage() {
               </div>
               <div className="border-b border-gray-200 pb-4">
                 <span className="text-gray-900">
-                  Quelles normes dois-je respecter afin de pouvoir louer ma piscine sur Swimmy ?
+                  Quelles normes dois-je respecter afin de pouvoir louer ma piscine sur YoumPool ?
                 </span>
               </div>
             </div>
@@ -327,4 +327,5 @@ export default function ProprietairePage() {
     </div>
   );
 }
+
 

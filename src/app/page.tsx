@@ -192,11 +192,11 @@ export default function Home() {
               <SearchBar />
             </div>
             
-            {/* Logo Swimmy à droite */}
+            {/* Logo YoumPool à droite */}
             <div className="flex-shrink-0">
               <Link href="/">
                 <h2 className="text-2xl font-bold" style={{ color: BRAND_BLUE, fontFamily: 'cursive' }}>
-                  Swimmy
+                  YoumPool
                 </h2>
               </Link>
             </div>
@@ -484,7 +484,7 @@ export default function Home() {
                 Des questions ?
               </h2>
               <h3 className="text-4xl text-center font-bold mb-8" style={{ color: BRAND_BLUE }}>
-                Swimmy a tout prévu
+                YoumPool a tout prévu
               </h3>
 
               <div className="space-y-4">
@@ -579,14 +579,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Louez votre piscine avec Swimmy */}
+      {/* Louez votre piscine avec YoumPool */}
       <section className="py-20 w-screen relative mb-12 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" style={{ backgroundColor: BRAND_BLUE }}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
             {/* Texte à gauche */}
             <div className="text-white text-left w-1/3">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
-                Louez votre piscine avec Swimmy
+                Louez votre piscine avec YoumPool
               </h2>
               <p className="text-lg text-white/90">
                 Faites des heureux, tout en faisant de votre piscine un revenu.

@@ -142,7 +142,7 @@ const NewPoolPage = () => {
           signal: addrAbortRef.current.signal,
           headers: {
             "Accept-Language": "fr",
-            "User-Agent": "swimmy-clone/1.0 (autocomplete)"
+            "User-Agent": "YoumPool-clone/1.0 (autocomplete)"
           }
         });
         if (!res.ok) throw new Error("nominatim error");
@@ -179,7 +179,7 @@ const NewPoolPage = () => {
             Rentabilisez votre piscine dès le premier plongeon.
           </p>
           <p className="text-muted-foreground max-w-xl">
-            Swimmy est le premier site de location de piscines entre particuliers.
+            YoumPool est le premier site de location de piscines entre particuliers.
             Vous fixez librement vos prix, vos règles, vos disponibilités. Toutes
             nos locations sont couvertes par une assurance.
           </p>
@@ -201,7 +201,7 @@ const NewPoolPage = () => {
         <div ref={formRef} className="w-full">
           <div className="bg-white dark:bg-black rounded-xl shadow border p-4 md:p-6">
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-800 font-medium">
+              <p className="text-sm text-white font-medium">
                 <span className="text-red-500 font-bold text-base">*</span> Champs obligatoires - Ces informations sont requises pour créer votre annonce
               </p>
             </div>
@@ -736,3 +736,4 @@ const NewPoolPage = () => {
 };
 
 export default NewPoolPage;
+

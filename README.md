@@ -1,6 +1,6 @@
-# Swimmy Clone
+# YoumPool Clone
 
-Un clone complet de Swimmy (location de piscines entre particuliers) avec Next.js 14, TypeScript, Tailwind CSS, shadcn, Prisma, Supabase et MangoPay.
+Un clone complet de YoumPool (location de piscines entre particuliers) avec Next.js 14, TypeScript, Tailwind CSS, shadcn, Prisma, Supabase et MangoPay.
 
 ## Stack
 
@@ -69,3 +69,4 @@ Un clone complet de Swimmy (location de piscines entre particuliers) avec Next.j
 ---
 
 Pour toute question, voir la doc ou ouvrir une issue !
+

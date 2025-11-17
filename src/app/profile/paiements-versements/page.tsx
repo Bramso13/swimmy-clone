@@ -130,7 +130,7 @@ export default function PaiementsVersementsPage() {
                     </button>
                   </div>
                   <p className="text-sm text-gray-600">
-                    J'autorise Swimmy à envoyer des instructions à l'institution financière ayant fourni ma carte bancaire pour prélever des paiements depuis mon compte, en accord avec les termes d'utilisations avec vous.
+                    J'autorise YoumPool à envoyer des instructions à l'institution financière ayant fourni ma carte bancaire pour prélever des paiements depuis mon compte, en accord avec les termes d'utilisations avec vous.
                   </p>
                 </div>
 
@@ -229,9 +229,9 @@ export default function PaiementsVersementsPage() {
 
           {/* Carte d'information à droite */}
           <aside className="bg-white rounded-xl border p-6 h-fit">
-            <div className="font-semibold text-lg mb-2">Effectuez tous vos paiements via Swimmy</div>
+            <div className="font-semibold text-lg mb-2">Effectuez tous vos paiements via YoumPool</div>
             <p className="text-gray-600 text-sm">
-              Effectuer vos paiements via Swimmy n'est pas une option. C'est bien une obligation ! Cela permet une vraie sérénité pour le bon déroulement de votre baignade.
+              Effectuer vos paiements via YoumPool n'est pas une option. C'est bien une obligation ! Cela permet une vraie sérénité pour le bon déroulement de votre baignade.
             </p>
           </aside>
         </div>
@@ -239,4 +239,5 @@ export default function PaiementsVersementsPage() {
     </main>
   );
 }
+
 

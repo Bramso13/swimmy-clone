@@ -21,11 +21,11 @@ export default function SettingsLayout({
               Contactez-nous
             </Link>
             <Link href="/" className="text-gray-800 hover:text-[var(--brand-blue)] transition-colors text-base font-medium">
-              Revenir sur Swimmy
+              Revenir sur YoumPool
             </Link>
           </div>
           <Link href="/" className="font-bold text-2xl tracking-tight" style={{ color: 'var(--brand-blue)', fontFamily: 'cursive' }}>
-            Swimmy
+            YoumPool
           </Link>
         </div>
       </nav>
@@ -35,4 +35,5 @@ export default function SettingsLayout({
     </div>
   );
 }
+
 

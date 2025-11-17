@@ -12,13 +12,13 @@ const BRAND_BLUE_SOFT = "#E3ECF2";
 export const faqItems: FaqItem[] = [
   {
     slug: "age-minimum-inscription",
-    title: "Quel est l'âge minimum pour s'inscrire sur Swimmy ?",
+    title: "Quel est l'âge minimum pour s'inscrire sur YoumPool ?",
     excerpt:
-      "Pour s'inscrire sur Swimmy, vous devez avoir plus de 18 ans.",
+      "Pour s'inscrire sur YoumPool, vous devez avoir plus de 18 ans.",
     content: (
       <div className="space-y-6">
         <p>
-          Pour s'inscrire sur Swimmy, vous devez avoir plus de 18 ans.
+          Pour s'inscrire sur YoumPool, vous devez avoir plus de 18 ans.
         </p>
       </div>
     ),
@@ -31,14 +31,14 @@ export const faqItems: FaqItem[] = [
     content: (
       <div className="space-y-6">
         <p>
-          Chez Swimmy, les enfants de 0 à 3 ans sont gratuits. De 3 à 12 ans, un tarif réduit de 50% s'applique par enfant.
+          Chez YoumPool, les enfants de 0 à 3 ans sont gratuits. De 3 à 12 ans, un tarif réduit de 50% s'applique par enfant.
         </p>
       </div>
     ),
   },
   {
-    slug: "joindre-equipe-swimmy",
-    title: "Comment joindre / contacter / appeler une personne de l'équipe Swimmy ?",
+    slug: "joindre-equipe-YoumPool",
+    title: "Comment joindre / contacter / appeler une personne de l'équipe YoumPool ?",
     excerpt:
       "Support via messagerie, e‑mail et formulaire de contact.",
     content: (
@@ -116,7 +116,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     slug: "comment-ca-marche",
-    title: "Swimmy : comment ça marche ?",
+    title: "YoumPool : comment ça marche ?",
     excerpt:
       "Tout savoir sur le fonctionnement des locations. Les locations fonctionnent par heure et par personne…",
     content: (
@@ -126,7 +126,7 @@ export const faqItems: FaqItem[] = [
           location, de son début (l'inscription et la réservation) à sa fin (l'état des lieux de sortie).
         </p>
         <p>
-          Les locations chez Swimmy <strong>fonctionnent par heure et par personne</strong>.
+          Les locations chez YoumPool <strong>fonctionnent par heure et par personne</strong>.
         </p>
         <p>Par exemple :</p>
         <ul className="list-disc pl-6 space-y-2">
@@ -139,7 +139,7 @@ export const faqItems: FaqItem[] = [
           </li>
         </ul>
         <p>
-          Pour rappel, Swimmy est gratuit pour les enfants de 0 à 3 ans, et le tarif est réduit de 50% pour les enfants de 3 à
+          Pour rappel, YoumPool est gratuit pour les enfants de 0 à 3 ans, et le tarif est réduit de 50% pour les enfants de 3 à
           12 ans.
         </p>
       </div>
@@ -149,11 +149,11 @@ export const faqItems: FaqItem[] = [
     slug: "contacter-un-proprietaire",
     title: "Comment contacter un propriétaire ?",
     excerpt:
-      "Pour contacter un propriétaire, connectez‑vous sur votre compte Swimmy puis cliquez sur “Envoyer un message”…",
+      "Pour contacter un propriétaire, connectez‑vous sur votre compte YoumPool puis cliquez sur “Envoyer un message”…",
     content: (
       <div className="space-y-6">
         <p>
-          Pour contacter un propriétaire, connectez‑vous sur votre compte Swimmy puis cliquez sur "Envoyer un message" en
+          Pour contacter un propriétaire, connectez‑vous sur votre compte YoumPool puis cliquez sur "Envoyer un message" en
           dessous du titre de l'annonce dans la rubrique “Votre hôte”.
         </p>
       </div>
@@ -229,7 +229,7 @@ export const faqItems: FaqItem[] = [
           </li>
         </ol>
         <p>
-          Cas exceptionnels (si vous souhaitez annuler moins de 48h avant le début de la réservation) : Swimmy apprécie à sa
+          Cas exceptionnels (si vous souhaitez annuler moins de 48h avant le début de la réservation) : YoumPool apprécie à sa
           seule discrétion, sur la base des éléments à sa disposition, la légitimité des demandes de remboursement qu'elle
           reçoit.
         </p>
@@ -292,14 +292,14 @@ export const faqItems: FaqItem[] = [
     slug: "assurance-speciale",
     title: "Dois‑je souscrire à une assurance spéciale ?",
     excerpt:
-      "L'assurance Swimmy vous protège en cas de casse/dégradation. Garantie Dommages à la piscine…",
+      "L'assurance YoumPool vous protège en cas de casse/dégradation. Garantie Dommages à la piscine…",
     content: (
       <div className="space-y-6">
         <p>
-          L'assurance Swimmy vous protège en cas de casse/dégradation.
+          L'assurance YoumPool vous protège en cas de casse/dégradation.
         </p>
         <p>
-          Swimmy propose pour les propriétaires une garantie "Dommages à la piscine et aux installations extérieures".
+          YoumPool propose pour les propriétaires une garantie "Dommages à la piscine et aux installations extérieures".
         </p>
         <p>
           Une franchise sera appliquée pour les éventuels dommages causés aux biens mobiliers des propriétaires et s'élèvera à
@@ -310,11 +310,11 @@ export const faqItems: FaqItem[] = [
           corporels.
         </p>
         <p>
-          Nous vous recommandons cependant de prévenir votre assureur de votre activité sur Swimmy. Il est normal qu'il en soit
+          Nous vous recommandons cependant de prévenir votre assureur de votre activité sur YoumPool. Il est normal qu'il en soit
           informé.
         </p>
         <p>
-          Pour en savoir plus, n'hésitez pas à consulter nos Conditions d'Utilisation: « https://www.swimmy.fr/terms-of-use »
+          Pour en savoir plus, n'hésitez pas à consulter nos Conditions d'Utilisation: « https://www.YoumPool.fr/terms-of-use »
           Rubrique XVI « Assurance ».
         </p>
       </div>
@@ -488,7 +488,7 @@ export const faqItems: FaqItem[] = [
     content: (
       <div className="space-y-6">
         <p>
-          Prévenez l’hôte dès l’incident et prenez des photos. Ouvrez un ticket auprès du support Swimmy avec le numéro de réservation pour activer la procédure prévue par nos conditions.
+          Prévenez l’hôte dès l’incident et prenez des photos. Ouvrez un ticket auprès du support YoumPool avec le numéro de réservation pour activer la procédure prévue par nos conditions.
         </p>
       </div>
     ),
@@ -502,7 +502,7 @@ export const faqItems: FaqItem[] = [
     content: (
       <div className="space-y-6">
         <p>
-          Swimmy prévoit une couverture pour les dommages à la piscine et installations extérieures selon nos conditions. Elle s’applique aux réservations effectuées et payées sur la plateforme.
+          YoumPool prévoit une couverture pour les dommages à la piscine et installations extérieures selon nos conditions. Elle s’applique aux réservations effectuées et payées sur la plateforme.
         </p>
       </div>
     ),
@@ -587,5 +587,6 @@ export const faqItems: FaqItem[] = [
     ),
   },
 ];
+
 
 

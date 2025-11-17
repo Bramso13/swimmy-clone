@@ -42,7 +42,7 @@ export default function SettingsPage() {
       >
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-8">
-            Swimmy à la rescousse
+            YoumPool à la rescousse
           </h1>
           
           <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
@@ -139,11 +139,11 @@ export default function SettingsPage() {
 
           {/* Thèmes d'aide */}
           <div className="mt-20">
-            <h2 className="text-2xl font-bold text-center mb-10">Les autres thèmes pour vous aider à mieux comprendre Swimmy</h2>
+            <h2 className="text-2xl font-bold text-center mb-10">Les autres thèmes pour vous aider à mieux comprendre YoumPool</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              {/* Comment fonctionne Swimmy */}
+              {/* Comment fonctionne YoumPool */}
               <Link
-                href="/settings/faq/comment-fonctionne-swimmy"
+                href="/settings/faq/comment-fonctionne-YoumPool"
                 className="bg-white border-2 rounded-lg p-6 text-center cursor-pointer transition-all duration-300 hover:shadow-lg group"
                 style={{ borderColor: "#E5E7EB" }}
                 onMouseEnter={(e) => setHelpCardState(e.currentTarget as HTMLElement, true)}
@@ -154,7 +154,7 @@ export default function SettingsPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
-                <p className="font-medium" style={{ color: BRAND_BLUE }}>Comment fonctionne Swimmy</p>
+                <p className="font-medium" style={{ color: BRAND_BLUE }}>Comment fonctionne YoumPool</p>
               </Link>
 
               {/* Annulation d'une réservation */}
@@ -275,3 +275,4 @@ export default function SettingsPage() {
     </>
   );
 }
+

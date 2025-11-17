@@ -462,7 +462,7 @@ export default function SearchPage() {
           </div>
           <div className="flex-shrink-0">
             <span className="text-2xl font-bold" style={{ color: "var(--brand-blue)", fontFamily: "cursive" }}>
-              Swimmy
+              YoumPool
             </span>
           </div>
         </div>
@@ -737,5 +737,6 @@ export default function SearchPage() {
     </main>
   );
 }
+
 
 

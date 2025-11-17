@@ -75,7 +75,7 @@ const ProfilePage = () => {
       items.push({
         key: "email",
         label:
-          "Votre email n'a pas été vérifié, sans faire cela, vous ne pourrez pas utiliser Swimmy",
+          "Votre email n'a pas été vérifié, sans faire cela, vous ne pourrez pas utiliser YoumPool",
         href: "#security",
       });
     }
@@ -228,3 +228,4 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+

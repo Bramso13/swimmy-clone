@@ -216,9 +216,9 @@ export default function InformationsPersonnellesPage() {
             </div>
           </div>
 
-          {/* Comment avez-vous connu Swimmy */}
+          {/* Comment avez-vous connu YoumPool */}
           <div>
-            <label className="block text-sm font-medium mb-2">Comment avez-vous connu Swimmy ?</label>
+            <label className="block text-sm font-medium mb-2">Comment avez-vous connu YoumPool ?</label>
             <select
               className="w-full border rounded-lg px-4 py-3"
               value={info.howDidYouKnow ?? ""}
@@ -275,4 +275,5 @@ export default function InformationsPersonnellesPage() {
     </main>
   );
 }
+
 

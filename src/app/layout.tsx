@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Swimmy Clone - Louez une piscine près de chez vous !",
+  title: "YoumPool Clone - Louez une piscine près de chez vous !",
   description:
     "Trouvez, réservez ou proposez une piscine en quelques clics. Paiement sécurisé MangoPay.",
 };
@@ -42,7 +42,7 @@ export default function RootLayout({
                 {/* Logo et tagline */}
                 <div className="md:col-span-1">
                   <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--brand-blue)', fontFamily: 'cursive' }}>
-                    Swimmy
+                    YoumPool
                   </h2>
                   <p className="text-sm" style={{ color: 'var(--brand-blue)' }}>
                     Le premier site de location de piscines privées en France.
@@ -56,8 +56,8 @@ export default function RootLayout({
                   </h3>
                   <ul className="space-y-2">
                     <li><Link href="/blog" className="text-gray-600 hover:underline text-sm">Blog</Link></li>
-                    <li><Link href="/media" className="text-gray-600 hover:underline text-sm">Swimmy dans les médias</Link></li>
-                    <li><Link href="/aventure" className="text-gray-600 hover:underline text-sm">L'aventure Swimmy</Link></li>
+                    <li><Link href="/media" className="text-gray-600 hover:underline text-sm">YoumPool dans les médias</Link></li>
+                    <li><Link href="/aventure" className="text-gray-600 hover:underline text-sm">L'aventure YoumPool</Link></li>
                   </ul>
                 </div>
 
@@ -133,3 +133,4 @@ export default function RootLayout({
     </html>
   );
 }
+

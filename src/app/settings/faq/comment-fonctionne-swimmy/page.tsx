@@ -2,14 +2,14 @@
 import Link from "next/link";
 import { faqItems } from "../data";
 
-export default function CommentFonctionneSwimmyPage() {
+export default function CommentFonctionneYoumPoolPage() {
   // titres à afficher dans l'ordre de l'image
   const orderedSlugs: string[] = [
     "age-minimum-inscription",
     "comment-ca-marche",
     "contacter-un-proprietaire",
     "est-ce-gratuit-pour-les-enfants",
-    "joindre-equipe-swimmy",
+    "joindre-equipe-YoumPool",
     "comment-trouver-une-piscine",
     "reserver-le-jour-meme",
     "delai-reponse-proprietaire",
@@ -25,10 +25,10 @@ export default function CommentFonctionneSwimmyPage() {
     <div className="max-w-5xl mx-auto px-6 py-12">
       <div className="flex items-center gap-3 mb-6">
         <span className="text-2xl">💬</span>
-        <h1 className="text-3xl font-bold">Comment fonctionne Swimmy</h1>
+        <h1 className="text-3xl font-bold">Comment fonctionne YoumPool</h1>
       </div>
       <p className="text-gray-600 mb-8">
-        Comment réserver une piscine ? Tout le détail du fonctionnement de Swimmy se trouve dans cette section.
+        Comment réserver une piscine ? Tout le détail du fonctionnement de YoumPool se trouve dans cette section.
       </p>
 
       <div className="divide-y border rounded-lg">
@@ -48,5 +48,6 @@ export default function CommentFonctionneSwimmyPage() {
     </div>
   );
 }
+
 
 

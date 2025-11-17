@@ -4,13 +4,13 @@ import Link from "next/link";
 import { faqItems } from "../faq/data";
 
 export default function LocatairePage() {
-  // Questions pour "Comment fonctionne Swimmy"
+  // Questions pour "Comment fonctionne YoumPool"
   const commentFonctionneSlugs = [
     "age-minimum-inscription",
     "comment-ca-marche",
     "contacter-un-proprietaire",
     "est-ce-gratuit-pour-les-enfants",
-    "joindre-equipe-swimmy",
+    "joindre-equipe-YoumPool",
     "comment-trouver-une-piscine",
   ];
 
@@ -122,10 +122,10 @@ export default function LocatairePage() {
 
       {/* Deux colonnes de questions */}
       <div className="grid md:grid-cols-2 gap-12 mt-12">
-        {/* Colonne gauche - Comment fonctionne Swimmy */}
+        {/* Colonne gauche - Comment fonctionne YoumPool */}
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Comment fonctionne Swimmy
+            Comment fonctionne YoumPool
           </h2>
           <div className="space-y-4">
             {commentFonctionneItems.map((item, index) => (
@@ -300,4 +300,5 @@ export default function LocatairePage() {
     </div>
   );
 }
+
 

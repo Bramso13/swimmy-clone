@@ -122,7 +122,7 @@ export default function MonProfilPage() {
         {/* Zone d’upload ronde */}
         <div className="md:col-span-2">
           <p className="mb-6 text-gray-700">
-            Swimmy est une grande communauté. Aidez les autres à mieux vous connaître !
+            YoumPool est une grande communauté. Aidez les autres à mieux vous connaître !
           </p>
 
           <div className="flex items-center gap-10">
@@ -195,5 +195,6 @@ export default function MonProfilPage() {
     </main>
   );
 }
+
 
 

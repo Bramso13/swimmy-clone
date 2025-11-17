@@ -164,7 +164,7 @@ const PoolsPage = () => {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h2 className="text-lg font-semibold">Piscines en cours de validation</h2>
-                  <p className="text-sm text-gray-600">Ces annonces sont encore en attente d'approbation par l'équipe Swimmy.</p>
+                  <p className="text-sm text-gray-600">Ces annonces sont encore en attente d'approbation par l'équipe YoumPool.</p>
                 </div>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -247,3 +247,4 @@ const PoolsPage = () => {
 };
 
 export default PoolsPage;
+

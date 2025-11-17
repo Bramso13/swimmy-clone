@@ -66,8 +66,9 @@ export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolea
           fontFamily: 'cursive'
         }}
       >
-        Swimmy
+        YoumPool
       </Link>
     </div>
   );
 }
+
