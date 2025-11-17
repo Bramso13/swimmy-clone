@@ -272,6 +272,20 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      <div className="mt-16 max-w-4xl mx-auto bg-white border border-[var(--brand-blue)]/20 rounded-2xl p-8 shadow-sm">
+        <p className="text-sm font-semibold tracking-[0.3em] text-gray-500 uppercase mb-4">Besoin d’aide en direct ?</p>
+        <div className="space-y-2 text-gray-700">
+          <p>📞 Appelez-nous au <span className="font-semibold">+216 XXXXXXXX</span></p>
+          <p>📲 WhatsApp disponible sur le même numéro pour un échange rapide.</p>
+          <p>
+            📧 Vous pouvez aussi écrire à{" "}
+            <a href="mailto:contact@youmpool.com" className="underline text-[var(--brand-blue)]">
+              contact@youmpool.com
+            </a>
+          </p>
+        </div>
+      </div>
     </>
   );
 }

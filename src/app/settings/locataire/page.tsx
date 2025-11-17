@@ -1,304 +1,117 @@
 "use client";
 
 import Link from "next/link";
-import { faqItems } from "../faq/data";
+
+const renterQuestions = [
+  {
+    title: "Comment fonctionne YoumPool ?",
+    content: (
+      <p>
+        YoumPool vous permet de réserver une piscine privée pour une durée précise, dans votre région, à des prix abordables.
+        Choisissez une piscine, une date, un créneau horaire et le nombre de personnes, puis payez en ligne pour valider.
+      </p>
+    ),
+  },
+  {
+    title: "Quel est l’âge minimum pour réserver sur YoumPool ?",
+    content: <p>Il faut avoir au moins 18 ans pour créer un compte et effectuer une réservation.</p>,
+  },
+  {
+    title: "Est-ce gratuit pour les enfants ?",
+    content: (
+      <p>
+        Chaque propriétaire fixe ses propres règles. Certains offrent l’entrée gratuite pour les enfants en bas âge
+        (souvent moins de 3 ou 5 ans). Cette information est indiquée sur l’annonce.
+      </p>
+    ),
+  },
+  {
+    title: "Est-ce que je peux annuler une réservation ?",
+    content: (
+      <div className="space-y-2">
+        <p>Oui, selon la politique d’annulation du propriétaire affichée avant votre paiement.</p>
+        <ul className="list-disc pl-5 text-gray-600">
+          <li>Certaines piscines autorisent l’annulation gratuite jusqu’à 24h avant.</li>
+          <li>En cas de météo défavorable, YoumPool peut proposer un report si le propriétaire accepte.</li>
+        </ul>
+      </div>
+    ),
+  },
+  {
+    title: "Comment contacter un propriétaire ?",
+    content: (
+      <p>
+        Une fois votre réservation confirmée, vous avez accès à ses coordonnées (téléphone, WhatsApp ou messagerie YoumPool)
+        pour discuter des détails pratiques.
+      </p>
+    ),
+  },
+  {
+    title: "Et la sécurité ?",
+    content: (
+      <p>
+        Les propriétaires s’engagent à respecter un minimum d’hygiène et à entretenir leur piscine. YoumPool vérifie chaque
+        annonce avant publication et notre service client reste disponible pour vous assister en cas de problème.
+      </p>
+    ),
+  },
+  {
+    title: "Dois-je souscrire à une assurance ?",
+    content: (
+      <p>
+        Non, ce n’est pas obligatoire. Certaines piscines peuvent toutefois inclure une assurance ou une petite caution
+        remboursable. C’est précisé sur chaque annonce.
+      </p>
+    ),
+  },
+];
+
+const helpContact = {
+  phone: "+216 XXXXXXXX",
+  email: "contact@youmpool.com",
+};
 
 export default function LocatairePage() {
-  // Questions pour "Comment fonctionne YoumPool"
-  const commentFonctionneSlugs = [
-    "age-minimum-inscription",
-    "comment-ca-marche",
-    "contacter-un-proprietaire",
-    "est-ce-gratuit-pour-les-enfants",
-    "joindre-equipe-YoumPool",
-    "comment-trouver-une-piscine",
-  ];
-
-  // Questions pour "Annulation d'une réservation"
-  const annulationSlugs = [
-    "modifier-date-reservation",
-    "plus-ou-moins-de-personnes",
-    "annuler-une-reservation",
-    "proprietaire-annule-demande",
-    "intemperies-mauvais-temps",
-  ];
-
-  const commentFonctionneItems = commentFonctionneSlugs
-    .map((slug) => faqItems.find((f) => f.slug === slug))
-    .filter(Boolean);
-
-  const annulationItems = annulationSlugs
-    .map((slug) => faqItems.find((f) => f.slug === slug))
-    .filter(Boolean);
-
-  // Questions pour "Paiements"
-  const paiementsSlugs = [
-    "double-reservation-debite-deux-fois",
-    "moyens-de-paiement-acceptes",
-    "debite-sans-acceptation-proprietaire",
-    "quand-serai-je-debite",
-    "carte-de-credit-ne-fonctionne-pas",
-  ];
-
-  // Questions pour "Gestion d'une location"
-  const gestionLocationSlugs = [
-    "retard-que-se-passe-t-il",
-    "demande-reservation-refusee",
-    "serai-je-seul-pendant-reservation",
-    "proprietaire-ne-repond-plus",
-  ];
-
-  // Questions pour "Compte"
-  const compteSlugs = [
-    "supprimer-mon-compte",
-    "compte-bloque-ou-mdp-oublie",
-    "impossible-de-se-connecter",
-  ];
-
-  // Questions pour "Sinistre, litige, caution"
-  const sinistreSlugs = [
-    "sinistre-que-faire",
-  ];
-
-  // Questions pour "Assurance"
-  const assuranceSlugs = [
-    "location-assuree-probleme",
-    "que-faire-declarer-sinistre",
-  ];
-
-  // Questions pour "Evaluations et commentaires"
-  const evaluationsSlugs = [
-    "voir-evaluation-recue",
-    "mauvais-commentaire-que-faire",
-    "comment-evaluer-une-location",
-    "commentaire-au-proprietaire-apres-reservation",
-  ];
-
-  const paiementsItems = paiementsSlugs
-    .map((slug) => faqItems.find((f) => f.slug === slug))
-    .filter(Boolean);
-
-  const gestionLocationItems = gestionLocationSlugs
-    .map((slug) => faqItems.find((f) => f.slug === slug))
-    .filter(Boolean);
-
-  const compteItems = compteSlugs
-    .map((slug) => faqItems.find((f) => f.slug === slug))
-    .filter(Boolean);
-
-  const sinistreItems = sinistreSlugs
-    .map((slug) => faqItems.find((f) => f.slug === slug))
-    .filter(Boolean);
-
-  const assuranceItems = assuranceSlugs
-    .map((slug) => faqItems.find((f) => f.slug === slug))
-    .filter(Boolean);
-
-  const evaluationsItems = evaluationsSlugs
-    .map((slug) => faqItems.find((f) => f.slug === slug))
-    .filter(Boolean);
-
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      {/* Breadcrumb */}
+    <div className="max-w-5xl mx-auto px-6 py-12">
       <div className="mb-8">
         <Link href="/settings" className="text-[var(--brand-blue)] hover:underline">
-          La foire aux questions
+          Centre d’aide
         </Link>
         <span className="mx-2 text-gray-500">›</span>
         <span className="text-gray-800">Je suis locataire</span>
       </div>
 
-      {/* Titre avec emoji */}
-      <div className="mb-6">
+      <div className="mb-8">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 flex items-center gap-3">
           <span className="text-5xl">🏊‍♂️</span>
           Je suis locataire
         </h1>
         <p className="text-gray-600 text-lg">
-          Vous cherchez une piscine à louer près de chez vous ? Toutes les réponses à vos questions sont ici.
+          Trouvez ici toutes les réponses pour réserver une piscine privée en toute sérénité.
         </p>
       </div>
 
-      {/* Deux colonnes de questions */}
-      <div className="grid md:grid-cols-2 gap-12 mt-12">
-        {/* Colonne gauche - Comment fonctionne YoumPool */}
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Comment fonctionne YoumPool
-          </h2>
-          <div className="space-y-4">
-            {commentFonctionneItems.map((item, index) => (
-              <div key={item.slug} className="border-b border-gray-200 pb-4">
-                <Link
-                  href={`/settings/faq/${item.slug}`}
-                  className="flex items-start gap-3 group hover:text-[var(--brand-blue)] transition-colors"
-                >
-                  <span className="text-[var(--brand-blue)] mt-1">★</span>
-                  <span className="text-gray-900 group-hover:text-[var(--brand-blue)]">
-                    {item.title}
-                  </span>
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6">
-            <Link
-              href="/settings"
-              className="text-[var(--brand-blue)] hover:underline text-sm"
-            >
-              Afficher les 10 articles →
-            </Link>
-          </div>
-        </div>
-
-        {/* Colonne droite - Annulation d'une réservation */}
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Annulation d'une réservation
-          </h2>
-          <div className="space-y-4">
-            {annulationItems.map((item, index) => (
-              <div key={item.slug} className="border-b border-gray-200 pb-4">
-                <Link
-                  href={`/settings/faq/${item.slug}`}
-                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
-                >
-                  {item.title}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="grid md:grid-cols-2 gap-6">
+        {renterQuestions.map((question) => (
+          <article key={question.title} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-3">
+            <h3 className="text-xl font-semibold text-gray-900">{question.title}</h3>
+            <div className="text-gray-700 leading-relaxed text-sm">{question.content}</div>
+          </article>
+        ))}
       </div>
 
-      {/* Nouvelles sections - Deux colonnes */}
-      <div className="grid md:grid-cols-2 gap-12 mt-16">
-        {/* Colonne gauche */}
-        <div className="space-y-12">
-          {/* Section Paiements */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Paiements
-            </h2>
-            <div className="space-y-4">
-              {paiementsItems.map((item) => (
-                <div key={item.slug} className="border-b border-gray-200 pb-4">
-                  <Link
-                    href={`/settings/faq/${item.slug}`}
-                    className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
-                  >
-                    {item.title}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Section Gestion d'une location */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Gestion d'une location
-            </h2>
-            <div className="space-y-4">
-              {gestionLocationItems.map((item) => (
-                <div key={item.slug} className="border-b border-gray-200 pb-4">
-                  <Link
-                    href={`/settings/faq/${item.slug}`}
-                    className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
-                  >
-                    {item.title}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Colonne droite */}
-        <div className="space-y-12">
-          {/* Section Compte */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Compte
-            </h2>
-            <div className="space-y-4">
-              {compteItems.map((item) => (
-                <div key={item.slug} className="border-b border-gray-200 pb-4">
-                  <Link
-                    href={`/settings/faq/${item.slug}`}
-                    className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
-                  >
-                    {item.title}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Section Sinistre, litige, caution */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Sinistre, litige, caution
-            </h2>
-            <div className="space-y-4">
-              {sinistreItems.map((item) => (
-                <div key={item.slug} className="border-b border-gray-200 pb-4">
-                  <Link
-                    href={`/settings/faq/${item.slug}`}
-                    className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
-                  >
-                    {item.title}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Nouvelles sections - Assurance et Evaluations */}
-      <div className="grid md:grid-cols-2 gap-12 mt-16">
-        {/* Colonne gauche - Assurance */}
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Assurance
-          </h2>
-          <div className="space-y-4">
-            {assuranceItems.map((item) => (
-              <div key={item.slug} className="border-b border-gray-200 pb-4">
-                <Link
-                  href={`/settings/faq/${item.slug}`}
-                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
-                >
-                  {item.title}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Colonne droite - Evaluations et commentaires */}
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Evaluations et commentaires
-          </h2>
-          <div className="space-y-4">
-            {evaluationsItems.map((item) => (
-              <div key={item.slug} className="border-b border-gray-200 pb-4">
-                <Link
-                  href={`/settings/faq/${item.slug}`}
-                  className="block text-gray-900 hover:text-[var(--brand-blue)] transition-colors"
-                >
-                  {item.title}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="mt-16 rounded-2xl border border-[var(--brand-blue)] bg-[var(--brand-blue)]/5 p-8 text-center space-y-3">
+        <p className="text-lg font-semibold text-[var(--brand-blue)]">Besoin d’aide en direct ?</p>
+        <p className="text-gray-700">
+          Appelez-nous ou écrivez-nous sur WhatsApp au <span className="font-semibold">{helpContact.phone}</span>.
+          Vous pouvez aussi nous contacter par mail :{" "}
+          <a href="mailto:contact@youmpool.com" className="underline">
+            {helpContact.email}
+          </a>
+          .
+        </p>
       </div>
     </div>
   );
 }
-
-
