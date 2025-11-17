@@ -2,10 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const DashboardPage = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -13,7 +16,7 @@ const DashboardPage = () => {
         const session = await authClient.getSession();
         const baseUser = session.data?.user || null;
         if (!baseUser) {
-          window.location.href = "/login";
+          router.replace("/login");
           return;
         }
         try {
@@ -28,7 +31,7 @@ const DashboardPage = () => {
           setUser(baseUser);
         }
       } catch (error) {
-        window.location.href = "/login";
+        router.replace("/login");
       } finally {
         setLoading(false);
       }
@@ -69,9 +72,9 @@ const DashboardPage = () => {
           <div className="text-xs uppercase text-gray-500 mb-1">Solde MangoPay</div>
           <div className="text-2xl font-bold">[solde] €</div>
           <div className="mt-3">
-            <a href="/dashboard/transactions" className="text-sm font-medium" style={{ color: 'var(--brand-blue)' }}>
+            <Link href="/dashboard/transactions" className="text-sm font-medium" style={{ color: 'var(--brand-blue)' }}>
               Voir mes transactions →
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -79,8 +82,8 @@ const DashboardPage = () => {
           <div className="text-xs uppercase text-gray-500 mb-1">Piscines</div>
           <div className="text-2xl font-bold">Gérer mes piscines</div>
           <div className="mt-3 flex gap-2">
-            <a href="/dashboard/pools" className="px-3 py-1.5 rounded-md text-white" style={{ backgroundColor: '#08436A' }}>Mes piscines</a>
-            <a href="/dashboard/pools/new" className="px-3 py-1.5 rounded-md border" style={{ borderColor: '#08436A', color: '#08436A' }}>Ajouter</a>
+            <Link href="/dashboard/pools" className="px-3 py-1.5 rounded-md text-white" style={{ backgroundColor: '#08436A' }}>Mes piscines</Link>
+            <Link href="/dashboard/pools/new" className="px-3 py-1.5 rounded-md border" style={{ borderColor: '#08436A', color: '#08436A' }}>Ajouter</Link>
           </div>
         </div>
 
@@ -88,15 +91,15 @@ const DashboardPage = () => {
           <div className="text-xs uppercase text-gray-500 mb-1">Messages</div>
           <div className="text-2xl font-bold">Mes conversations</div>
           <div className="mt-3">
-            <a href="/dashboard/messages" className="text-sm font-medium" style={{ color: 'var(--brand-blue)' }}>
+            <Link href="/dashboard/messages" className="text-sm font-medium" style={{ color: 'var(--brand-blue)' }}>
               Ouvrir la messagerie →
-            </a>
+            </Link>
           </div>
         </div>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <a href="/dashboard/reservations" className="group rounded-xl border bg-white shadow-sm p-6 transition hover:shadow-md">
+        <Link href="/dashboard/reservations" className="group rounded-xl border bg-white shadow-sm p-6 transition hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-500">Réservations</div>
@@ -105,9 +108,9 @@ const DashboardPage = () => {
             <span className="text-2xl" style={{ color: 'var(--brand-blue)' }}>📅</span>
           </div>
           <div className="mt-3 text-sm text-gray-600 group-hover:underline" style={{ color: 'var(--brand-blue)' }}>Gérer →</div>
-        </a>
+        </Link>
 
-        <a href="/dashboard/favorites" className="group rounded-xl border bg-white shadow-sm p-6 transition hover:shadow-md">
+        <Link href="/dashboard/favorites" className="group rounded-xl border bg-white shadow-sm p-6 transition hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-500">Favoris</div>
@@ -116,7 +119,7 @@ const DashboardPage = () => {
             <span className="text-2xl text-pink-600">💗</span>
           </div>
           <div className="mt-3 text-sm text-gray-600 group-hover:underline" style={{ color: 'var(--brand-blue)' }}>Voir →</div>
-        </a>
+        </Link>
       </section>
     </main>
   );

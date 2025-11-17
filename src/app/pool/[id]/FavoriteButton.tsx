@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 interface FavoriteButtonProps {
   poolId: string;
@@ -11,6 +12,7 @@ export default function FavoriteButton({ poolId }: FavoriteButtonProps) {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -34,7 +36,7 @@ export default function FavoriteButton({ poolId }: FavoriteButtonProps) {
 
   const toggleFavorite = async () => {
     if (!isAuthenticated) {
-      window.location.href = "/login";
+      router.push("/login");
       return;
     }
 

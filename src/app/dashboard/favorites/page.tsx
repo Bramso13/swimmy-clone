@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import PoolCard from "@/components/PoolCard";
+import { useRouter } from "next/navigation";
 
 interface Favorite {
   id: string;
@@ -24,13 +25,14 @@ export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
         const session = await authClient.getSession();
         if (!session.data?.user) {
-          window.location.href = "/login";
+          router.replace("/login");
           return;
         }
 

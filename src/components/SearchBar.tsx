@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Swimmers = { adults: number; children: number; babies: number };
 
 export default function SearchBar() {
+  const router = useRouter();
   const [address, setAddress] = useState("");
   const [date, setDate] = useState<string>("");
   const [start, setStart] = useState<string>("");
@@ -43,7 +45,7 @@ export default function SearchBar() {
       children: String(swimmers.children),
       babies: String(swimmers.babies),
     }).toString();
-    window.location.href = `/dashboard/pools?${query}`;
+    router.push(`/dashboard/pools?${query}`);
   };
 
   return (

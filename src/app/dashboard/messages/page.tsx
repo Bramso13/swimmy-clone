@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface Conversation {
   userId: string;
@@ -54,6 +56,7 @@ export default function MessagesPage() {
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
+  const router = useRouter();
 
   // Récupérer l'ID de l'utilisateur connecté
   useEffect(() => {
@@ -74,7 +77,7 @@ export default function MessagesPage() {
       try {
         const session = await authClient.getSession();
         if (!session.data?.user) {
-          window.location.href = "/login";
+          router.replace("/login");
           return;
         }
         const res = await fetch("/api/messages");

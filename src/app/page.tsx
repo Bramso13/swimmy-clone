@@ -7,6 +7,7 @@ import SideMenu from "@/components/SideMenu";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 const BRAND_BLUE = "#08436A";
 const BRAND_BLUE_HOVER = "#06324B";
@@ -14,6 +15,7 @@ const BRAND_BLUE_GRADIENT = "#0A5B87";
 const BRAND_BLUE_SOFT = "#E3ECF2";
 
 export default function Home() {
+  const router = useRouter();
   const [openCard, setOpenCard] = useState<"share" | "swim" | null>(null);
   const [openFaq, setOpenFaq] = useState<"children" | "contact" | "clean" | null>(null);
   const [pools, setPools] = useState<Array<{
@@ -159,15 +161,15 @@ export default function Home() {
       
       if (session.data?.user) {
         // Utilisateur connecté, rediriger vers la création de piscine
-        window.location.href = "/dashboard/pools/new";
+        router.push("/dashboard/pools/new");
       } else {
         // Utilisateur non connecté, rediriger vers la page de connexion
-        window.location.href = "/login";
+        router.push("/login");
       }
     } catch (error) {
       console.error("Erreur lors de la vérification de l'authentification:", error);
       // En cas d'erreur, rediriger vers la page de connexion par sécurité
-      window.location.href = "/login";
+      router.push("/login");
     }
   };
 

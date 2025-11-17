@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Pool {
   id: string;
@@ -34,6 +35,7 @@ export default function AvailabilityPage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<OwnerAvailTab>("disponibilite");
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +45,7 @@ export default function AvailabilityPage() {
         const authUser = session.data?.user;
         
         if (!authUser) {
-          window.location.href = "/login";
+          router.replace("/login");
           return;
         }
 

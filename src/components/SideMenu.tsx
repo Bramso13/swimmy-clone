@@ -2,11 +2,13 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: boolean }) {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     // Vérifier le statut de connexion + récupérer le rôle depuis l'API utilisateur
@@ -51,7 +53,7 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
   const handleProposePool = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
-      window.location.href = "/register";
+      router.push("/register");
       return;
     }
     // Si l'utilisateur est connecté, laisser le lien normal fonctionner

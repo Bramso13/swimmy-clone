@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export type Pool = {
   id: string;
@@ -30,6 +31,7 @@ function isValidSrc(src?: string) {
 }
 
 export default function PoolCard({ pool }: { pool: Pool }) {
+  const router = useRouter();
   const validPhotos = useMemo(() => (Array.isArray(pool.photos) ? pool.photos : []).filter(isValidSrc), [pool.photos]);
   const initialCover = validPhotos[0];
   const [showImage, setShowImage] = useState<boolean>(!!initialCover);
@@ -63,7 +65,7 @@ export default function PoolCard({ pool }: { pool: Pool }) {
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      window.location.href = "/login";
+      router.push("/login");
       return;
     }
 

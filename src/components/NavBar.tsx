@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolean }) {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -42,7 +44,7 @@ export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolea
     try {
       await authClient.signOut();
       setUser(null);
-      window.location.href = "/";
+      router.push("/");
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     }
