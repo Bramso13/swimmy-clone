@@ -322,26 +322,30 @@ export default function Home() {
             Rien de plus simple pour passer un bon moment. Laquelle préférez-vous ?
           </p>
         </div>
+        <p className="md:hidden text-sm text-gray-500 text-center mb-4">
+          Glissez vers la gauche pour découvrir les piscines disponibles.
+        </p>
         {pools.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-2">
+          <div className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible">
             {pools.map((p) => (
-              <PoolCard
-                key={p.id}
-                pool={{
-                  id: p.id,
-                  title: p.title,
-                  photos: p.photos || [],
-                  pricePerHour: p.pricePerHour,
-                  address: p.address,
-                }}
-              />
+              <div key={p.id} className="flex-shrink-0 w-[85vw] max-w-sm snap-center md:w-auto md:max-w-none md:snap-start">
+                <PoolCard
+                  pool={{
+                    id: p.id,
+                    title: p.title,
+                    photos: p.photos || [],
+                    pricePerHour: p.pricePerHour,
+                    address: p.address,
+                  }}
+                />
+              </div>
             ))}
           </div>
         ) : (
-          <div className="flex flex-wrap justify-center gap-6 pb-2">
+          <div className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="min-w-[300px] bg-white border rounded-lg shadow-lg p-4 flex flex-col gap-2 opacity-70">
-                <div className="w-[340px] h-[160px] bg-gray-200 rounded-lg" />
+              <div key={i} className="flex-shrink-0 w-[85vw] max-w-sm snap-center md:w-auto md:max-w-none bg-white border rounded-lg shadow-lg p-4 flex flex-col gap-2 opacity-70">
+                <div className="h-[160px] bg-gray-200 rounded-lg" />
                 <div className="h-5 bg-gray-200 rounded w-3/4" />
                 <div className="h-4 bg-gray-100 rounded w-1/2" />
                 <div className="h-5 bg-gray-200 rounded w-1/4" />
