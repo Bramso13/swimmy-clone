@@ -76,7 +76,7 @@ export default function RootLayout({
                 </div>
 
                 {/* Colonne SUIVEZ-NOUS */}
-                <div className="col-span-2 md:col-span-1">
+                <div className="col-span-1">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
                     SUIVEZ-NOUS
                   </h3>
