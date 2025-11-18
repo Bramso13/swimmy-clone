@@ -35,6 +35,8 @@ export default function AvailabilityPage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<OwnerAvailTab>("disponibilite");
+  const [isMobile, setIsMobile] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -136,6 +138,18 @@ export default function AvailabilityPage() {
     }).format(date);
   };
 
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) setShowSidebar(false);
+  }, [isMobile]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
@@ -173,41 +187,64 @@ export default function AvailabilityPage() {
     );
   }
 
+  const Sidebar = (
+    <div className="p-8">
+      <h1 className="text-3xl font-bold text-gray-800 leading-tight mb-8">
+        <span className="block">Ma</span>
+        <span className="block">disponibilité</span>
+      </h1>
+      <nav className="space-y-1">
+        <button
+          onClick={() => {
+            setActiveTab("disponibilite");
+            if (isMobile) setShowSidebar(false);
+          }}
+          className={`w-full text-left py-3 px-4 text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${
+            activeTab === "disponibilite" ? "font-semibold text-gray-900 bg-gray-200" : "font-normal"
+          }`}
+        >
+          Disponibilité
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab("piscines");
+            if (isMobile) setShowSidebar(false);
+          }}
+          className={`w-full text-left py-3 px-4 text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${
+            activeTab === "piscines" ? "font-semibold text-gray-900 bg-gray-200" : "font-normal"
+          }`}
+        >
+          Mes piscines
+        </button>
+        <Link href="/dashboard" className="inline-block text-blue-600 mt-6 hover:underline">
+          ← Retour au tableau de bord
+        </Link>
+      </nav>
+    </div>
+  );
+
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar à gauche */}
-      <div className="w-80 bg-gray-100 border-r border-gray-300">
-        <div className="p-8">
-          <h1 className="text-3xl font-bold text-gray-800 leading-tight mb-8">
-            <span className="block">Ma</span>
-            <span className="block">disponibilité</span>
-          </h1>
-          <nav className="space-y-1">
-            <button
-              onClick={() => setActiveTab("disponibilite")}
-              className={`w-full text-left py-3 px-4 text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${
-                activeTab === "disponibilite" ? "font-semibold text-gray-900 bg-gray-200" : "font-normal"
-              }`}
-            >
-              Disponibilité
-            </button>
-            <button
-              onClick={() => setActiveTab("piscines")}
-              className={`w-full text-left py-3 px-4 text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${
-                activeTab === "piscines" ? "font-semibold text-gray-900 bg-gray-200" : "font-normal"
-              }`}
-            >
-              Mes piscines
-            </button>
-            <Link href="/dashboard" className="inline-block text-blue-600 mt-6 hover:underline">
-              ← Retour au tableau de bord
-            </Link>
-          </nav>
+      {/* Sidebar */}
+      {!isMobile && (
+        <div className="w-80 bg-gray-100 border-r border-gray-300">
+          {Sidebar}
         </div>
-      </div>
+      )}
 
       {/* Contenu principal */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 sm:p-8">
+        {isMobile && (
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => setShowSidebar(true)}
+              className="px-4 py-2 rounded-full border border-gray-300 bg-white text-sm font-medium"
+            >
+              ☰ Menu
+            </button>
+            <h1 className="text-lg font-semibold text-gray-900">Ma disponibilité</h1>
+          </div>
+        )}
         {activeTab === "disponibilite" ? (
           <div className="space-y-10">
             <div>

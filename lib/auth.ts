@@ -3,7 +3,10 @@ import { nextCookies } from "better-auth/next-js";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 
-const authSecret = process.env.BETTER_AUTH_SECRET;
+const isProd = process.env.NODE_ENV === "production";
+const authSecret =
+  process.env.BETTER_AUTH_SECRET ??
+  (!isProd ? "dev-secret-change-me" : undefined);
 
 if (!authSecret) {
   throw new Error(
