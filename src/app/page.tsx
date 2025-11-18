@@ -199,10 +199,10 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Logo YoumPool à droite */}
+            {/* Logo YoumPool à droite (version blanc pour la barre sticky) */}
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" aria-label="Accueil YoumPool">
-                <Image src="/yoompool-logo.svg" alt="Logo YoumPool" width={150} height={54} priority />
+                <Image src="/yoompool-logo-white.svg" alt="Logo YoumPool" width={150} height={54} priority />
               </Link>
             </div>
           </div>
@@ -236,7 +236,12 @@ export default function Home() {
             </button>
           </div>
           <div className="w-full max-w-3xl">
-            <SearchBar />
+            <div className="md:hidden">
+              <SearchBar variant="compact" />
+            </div>
+            <div className="hidden md:block">
+              <SearchBar />
+            </div>
           </div>
         </div>
       </section>
