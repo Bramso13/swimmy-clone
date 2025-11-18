@@ -18,6 +18,8 @@ const ReservationsPage = () => {
   const [sendingByPool, setSendingByPool] = useState<Record<string, boolean>>({});
   const [feedbackByPool, setFeedbackByPool] = useState<Record<string, { type: 'success' | 'error'; text: string } | undefined>>({});
   const [ratingByPool, setRatingByPool] = useState<Record<string, number>>({});
+  const [isMobile, setIsMobile] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   const fetchMyApprovals = async (currentUserId?: string) => {
     try {
@@ -189,6 +191,47 @@ const ReservationsPage = () => {
     { key: "demandes", label: "Demandes d'annonce" },
   ];
 
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const handle = () => setIsMobile(mq.matches);
+    handle();
+    mq.addEventListener("change", handle);
+    return () => mq.removeEventListener("change", handle);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setShowSidebar(false);
+    }
+  }, [isMobile]);
+
+  const SidebarContent = (
+    <div className="p-8">
+      <h1 className="text-3xl font-bold text-gray-800 leading-tight mb-8">
+        <span className="block">Mes</span>
+        <span className="block">réservations</span>
+      </h1>
+      <nav className="space-y-1">
+        {sidebarItems.map((item) => (
+          <button
+            key={item.key}
+            onClick={() => {
+              setActiveTab(item.key as ReservationStatus);
+              if (isMobile) setShowSidebar(false);
+            }}
+            className={`w-full text-left py-3 px-4 text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${
+              activeTab === item.key 
+                ? "font-semibold text-gray-900 bg-gray-200" 
+                : "font-normal"
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+
   const filteredReservations = getFilteredReservations();
   const approvalsForTab = approvals.filter((r) => {
     if (activeTab !== 'demandes') return false;
@@ -199,35 +242,25 @@ const ReservationsPage = () => {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Sidebar */}
-      <div className="w-80 bg-gray-100 border-r border-gray-300">
-        <div className="p-8">
-          {/* Titre */}
-          <h1 className="text-3xl font-bold text-gray-800 leading-tight mb-8">
-            <span className="block">Mes</span>
-            <span className="block">réservations</span>
-          </h1>
-
-          {/* Navigation */}
-          <nav className="space-y-1">
-            {sidebarItems.map((item) => (
-              <button
-                key={item.key}
-                onClick={() => setActiveTab(item.key as ReservationStatus)}
-                className={`w-full text-left py-3 px-4 text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${
-                  activeTab === item.key 
-                    ? "font-semibold text-gray-900 bg-gray-200" 
-                    : "font-normal"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
+      {!isMobile && (
+        <div className="w-80 bg-gray-100 border-r border-gray-300">
+          {SidebarContent}
         </div>
-      </div>
+      )}
 
       {/* Contenu principal */}
-      <div className="flex-1 bg-white p-8">
+      <div className="flex-1 bg-white p-4 sm:p-8">
+        {isMobile && (
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => setShowSidebar(true)}
+              className="px-4 py-2 rounded-full border border-gray-300 bg-white"
+            >
+              ☰
+            </button>
+            <h1 className="text-xl font-semibold text-gray-900">Mes réservations</h1>
+          </div>
+        )}
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-gray-500">Chargement...</div>
@@ -460,6 +493,21 @@ const ReservationsPage = () => {
           </div>
         )}
       </div>
+
+      {isMobile && showSidebar && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowSidebar(false)} />
+          <div className="absolute top-0 left-0 h-full w-4/5 max-w-sm bg-white border-r border-gray-300 shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <h2 className="text-lg font-semibold text-gray-800">Navigation</h2>
+              <button onClick={() => setShowSidebar(false)} className="text-2xl text-gray-500">✕</button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {SidebarContent}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
