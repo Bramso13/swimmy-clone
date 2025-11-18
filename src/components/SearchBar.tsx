@@ -3,8 +3,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Swimmers = { adults: number; children: number; babies: number };
+type SearchBarProps = {
+  variant?: "default" | "compact";
+};
 
-export default function SearchBar() {
+export default function SearchBar({ variant = "default" }: SearchBarProps) {
   const router = useRouter();
   const [address, setAddress] = useState("");
   const [date, setDate] = useState<string>("");
@@ -45,8 +48,38 @@ export default function SearchBar() {
       children: String(swimmers.children),
       babies: String(swimmers.babies),
     }).toString();
-    router.push(`/dashboard/pools?${query}`);
+    router.push(`/search?${query}`);
   };
+
+  if (variant === "compact") {
+    return (
+      <form
+        onSubmit={submit}
+        className="flex items-center gap-3 w-full rounded-full bg-white shadow-md border px-4 py-2"
+      >
+        <span className="text-xl" aria-hidden="true">
+          🔍
+        </span>
+        <label className="sr-only" htmlFor="search-compact-address">
+          Adresse
+        </label>
+        <input
+          id="search-compact-address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Trouver une piscine"
+          className="flex-1 bg-transparent outline-none text-black placeholder:text-gray-500"
+        />
+        <button
+          type="submit"
+          className="px-4 py-2 rounded-full text-white text-sm font-semibold"
+          style={{ backgroundColor: "var(--brand-blue)" }}
+        >
+          OK
+        </button>
+      </form>
+    );
+  }
 
   return (
     <form

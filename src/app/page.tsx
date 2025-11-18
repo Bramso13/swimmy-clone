@@ -190,8 +190,13 @@ export default function Home() {
             </div>
             
             {/* SearchBar au centre */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 max-w-2xl">
-              <SearchBar />
+            <div className="absolute left-1/2 transform -translate-x-1/2 max-w-2xl w-full">
+              <div className="md:hidden">
+                <SearchBar variant="compact" />
+              </div>
+              <div className="hidden md:block">
+                <SearchBar />
+              </div>
             </div>
             
             {/* Logo YoumPool à droite */}
@@ -237,8 +242,8 @@ export default function Home() {
       </section>
 
       {/* Pourquoi YoumPool */}
-      <section className="py-16 bg-white w-full -mx-4 px-4">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+      <section className="py-16 bg-white w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center px-6 md:px-10">
           <div className="space-y-6">
             <h2 className="text-4xl md:text-5xl font-bold leading-tight">
               Marre de chercher une piscine l’été ?<br /> YoumPool change la donne.
@@ -286,8 +291,8 @@ export default function Home() {
       </section>
 
       {/* Vos prochaines baignades */}
-      <section className="py-16 bg-gray-50 w-full -mx-4 px-4">
-        <div className="max-w-6xl mx-auto text-center space-y-10">
+      <section className="py-16 bg-gray-50 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+        <div className="max-w-6xl mx-auto text-center space-y-10 px-6 md:px-10">
           <div className="space-y-4">
             <p className="text-sm font-semibold tracking-[0.3em] text-gray-500 uppercase">Vos prochaines baignades</p>
             <h2 className="text-3xl md:text-4xl font-bold">💧 Tout est pensé pour réserver sans stress</h2>
@@ -326,7 +331,7 @@ export default function Home() {
           Glissez vers la gauche pour découvrir les piscines disponibles.
         </p>
         {pools.length > 0 ? (
-          <div className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible">
+          <div className="flex justify-center gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-4 md:justify-start md:px-0 md:grid md:grid-cols-3 md:overflow-visible">
             {pools.map((p) => (
               <div key={p.id} className="flex-shrink-0 w-[85vw] max-w-sm snap-center md:w-auto md:max-w-none md:snap-start">
                 <PoolCard
@@ -342,7 +347,7 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible">
+          <div className="flex justify-center gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-4 md:justify-start md:px-0 md:grid md:grid-cols-3 md:overflow-visible">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex-shrink-0 w-[85vw] max-w-sm snap-center md:w-auto md:max-w-none bg-white border rounded-lg shadow-lg p-4 flex flex-col gap-2 opacity-70">
                 <div className="h-[160px] bg-gray-200 rounded-lg" />

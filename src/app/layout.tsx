@@ -39,9 +39,9 @@ export default function RootLayout({
           </main>
           <footer className="w-full bg-white py-12 px-4">
             <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+              <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
                 {/* Logo et tagline */}
-                <div className="md:col-span-1">
+                <div className="col-span-2 md:col-span-1">
                   <div className="mb-2">
                     <Image src="/yoompool-logo.svg" alt="Logo YoumPool" width={160} height={58} priority />
                   </div>
@@ -51,7 +51,7 @@ export default function RootLayout({
                 </div>
 
                 {/* Colonne NEWS */}
-                <div>
+                <div className="col-span-1">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
                     NEWS
                   </h3>
@@ -63,7 +63,7 @@ export default function RootLayout({
                 </div>
 
                 {/* Colonne AIDE 1 */}
-                <div>
+                <div className="col-span-1">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
                     AIDE
                   </h3>
@@ -75,21 +75,8 @@ export default function RootLayout({
                   </ul>
                 </div>
 
-                {/* Colonne AIDE 2 */}
-                <div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
-                    AIDE
-                  </h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/settings" className="text-gray-600 hover:underline text-sm">Centre d'aide</Link></li>
-                    <li><Link href="/terms" className="text-gray-600 hover:underline text-sm">Conditions d'utilisation</Link></li>
-                    <li><Link href="/privacy" className="text-gray-600 hover:underline text-sm">Politique de confidentialité</Link></li>
-                    <li><Link href="/legal" className="text-gray-600 hover:underline text-sm">Mentions légales</Link></li>
-                  </ul>
-                </div>
-
                 {/* Colonne SUIVEZ-NOUS */}
-                <div>
+                <div className="col-span-2 md:col-span-1">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
                     SUIVEZ-NOUS
                   </h3>
@@ -110,6 +97,19 @@ export default function RootLayout({
                         Instagram
                       </Link>
                     </li>
+                  </ul>
+                </div>
+
+                {/* Colonne AIDE 2 */}
+                <div className="col-span-1">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
+                    AIDE
+                  </h3>
+                  <ul className="space-y-2">
+                    <li><Link href="/settings" className="text-gray-600 hover:underline text-sm">Centre d'aide</Link></li>
+                    <li><Link href="/terms" className="text-gray-600 hover:underline text-sm">Conditions d'utilisation</Link></li>
+                    <li><Link href="/privacy" className="text-gray-600 hover:underline text-sm">Politique de confidentialité</Link></li>
+                    <li><Link href="/legal" className="text-gray-600 hover:underline text-sm">Mentions légales</Link></li>
                   </ul>
                 </div>
               </div>

@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import PoolCard from "@/components/PoolCard";
 import SideMenu from "@/components/SideMenu";
+import { useSearchParams } from "next/navigation";
 
 async function getPools() {
   const base =
@@ -20,6 +21,7 @@ type LocationSuggestion = {
 };
 
 export default function SearchPage() {
+  const searchParams = useSearchParams();
   const [pools, setPools] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -39,6 +41,12 @@ export default function SearchPage() {
   const [maxPrice, setMaxPrice] = useState<string>("");
   // Plus de filtres
   const [moreOpen, setMoreOpen] = useState(false);
+  const [searchDrawerOpen, setSearchDrawerOpen] = useState(false);
+  const [searchDate, setSearchDate] = useState("");
+  const [searchGuests, setSearchGuests] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobilePage, setMobilePage] = useState(0);
+  const poolsPerPage = 10;
   const [locationOpen, setLocationOpen] = useState(false);
   const [locationQuery, setLocationQuery] = useState<string>("");
   const [locationSuggestions, setLocationSuggestions] = useState<LocationSuggestion[]>([]);
@@ -202,6 +210,14 @@ export default function SearchPage() {
     };
   }, [locationQuery, locationOpen]);
 
+  React.useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   const handleLocationSelect = (suggestion: LocationSuggestion | null) => {
     if (!suggestion) {
       setSelectedLocation("");
@@ -249,6 +265,58 @@ export default function SearchPage() {
       setSelectedEquipments(eq);
     }
   }, []);
+
+  React.useEffect(() => {
+    const query = searchParams.get('q');
+    if (!query || query.trim().length === 0) {
+      return;
+    }
+    let cancelled = false;
+    const fetchFromQuery = async () => {
+      setLocationLoading(true);
+      try {
+        const params = new URLSearchParams({
+          q: query,
+          limit: "1",
+          autocomplete: "1",
+          type: "housenumber,street,locality,municipality",
+        });
+        const res = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
+        if (!res.ok) {
+          throw new Error("Adresse API error");
+        }
+        const data = await res.json();
+        const feature = Array.isArray(data?.features) ? data.features[0] : null;
+        if (!feature) {
+          return;
+        }
+        const coords = Array.isArray(feature?.geometry?.coordinates)
+          ? feature.geometry.coordinates
+          : null;
+        if (!coords || typeof coords[0] !== "number" || typeof coords[1] !== "number") {
+          return;
+        }
+        const label = String(feature?.properties?.label || query);
+        if (!cancelled) {
+          setSelectedLocation(label);
+          setSelectedLocationCoords({ latitude: coords[1], longitude: coords[0] });
+          setLocationQuery(label);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Erreur géocodage depuis la barre de recherche:", error);
+        }
+      } finally {
+        if (!cancelled) {
+          setLocationLoading(false);
+        }
+      }
+    };
+    fetchFromQuery();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
 
   const handleSortChange = (sortType: string) => {
     setFilters(prev => ({ ...prev, sortBy: sortType }));
@@ -343,10 +411,25 @@ export default function SearchPage() {
       return 0;
     });
 
+  const totalMobilePages = Math.max(1, Math.ceil(displayedPools.length / poolsPerPage));
+  const poolsToRender = isMobile
+    ? displayedPools.slice(mobilePage * poolsPerPage, mobilePage * poolsPerPage + poolsPerPage)
+    : displayedPools;
+
+  React.useEffect(() => {
+    if (!isMobile && mobilePage !== 0) {
+      setMobilePage(0);
+    } else if (isMobile) {
+      if (mobilePage >= totalMobilePages) {
+        setMobilePage(totalMobilePages - 1);
+      }
+    }
+  }, [isMobile, mobilePage, totalMobilePages]);
+
   if (loading) {
     return (
-      <main className="w-full p-0">
-        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen px-3 sm:px-4 md:px-6">
+      <main className="w-full p-0 overflow-x-hidden">
+        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen box-border px-3 sm:px-4 md:px-6">
           <div className="text-center">Chargement...</div>
         </div>
       </main>
@@ -354,273 +437,228 @@ export default function SearchPage() {
   }
 
   return (
-    <main className="w-full p-0">
-      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen px-3 sm:px-4 md:px-6">
-        <div className="flex flex-wrap items-center justify-between gap-4 py-4">
-          <div className="flex items-center gap-3">
-            <SideMenu />
+    <main className="w-full p-0 overflow-x-hidden">
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen box-border px-3 sm:px-4 md:px-6">
+        <div className="flex justify-center py-4">
+          <div className="flex w-full max-w-3xl items-center gap-3">
             <button
               type="button"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-lg shadow-sm"
-              aria-label="Choisir la langue"
+              onClick={() => setSearchDrawerOpen(true)}
+              className="flex flex-1 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm"
             >
-              🇫🇷
+              <span className="text-xl">◀</span>
+              <span className="font-semibold">{selectedLocation || "France"}</span>
+              <span className="text-gray-500 truncate">
+                {searchDate || "Ajoutez une date"}
+              </span>
             </button>
-          </div>
-          <div className="flex-1 min-w-[260px] flex justify-center">
-            <div className="flex w-full max-w-3xl items-center gap-3 rounded-full border border-gray-200 bg-white px-6 py-3 shadow-sm">
-              <div ref={locationRef} className="relative">
-                <button
-                  type="button"
-                  className="rounded-full bg-gray-100 px-4 py-1 text-sm font-semibold text-gray-900"
-                  onClick={() => {
-                    setLocationQuery(selectedLocation);
-                    setLocationOpen((prev) => !prev);
-                  }}
-                >
-                  {selectedLocation || 'France'}
-                </button>
-                {locationOpen && (
-                  <div className="absolute left-0 top-full z-50 mt-3 w-72 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
-                    <label className="mb-2 block text-xs font-semibold text-gray-500" htmlFor="search-location-input">
-                      Rechercher un lieu
-                    </label>
-                    <input
-                      id="search-location-input"
-                      ref={locationInputRef}
-                      value={locationQuery}
-                      onChange={(e) => setLocationQuery(e.target.value)}
-                      onKeyDown={handleLocationKeyDown}
-                      placeholder="Ville, code postal, adresse"
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
-                    />
-                    <div className="mt-3 max-h-60 overflow-y-auto">
-                      {locationLoading && (
-                        <div className="py-2 text-sm text-gray-500">Chargement...</div>
-                      )}
-                      {!locationLoading && locationSuggestions.length === 0 && locationQuery.trim().length < 2 && (
-                        <div className="py-2 text-sm text-gray-500">
-                          Saisissez au moins 2 lettres
-                        </div>
-                      )}
-                      {!locationLoading && locationSuggestions.length === 0 && locationQuery.trim().length >= 2 && (
-                        <div className="py-2 text-sm text-gray-500">
-                          Aucun résultat
-                        </div>
-                      )}
-                      {locationSuggestions.map((suggestion) => (
-                        <button
-                          key={`${suggestion.label}-${suggestion.latitude}-${suggestion.longitude}`}
-                          type="button"
-                          className="flex w-full flex-col items-start gap-0.5 rounded-lg px-3 py-2 text-left hover:bg-blue-50"
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                            handleLocationSelect(suggestion);
-                          }}
-                        >
-                          <span className="text-sm font-medium text-gray-900">{suggestion.label}</span>
-                          {suggestion.context && (
-                            <span className="text-xs text-gray-500">{suggestion.context}</span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <span className="h-6 w-px bg-gray-200" aria-hidden="true" />
-              <button type="button" className="text-sm font-medium text-gray-500 hover:text-gray-700">
-                Ajoutez une date
-              </button>
-              <span className="h-6 w-px bg-gray-200" aria-hidden="true" />
-              <button type="button" className="text-sm font-medium text-gray-500 hover:text-gray-700">
-                Ajoutez des baigneurs
-              </button>
-              <div className="ml-auto">
-                <button
-                  type="button"
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-white shadow"
-                  style={{ backgroundColor: "var(--brand-blue)" }}
-                  aria-label="Rechercher"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5"
-                  >
-                    <circle cx="11" cy="11" r="7" />
-                    <line x1="20" y1="20" x2="16.65" y2="16.65" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="flex-shrink-0">
-            <span className="text-2xl font-bold" style={{ color: "var(--brand-blue)", fontFamily: "cursive" }}>
-              YoumPool
-            </span>
+            <button
+              type="button"
+              onClick={() => setSearchDrawerOpen(true)}
+              className="rounded-full border border-gray-200 bg-white p-2 shadow-sm"
+              aria-label="Modifier la recherche"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M4 8h16" />
+                <path d="M4 16h16" />
+                <circle cx="9" cy="8" r="2" />
+                <circle cx="15" cy="16" r="2" />
+              </svg>
+            </button>
           </div>
         </div>
         <h1 className="text-2xl font-bold mb-2">Toutes les piscines</h1>
         <p className="text-gray-600 mb-4">{pools.length} résultat{pools.length > 1 ? 's' : ''}</p>
       
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <button 
-            onClick={() => handleSortChange('closest')}
-            className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
-              filters.sortBy === 'closest' 
-                ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                : 'text-gray-700'
-            }`}
-          >
-            <span>🌍</span>
-            <span>Au Plus Proche</span>
-            {filters.sortBy === 'closest' && (
-              <span className="ml-1 inline-flex items-center justify-center h-5 w-5 rounded-full bg-blue-600 text-white text-xs">✓</span>
-            )}
-          </button>
-
-          
-
-          <div className="flex items-center gap-2 rounded-full border px-2 py-2">
-            <span className="ml-1 mr-2 text-gray-700">Type</span>
-            <button
-              onClick={() => setLocationFilter('ALL')}
-              className={`rounded-full px-3 py-1 text-sm ${filters.location === 'ALL' ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
-            >
-              Tous
-            </button>
-            <button
-              onClick={() => setLocationFilter('OUTDOOR')}
-              className={`rounded-full px-3 py-1 text-sm ${filters.location === 'OUTDOOR' ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
-            >
-              🌤️ Extérieur
-            </button>
-            <button
-              onClick={() => setLocationFilter('INDOOR')}
-              className={`rounded-full px-3 py-1 text-sm ${filters.location === 'INDOOR' ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
-            >
-              🏡 Intérieur
-            </button>
-          </div>
-
-          <button 
-            onClick={() => handleFilterChange('jacuzzi')}
-            className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
-              filters.jacuzzi 
-                ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                : 'text-gray-700'
-            }`}
-          >
-            <span>🛁</span>
-            <span>Jacuzzi / Spa</span>
-            <input 
-              type="checkbox" 
-              checked={filters.jacuzzi}
-              onChange={() => handleFilterChange('jacuzzi')}
-              className="ml-2 h-5 w-5 rounded border" 
-            />
-          </button>
-
-          <div className="relative">
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-3">
             <button 
-              onClick={togglePricePanel}
-              className={`rounded-full border px-4 py-2 ${showPrice ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}`}
+              onClick={() => handleSortChange('closest')}
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
+                filters.sortBy === 'closest' 
+                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                  : 'text-gray-700'
+              }`}
             >
-              Prix
+              <span>🌍</span>
+              <span>Au Plus Proche</span>
+              {filters.sortBy === 'closest' && (
+                <span className="ml-1 inline-flex items-center justify-center h-5 w-5 rounded-full bg-blue-600 text-white text-xs">✓</span>
+              )}
             </button>
-            {showPrice && (
-              <div className="absolute z-10 mt-2 w-64 rounded-lg border bg-white p-3 shadow">
-                <div className="text-sm text-gray-700 mb-2">Prix par heure (€)</div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    placeholder="Min"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                    className="w-1/2 rounded border px-2 py-1 text-sm"
-                    min={0}
-                  />
-                  <span className="text-gray-400">—</span>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    placeholder="Max"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                    className="w-1/2 rounded border px-2 py-1 text-sm"
-                    min={0}
-                  />
-                </div>
-                <div className="mt-3 flex justify-end gap-2">
-                  <button
-                    className="text-xs text-gray-600 underline"
-                    onClick={() => { setMinPrice(""); setMaxPrice(""); }}
-                  >
-                    Réinitialiser
-                  </button>
-                  <button
-                    className="rounded bg-blue-600 px-3 py-1 text-xs text-white"
-                    onClick={() => setShowPrice(false)}
-                  >
-                    Appliquer
-                  </button>
-                </div>
-              </div>
-            )}
+            <button
+              onClick={() => handleSortChange('top')}
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
+                filters.sortBy === 'top' 
+                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                  : 'text-gray-700'
+              }`}
+            >
+              <span>⭐</span>
+              <span>Top Sélection</span>
+            </button>
+            <button
+              onClick={() => handleSortChange('instant')}
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
+                filters.sortBy === 'instant' 
+                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                  : 'text-gray-700'
+              }`}
+            >
+              <span>⚡</span>
+              <span>Instantanée</span>
+            </button>
           </div>
 
-          {/* Plus de filtres */}
-          <div className="relative">
-            <button
-              onClick={() => setMoreOpen((v) => !v)}
-              className={`rounded-full border px-4 py-2 ${moreOpen ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}`}
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2 rounded-full border px-3 py-2">
+              <span className="text-gray-700">Type</span>
+              <button
+                onClick={() => setLocationFilter('ALL')}
+                className={`rounded-full px-3 py-1 text-sm ${filters.location === 'ALL' ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
+              >
+                Tous
+              </button>
+              <button
+                onClick={() => setLocationFilter('OUTDOOR')}
+                className={`rounded-full px-3 py-1 text-sm ${filters.location === 'OUTDOOR' ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
+              >
+                🌤️ Extérieur
+              </button>
+              <button
+                onClick={() => setLocationFilter('INDOOR')}
+                className={`rounded-full px-3 py-1 text-sm ${filters.location === 'INDOOR' ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
+              >
+                🏡 Intérieur
+              </button>
+            </div>
+
+            <button 
+              onClick={() => handleFilterChange('jacuzzi')}
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
+                filters.jacuzzi 
+                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                  : 'text-gray-700'
+              }`}
             >
-              Plus de filtres{selectedEquipments.length > 0 ? ` (${selectedEquipments.length})` : ''}
+              <span>🛁</span>
+              <span>Jacuzzi / Spa</span>
             </button>
-            {/* Le contenu du modal est rendu plus bas */}
+
+            <div className="relative">
+              <button 
+                onClick={togglePricePanel}
+                className={`rounded-full border px-4 py-2 ${showPrice ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}`}
+              >
+                Prix
+              </button>
+              {showPrice && (
+                <div className="absolute z-10 mt-2 w-64 rounded-lg border bg-white p-3 shadow">
+                  <div className="text-sm text-gray-700 mb-2">Prix par heure (€)</div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="Min"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      className="w-1/2 rounded border px-2 py-1 text-sm"
+                      min={0}
+                    />
+                    <span className="text-gray-400">—</span>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="Max"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      className="w-1/2 rounded border px-2 py-1 text-sm"
+                      min={0}
+                    />
+                  </div>
+                  <div className="mt-3 flex justify-end gap-2">
+                    <button
+                      className="text-xs text-gray-600 underline"
+                      onClick={() => { setMinPrice(""); setMaxPrice(""); }}
+                    >
+                      Réinitialiser
+                    </button>
+                    <button
+                      className="rounded bg-blue-600 px-3 py-1 text-xs text-white"
+                      onClick={() => setShowPrice(false)}
+                    >
+                      Appliquer
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Plus de filtres */}
+            <div className="relative">
+              <button
+                onClick={() => setMoreOpen((v) => !v)}
+                className={`rounded-full border px-4 py-2 ${moreOpen ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}`}
+              >
+                Plus de filtres{selectedEquipments.length > 0 ? ` (${selectedEquipments.length})` : ''}
+              </button>
+            </div>
           </div>
-          
         </div>
 
-        <label className="flex items-center gap-3 text-gray-700">
-          <span>Afficher la carte</span>
-          <span className="relative inline-flex items-center">
-            <input 
-              type="checkbox" 
-              checked={filters.showMap}
-              onChange={handleMapToggle}
-              className="sr-only peer" 
-            />
-            <div className={`w-12 h-6 rounded-full transition-colors ${
-              filters.showMap ? 'bg-blue-600' : 'bg-gray-400'
-            }`}></div>
-            <div className={`absolute left-0.5 top-0.5 h-5 w-5 bg-white rounded-full transition-transform ${
-              filters.showMap ? 'translate-x-6' : ''
-            }`}></div>
-          </span>
-        </label>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm font-semibold text-gray-700">Afficher la carte</span>
+          <label className="inline-flex items-center gap-3 text-gray-700">
+            <span className="relative inline-flex items-center">
+              <input 
+                type="checkbox" 
+                checked={filters.showMap}
+                onChange={handleMapToggle}
+                className="sr-only peer" 
+              />
+              <div className={`w-12 h-6 rounded-full transition-colors ${
+                filters.showMap ? 'bg-blue-600' : 'bg-gray-400'
+              }`}></div>
+              <div className={`absolute left-0.5 top-0.5 h-5 w-5 bg-white rounded-full transition-transform ${
+                filters.showMap ? 'translate-x-6' : ''
+              }`}></div>
+            </span>
+          </label>
+        </div>
       </div>
       
       {/* Liste + Carte (optionnelle) */}
       {filters.showMap ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Colonne liste */}
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {displayedPools.map((p: any) => (
+              {poolsToRender.map((p: any) => (
                 <PoolCard key={p.id} pool={p} />
               ))}
             </div>
+            {isMobile && totalMobilePages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-6">
+                <button
+                  onClick={() => setMobilePage((page) => Math.max(0, page - 1))}
+                  disabled={mobilePage === 0}
+                  className="px-4 py-2 rounded-full border text-sm font-medium disabled:opacity-40"
+                >
+                  ◀ Retour
+                </button>
+                <span className="text-sm text-gray-600">
+                  {mobilePage + 1} / {totalMobilePages}
+                </span>
+                <button
+                  onClick={() => setMobilePage((page) => Math.min(totalMobilePages - 1, page + 1))}
+                  disabled={mobilePage >= totalMobilePages - 1}
+                  className="px-4 py-2 rounded-full border text-sm font-medium disabled:opacity-40"
+                >
+                  Suivant ▶
+                </button>
+              </div>
+            )}
           </div>
-          {/* Colonne carte */}
           <div className="h-[70vh] lg:h-[80vh] sticky top-4 rounded overflow-hidden border">
             <iframe
               title="Carte des piscines"
@@ -632,13 +670,153 @@ export default function SearchPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {displayedPools.map((p: any) => (
-            <PoolCard key={p.id} pool={p} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {poolsToRender.map((p: any) => (
+              <PoolCard key={p.id} pool={p} />
+            ))}
+          </div>
+          {isMobile && totalMobilePages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-6">
+              <button
+                onClick={() => setMobilePage((page) => Math.max(0, page - 1))}
+                disabled={mobilePage === 0}
+                className="px-4 py-2 rounded-full border text-sm font-medium disabled:opacity-40"
+              >
+                ◀ Retour
+              </button>
+              <span className="text-sm text-gray-600">
+                {mobilePage + 1} / {totalMobilePages}
+              </span>
+              <button
+                onClick={() => setMobilePage((page) => Math.min(totalMobilePages - 1, page + 1))}
+                disabled={mobilePage >= totalMobilePages - 1}
+                className="px-4 py-2 rounded-full border text-sm font-medium disabled:opacity-40"
+              >
+                Suivant ▶
+              </button>
+            </div>
+          )}
+        </>
       )}
       </div>
+
+      {/* Modale de recherche compacte */}
+      {searchDrawerOpen && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setSearchDrawerOpen(false)} />
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <button className="text-2xl" onClick={() => setSearchDrawerOpen(false)}>✕</button>
+              <div className="text-base font-semibold">Modifiez votre recherche</div>
+              <div className="w-6 h-6 flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M4 8h16" />
+                  <path d="M4 16h16" />
+                  <circle cx="9" cy="8" r="2" />
+                  <circle cx="15" cy="16" r="2" />
+                </svg>
+              </div>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="rounded-2xl border border-gray-200 overflow-hidden">
+                <div ref={locationRef} className="relative">
+                  <button
+                    type="button"
+                    className="flex items-center gap-3 px-4 py-3 w-full text-left"
+                    onClick={() => {
+                      setLocationQuery(selectedLocation);
+                      setLocationOpen((prev) => !prev);
+                    }}
+                  >
+                    <span className="text-lg">🔍</span>
+                    <span className="flex-1 flex flex-col">
+                      <span className="text-sm text-gray-500">Où ?</span>
+                      <span className="font-semibold">{selectedLocation || "France"}</span>
+                    </span>
+                  </button>
+                  {locationOpen && (
+                    <div className="absolute left-4 right-4 top-[72px] z-50 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
+                      <label className="mb-2 block text-xs font-semibold text-gray-500" htmlFor="search-location-input-modal">
+                        Rechercher un lieu
+                      </label>
+                      <input
+                        id="search-location-input-modal"
+                        ref={locationInputRef}
+                        value={locationQuery}
+                        onChange={(e) => setLocationQuery(e.target.value)}
+                        onKeyDown={handleLocationKeyDown}
+                        placeholder="Ville, code postal, adresse"
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+                      />
+                      <div className="mt-3 max-h-60 overflow-y-auto">
+                        {locationLoading && (
+                          <div className="py-2 text-sm text-gray-500">Chargement...</div>
+                        )}
+                        {!locationLoading && locationSuggestions.length === 0 && locationQuery.trim().length < 2 && (
+                          <div className="py-2 text-sm text-gray-500">
+                            Saisissez au moins 2 lettres
+                          </div>
+                        )}
+                        {!locationLoading && locationSuggestions.length === 0 && locationQuery.trim().length >= 2 && (
+                          <div className="py-2 text-sm text-gray-500">
+                            Aucun résultat
+                          </div>
+                        )}
+                        {locationSuggestions.map((suggestion) => (
+                          <button
+                            key={`${suggestion.label}-${suggestion.latitude}-${suggestion.longitude}`}
+                            type="button"
+                            className="flex w-full flex-col items-start gap-0.5 rounded-lg px-3 py-2 text-left hover:bg-blue-50"
+                            onMouseDown={(event) => {
+                              event.preventDefault();
+                              handleLocationSelect(suggestion);
+                              setLocationOpen(false);
+                            }}
+                          >
+                            <span className="text-sm font-medium text-gray-900">{suggestion.label}</span>
+                            {suggestion.context && (
+                              <span className="text-xs text-gray-500">{suggestion.context}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 border-t border-gray-200">
+                  <div className="flex flex-col gap-2 px-4 py-3 border-r border-gray-200">
+                    <span className="text-sm text-gray-500">Quand ?</span>
+                    <input
+                      type="date"
+                      value={searchDate}
+                      onChange={(e) => setSearchDate(e.target.value)}
+                      className="w-full rounded-lg border px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2 px-4 py-3">
+                    <span className="text-sm text-gray-500">Combien ?</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={searchGuests}
+                      onChange={(e) => setSearchGuests(e.target.value)}
+                      placeholder="0"
+                      className="w-full rounded-lg border px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                className="w-full rounded-full bg-blue-600 px-4 py-3 text-white font-semibold"
+                onClick={() => setSearchDrawerOpen(false)}
+              >
+                Afficher les résultats
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Plus de filtres */}
       {moreOpen && (
@@ -648,7 +826,7 @@ export default function SearchPage() {
           {/* panel */}
           <div className="absolute left-1/2 top-8 -translate-x-1/2 w-[92vw] max-w-3xl bg-white rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[85vh]">
             {/* header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b">
+            <div className="flex items-center justify_between px-4 py-3 border-b">
               <div className="text-lg font-semibold">Plus de filtres</div>
               <button className="text-gray-600" onClick={() => setMoreOpen(false)}>✕</button>
             </div>
