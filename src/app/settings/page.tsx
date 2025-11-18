@@ -15,7 +15,6 @@ export default function SettingsPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // Logique de recherche à implémenter
-    console.log("Recherche:", searchQuery);
   };
 
   const handleLocataireClick = () => {

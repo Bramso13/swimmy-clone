@@ -59,6 +59,18 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
     // Si l'utilisateur est connecté, laisser le lien normal fonctionner
   };
 
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      await authClient.signOut();
+      setUser(null);
+      setOpen(false);
+      router.push("/");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
+  };
+
   return (
     <>
       <button
@@ -151,7 +163,6 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
                   { label: "Compte", href: "/profile" },
                   { label: "Aide", href: "/settings" },
                   { label: "Blog", href: "/" },
-                  { label: "Déconnexion", href: "/login" },
                 ].map((item) => (
                   <li key={item.label}>
                     <Link
@@ -163,6 +174,15 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
                     </Link>
                   </li>
                 ))}
+                {/* Bouton de déconnexion séparé */}
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-3 hover:bg-muted rounded-md"
+                  >
+                    Déconnexion
+                  </button>
+                </li>
                 
                 {/* Option supplémentaire pour les owners/admins */}
                 {user.role === "owner" && (

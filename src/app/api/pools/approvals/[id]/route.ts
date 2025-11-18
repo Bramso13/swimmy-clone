@@ -29,6 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       } catch {}
 
       // Créer la Pool depuis le snapshot en re-projetant les extras/locations
+      // Le ownerId doit être le requesterId (le tenant qui a créé la demande), pas l'owner qui approuve
       const pool = await prisma.pool.create({
         data: {
           title: reqRow.title ?? "",
@@ -43,7 +44,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           additional: reqRow.additional,
           extras: extrasFromRequest, // restitue les équipements
           location: locationFromRequest === "INDOOR" || locationFromRequest === "OUTDOOR" ? locationFromRequest : undefined,
-          ownerId: session.user.id as string,
+          ownerId: reqRow.requesterId ?? session.user.id as string, // Utiliser le requesterId (créateur) comme ownerId
           approved: true,
         },
       });

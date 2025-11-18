@@ -18,8 +18,18 @@ export async function GET(
       return NextResponse.json({ error: "Piscine introuvable" }, { status: 404 });
     }
 
+    // Vérifier si l'utilisateur est le propriétaire de la piscine
     if ((pool as any).ownerId !== session.user.id) {
-      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+      // Vérifier aussi si l'utilisateur est le créateur original via une demande d'approbation
+      const approvalRequest = await prisma.poolApprovalRequest.findFirst({
+        where: {
+          poolId: params.id,
+          requesterId: session.user.id as string,
+        },
+      });
+      if (!approvalRequest) {
+        return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+      }
     }
 
     return NextResponse.json({ pool });
@@ -48,7 +58,16 @@ export async function PATCH(
       return NextResponse.json({ error: "Piscine introuvable" }, { status: 404 });
     }
     if (pool.ownerId !== (session.user.id as string)) {
-      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+      // Vérifier aussi si l'utilisateur est le créateur original via une demande d'approbation
+      const approvalRequest = await prisma.poolApprovalRequest.findFirst({
+        where: {
+          poolId: poolId,
+          requesterId: session.user.id as string,
+        },
+      });
+      if (!approvalRequest) {
+        return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+      }
     }
 
     const {

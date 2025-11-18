@@ -438,7 +438,7 @@ export default function SearchPage() {
 
   return (
     <main className="w-full p-0 overflow-x-hidden">
-      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen box-border px-3 sm:px-4 md:px-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
         <div className="flex justify-center py-4">
           <div className="flex w-full max-w-3xl items-center gap-3">
             <button
