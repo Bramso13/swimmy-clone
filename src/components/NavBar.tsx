@@ -68,7 +68,7 @@ export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolea
           width={150}
           height={54}
           priority
-          style={{ filter: isHeaderBlue ? "brightness(0) invert(1)" : "none", height: "auto" }}
+          style={{ height: "auto" }}
         />
       </Link>
     </div>
