@@ -25,6 +25,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Piscine introuvable" }, { status: 404 });
     }
 
+    // IMPORTANT: Toutes les demandes de disponibilité sont créées avec le statut "pending"
+    // Le propriétaire de la piscine doit les accepter manuellement
+    // même si la demande d'annonce a été approuvée et que la piscine existe
     const created = await prisma.availabilityRequest.create({
       data: {
         poolId,
@@ -35,6 +38,7 @@ export async function POST(req: NextRequest) {
         adults: Number(adults ?? 1),
         children: Number(children ?? 0),
         babies: Number(babies ?? 0),
+        // status: "pending" par défaut dans le schema - nécessite acceptation manuelle par le propriétaire
       },
     });
 

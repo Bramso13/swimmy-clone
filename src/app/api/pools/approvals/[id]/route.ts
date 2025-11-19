@@ -45,7 +45,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           extras: extrasFromRequest, // restitue les équipements
           location: locationFromRequest === "INDOOR" || locationFromRequest === "OUTDOOR" ? locationFromRequest : undefined,
           ownerId: reqRow.requesterId ?? session.user.id as string, // Utiliser le requesterId (créateur) comme ownerId
-          approved: true,
+          approved: true, // La piscine est approuvée pour être visible dans les recherches
+          // NOTE: Les réservations sur cette piscine resteront en "pending" jusqu'à acceptation manuelle par le propriétaire
         },
       });
 

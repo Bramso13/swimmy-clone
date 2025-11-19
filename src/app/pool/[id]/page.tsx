@@ -153,7 +153,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
           <aside className="h-max rounded-2xl border shadow-sm p-4 sticky top-20">
             <div className="font-semibold mb-2">À partir de</div>
             <div className="text-2xl font-extrabold text-blue-700 mb-4">{pool.pricePerHour} € / heure</div>
-            <BookingForm poolId={pool.id} />
+            <BookingForm poolId={pool.id} pricePerHour={pool.pricePerHour} />
           </aside>
       </div>
       {/* Avis / commentaires */}

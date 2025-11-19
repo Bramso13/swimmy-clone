@@ -2,51 +2,109 @@
 
 import React, { useMemo, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 type Props = {
   poolId: string;
+  pricePerHour: number;
 };
 
-export default function BookingForm({ poolId }: Props) {
+export default function BookingForm({ poolId, pricePerHour }: Props) {
+  const router = useRouter();
   const [date, setDate] = useState<string>("");
   const [startTime, setStartTime] = useState<string>("10:00");
   const [endTime, setEndTime] = useState<string>("10:00");
   const [adults, setAdults] = useState<number>(1);
   const [children, setChildren] = useState<number>(0);
   const [babies, setBabies] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
 
   const disabled = useMemo(() => !date || !startTime || !endTime, [date, startTime, endTime]);
 
+  // Calculer le prix total
+  const calculatePrice = useMemo(() => {
+    if (!date || !startTime || !endTime) return 0;
+    
+    const [startHour, startMin] = startTime.split(':').map(Number);
+    const [endHour, endMin] = endTime.split(':').map(Number);
+    const startMinutes = startHour * 60 + startMin;
+    const endMinutes = endHour * 60 + endMin;
+    const totalMinutes = endMinutes > startMinutes ? endMinutes - startMinutes : (24 * 60) - startMinutes + endMinutes;
+    const hours = totalMinutes / 60;
+    
+    // Prix de base pour les adultes
+    let totalPrice = adults * pricePerHour * hours;
+    
+    // Réduction de 50% pour les enfants
+    totalPrice += children * pricePerHour * hours * 0.5;
+    
+    // Bébés gratuits (pas de calcul)
+    
+    // Réduction de 50% si plus de 3 heures
+    if (hours > 3) {
+      totalPrice *= 0.5;
+    }
+    
+    return Math.round(totalPrice * 100) / 100;
+  }, [date, startTime, endTime, adults, children, pricePerHour]);
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (disabled) return;
+    if (disabled || loading) return;
+    
     try {
-      // Récupérer l'utilisateur connecté pour lier la demande
+      setLoading(true);
+      // Récupérer l'utilisateur connecté
       const session = await authClient.getSession();
       const currentUserId = session.data?.user?.id as string | undefined;
+      
+      if (!currentUserId) {
+        alert("Vous devez être connecté pour effectuer une réservation.");
+        router.push("/login");
+        return;
+      }
 
-      const res = await fetch("/api/availability/requests", {
+      // Créer les dates complètes
+      const startDateTime = new Date(`${date}T${startTime}`);
+      const endDateTime = new Date(`${date}T${endTime}`);
+      
+      // Si l'heure de fin est avant l'heure de début, on ajoute un jour
+      if (endDateTime <= startDateTime) {
+        endDateTime.setDate(endDateTime.getDate() + 1);
+      }
+
+      // Créer la réservation
+      const res = await fetch("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           poolId,
-          userId: currentUserId || null,
-          date,
-          startTime,
-          endTime,
-          adults,
-          children,
-          babies,
+          userId: currentUserId,
+          startDate: startDateTime.toISOString(),
+          endDate: endDateTime.toISOString(),
+          amount: calculatePrice,
         }),
       });
+
       if (res.ok) {
-        alert("Votre demande a été envoyée à l'hôte pour confirmation.");
+        const data = await res.json();
+        const reservationId = data.reservation?.id;
+        
+        if (reservationId) {
+          // Rediriger vers la page de paiement
+          router.push(`/payment/${reservationId}`);
+        } else {
+          alert("Erreur lors de la création de la réservation.");
+        }
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || "Impossible d'envoyer la demande.");
+        alert(err.error || "Impossible de créer la réservation.");
       }
     } catch (error) {
+      console.error("Erreur:", error);
       alert("Erreur réseau, veuillez réessayer.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,8 +160,8 @@ export default function BookingForm({ poolId }: Props) {
       <div className="rounded-xl border bg-blue-50 text-blue-900 p-4 text-sm">
         <div className="flex items-start gap-2">
           <span>🔖</span>
-          <p>
-            Au-delà de 3 heures consécutives de réservation, l’hôte vous fait bénéficier d’une réduction de 50%.
+          <p className="text-white">
+            Au-delà de 3 heures consécutives de réservation, l'hôte vous fait bénéficier d'une réduction de 50%.
           </p>
         </div>
       </div>
@@ -114,8 +172,17 @@ export default function BookingForm({ poolId }: Props) {
 
       <Qty label="Bébés" sub="Moins de 3 ans" value={babies} setValue={setBabies} badge={<span className="ml-2 inline-block text-[10px] bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Gratuit</span>} />
 
-      <button type="submit" disabled={disabled} className={`w-full rounded-lg px-4 py-3 text-white ${disabled ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}>
-        Vérifier la disponibilité
+      {calculatePrice > 0 && (
+        <div className="border-t pt-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-semibold">Total</span>
+            <span className="text-xl font-bold">{calculatePrice.toFixed(2)} €</span>
+          </div>
+        </div>
+      )}
+
+      <button type="submit" disabled={disabled || loading} className={`w-full rounded-lg px-4 py-3 text-white ${disabled || loading ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}>
+        {loading ? "Création de la réservation..." : calculatePrice > 0 ? "Réserver et payer" : "Vérifier la disponibilité"}
       </button>
     </form>
   );

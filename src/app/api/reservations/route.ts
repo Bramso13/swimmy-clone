@@ -28,6 +28,9 @@ export async function POST(req: NextRequest) {
     );
   }
   try {
+    // IMPORTANT: Toutes les réservations sont créées avec le statut "pending"
+    // Le propriétaire de la piscine doit les accepter manuellement
+    // même si la demande d'annonce a été approuvée et que la piscine existe
     const reservation = await prisma.reservation.create({
       data: {
         poolId,
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         amount,
-        status: "pending",
+        status: "pending", // Toujours "pending" jusqu'à acceptation manuelle par le propriétaire
       },
     });
     return NextResponse.json({ reservation });
