@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRenter } from "@/context/RenterContext";
 import { authClient } from "@/lib/auth-client";
 
-type ReservationStatus = "en-attente" | "acceptees" | "refusees" | "demandes";
+type ReservationStatus = "en-attente" | "acceptees" | "refusees" | "demandes" | "reservations-demandees";
 
 const ReservationsPage = () => {
   const [activeTab, setActiveTab] = useState<ReservationStatus>("en-attente");
@@ -13,6 +13,8 @@ const ReservationsPage = () => {
   const [approvals, setApprovals] = useState<any[]>([]);
   const [approvalsToValidate, setApprovalsToValidate] = useState<any[]>([]);
   const [myRequests, setMyRequests] = useState<any[]>([]);
+  const [requestedReservations, setRequestedReservations] = useState<any[]>([]);
+  const [loadingRequested, setLoadingRequested] = useState(false);
   const [commentsByPool, setCommentsByPool] = useState<Record<string, any[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [sendingByPool, setSendingByPool] = useState<Record<string, boolean>>({});
@@ -31,6 +33,32 @@ const ReservationsPage = () => {
     } catch {}
   };
 
+  const fetchRequestedReservations = async (currentUserId?: string) => {
+    if (!currentUserId) return;
+    try {
+      setLoadingRequested(true);
+      const res = await fetch(`/api/pools?ownerId=${encodeURIComponent(currentUserId)}&includeReservations=true`, { cache: 'no-store' });
+      if (!res.ok) throw new Error('Erreur lors du chargement');
+      const data = await res.json();
+      const pools = Array.isArray(data?.pools) ? data.pools : [];
+      const allReservations: any[] = [];
+      pools.forEach((pool: any) => {
+        if (Array.isArray(pool.reservations)) {
+          pool.reservations.forEach((reservation: any) => {
+            allReservations.push({ ...reservation, pool });
+          });
+        }
+      });
+      // Filtrer pour ne garder que les réservations en attente (pending)
+      const pending = allReservations.filter((r: any) => r.status === 'pending');
+      setRequestedReservations(pending);
+    } catch (error) {
+      console.error('Erreur lors du chargement des réservations demandées:', error);
+    } finally {
+      setLoadingRequested(false);
+    }
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -41,6 +69,7 @@ const ReservationsPage = () => {
         if (currentUser) {
           fetchReservations(currentUser.id);
           await fetchMyApprovals(currentUser.id);
+          await fetchRequestedReservations(currentUser.id);
           // Si owner, charger aussi les demandes à valider
           try {
             const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
@@ -75,6 +104,35 @@ const ReservationsPage = () => {
         const dataAll = await resAll.json();
         setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
       } catch {}
+    };
+
+    // Premier chargement + polling léger
+    refresh();
+    const id = setInterval(refresh, 10000); // toutes les 10s
+
+    // Rafraîchit au focus de la fenêtre
+    const onFocus = () => { refresh(); };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', onFocus);
+    }
+
+    return () => {
+      if (cancelled) return;
+      clearInterval(id);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('focus', onFocus);
+      }
+      cancelled = true;
+    };
+  }, [activeTab, user?.id]);
+
+  // Rafraîchir automatiquement les réservations demandées quand l'onglet correspondant est actif
+  useEffect(() => {
+    if (activeTab !== 'reservations-demandees' || !user?.id) return;
+    let cancelled = false;
+
+    const refresh = async () => {
+      await fetchRequestedReservations(user.id);
     };
 
     // Premier chargement + polling léger
@@ -188,6 +246,7 @@ const ReservationsPage = () => {
     { key: "en-attente", label: "En attente" },
     { key: "acceptees", label: "Acceptées" },
     { key: "refusees", label: "Refusées" },
+    { key: "reservations-demandees", label: "Réservations demandées" },
     { key: "demandes", label: "Demandes d'annonce" },
   ];
 
@@ -269,6 +328,92 @@ const ReservationsPage = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-red-500">Erreur: {error}</div>
           </div>
+        ) : (activeTab as any) === 'reservations-demandees' ? (
+          loadingRequested ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500">Chargement...</div>
+            </div>
+          ) : requestedReservations.length === 0 ? (
+            <div className="flex items-start justify-start pt-4">
+              <p className="text-gray-500 text-lg">Aucune réservation demandée pour vos piscines.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">Réservations demandées pour vos piscines</h2>
+              {requestedReservations.map((reservation) => (
+                <div
+                  key={reservation.id}
+                  className="border border-gray-200 rounded-lg p-6 bg-yellow-50 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {reservation.pool?.title || "Piscine"}
+                      </h3>
+                      <p className="text-gray-600 mt-1">
+                        Demande de réservation du {new Date(reservation.startDate).toLocaleDateString('fr-FR')} au {new Date(reservation.endDate).toLocaleDateString('fr-FR')}
+                      </p>
+                      <p className="text-gray-500 text-sm mt-1">
+                        {reservation.pool?.address}
+                      </p>
+                      <p className="text-gray-700 mt-2">
+                        <span className="font-medium">Locataire:</span> {reservation.user?.name || reservation.user?.email || 'Non renseigné'}
+                      </p>
+                      <p className="text-gray-700 mt-1">
+                        <span className="font-medium">Montant:</span> {reservation.amount}€
+                      </p>
+                      <p className="text-gray-500 text-xs mt-2">
+                        Demandée le {new Date(reservation.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <div className="ml-4">
+                      <div className="text-sm px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 mb-3">En attente</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch('/api/reservations', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: reservation.id, status: 'accepted' })
+                          });
+                          if (res.ok) {
+                            await fetchRequestedReservations(user?.id);
+                          }
+                        } catch (error) {
+                          console.error('Erreur lors de l\'acceptation:', error);
+                        }
+                      }}
+                      className="px-4 py-2 rounded bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors"
+                    >
+                      Accepter
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch('/api/reservations', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: reservation.id, status: 'rejected' })
+                          });
+                          if (res.ok) {
+                            await fetchRequestedReservations(user?.id);
+                          }
+                        } catch (error) {
+                          console.error('Erreur lors du refus:', error);
+                        }
+                      }}
+                      className="px-4 py-2 rounded bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors"
+                    >
+                      Refuser
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         ) : (activeTab as any) === 'demandes' ? (
           showApprovals ? (
             <div className="space-y-4">
