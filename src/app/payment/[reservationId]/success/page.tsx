@@ -37,6 +37,7 @@ export default function PaymentSuccessPage({
         </h1>
         <p className="text-gray-700 mb-6">
           Votre réservation a été confirmée. Vous recevrez un email de confirmation sous peu.
+          Vous pouvez également voir les détails dans votre tableau de bord.
         </p>
         <div className="flex gap-4 justify-center">
           <Link

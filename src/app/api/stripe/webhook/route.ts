@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "../../../../../lib/prisma";
+import { sendReservationConfirmationEmail } from "../../../../../lib/send-email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2024-12-18.acacia",
@@ -62,6 +63,11 @@ export async function POST(req: NextRequest) {
             data: { isAvailable: false },
           });
         }
+
+        // Envoyer l'email de confirmation (en arrière-plan, ne pas bloquer)
+        sendReservationConfirmationEmail(reservationId).catch((err) => {
+          console.error("Erreur lors de l'envoi de l'email:", err);
+        });
       }
     } else if (event.type === "payment_intent.payment_failed") {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;

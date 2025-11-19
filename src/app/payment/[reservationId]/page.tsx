@@ -103,6 +103,15 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
         setError(confirmError.message || "Erreur lors du paiement");
         setLoading(false);
       } else if (paymentIntent?.status === "succeeded") {
+        // Envoyer l'email de confirmation (en arrière-plan, ne pas bloquer la redirection)
+        fetch("/api/email/send-confirmation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reservationId }),
+        }).catch((err) => {
+          console.error("Erreur lors de l'envoi de l'email:", err);
+        });
+
         // Rediriger vers une page de succès
         router.push(`/payment/${reservationId}/success`);
       }
