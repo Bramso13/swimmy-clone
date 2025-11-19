@@ -4,11 +4,14 @@ import React, { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
-  CardElement,
+  CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement,
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
@@ -19,21 +22,29 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reservation, setReservation] = useState<any>(null);
+  const [email, setEmail] = useState<string>("");
 
   useEffect(() => {
-    // Charger les détails de la réservation
-    const loadReservation = async () => {
+    // Charger les détails de la réservation et l'email de l'utilisateur
+    const loadData = async () => {
       try {
+        // Charger la réservation
         const res = await fetch(`/api/reservations/${reservationId}`);
         if (res.ok) {
           const data = await res.json();
           setReservation(data.reservation);
         }
+        
+        // Charger l'email de l'utilisateur connecté
+        const session = await authClient.getSession();
+        if (session?.data?.user?.email) {
+          setEmail(session.data.user.email);
+        }
       } catch (err) {
-        console.error("Erreur lors du chargement de la réservation:", err);
+        console.error("Erreur lors du chargement:", err);
       }
     };
-    loadReservation();
+    loadData();
   }, [reservationId]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -61,17 +72,29 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
 
       const { clientSecret } = await res.json();
 
-      // Confirmer le paiement
-      const cardElement = elements.getElement(CardElement);
-      if (!cardElement) {
-        throw new Error("Élément de carte introuvable");
+      // Vérifier que l'email est rempli
+      if (!email || !email.includes("@")) {
+        throw new Error("Veuillez entrer une adresse email valide");
       }
 
+      // Récupérer les éléments de carte
+      const cardNumberElement = elements.getElement(CardNumberElement);
+      const cardExpiryElement = elements.getElement(CardExpiryElement);
+      const cardCvcElement = elements.getElement(CardCvcElement);
+
+      if (!cardNumberElement || !cardExpiryElement || !cardCvcElement) {
+        throw new Error("Les éléments de carte sont introuvables");
+      }
+
+      // Confirmer le paiement
       const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
         clientSecret,
         {
           payment_method: {
-            card: cardElement,
+            card: cardNumberElement,
+            billing_details: {
+              email: email,
+            },
           },
         }
       );
@@ -119,11 +142,48 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
         </div>
       )}
 
-      <div className="border rounded-lg p-4">
-        <label className="block text-sm font-medium mb-2">
-          Informations de carte
-        </label>
-        <CardElement options={cardElementOptions} />
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Adresse email <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="votre@email.com"
+            required
+            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="border rounded-lg p-4 space-y-4">
+          <label className="block text-sm font-medium mb-2">
+            Informations de carte bancaire <span className="text-red-500">*</span>
+          </label>
+          
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Numéro de carte</label>
+            <div className="border rounded px-3 py-2">
+              <CardNumberElement options={cardElementOptions} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Date d'expiration</label>
+              <div className="border rounded px-3 py-2">
+                <CardExpiryElement options={cardElementOptions} />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">CVC (3 chiffres)</label>
+              <div className="border rounded px-3 py-2">
+                <CardCvcElement options={cardElementOptions} />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {error && (
