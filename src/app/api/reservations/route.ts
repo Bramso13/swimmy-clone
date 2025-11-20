@@ -155,11 +155,15 @@ export async function PATCH(req: NextRequest) {
           minute: '2-digit',
         });
 
+        // Construire l'URL de paiement
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000';
+        const paymentUrl = `${baseUrl}/payment/${updated.id}`;
+        
         await prisma.message.create({
           data: {
             senderId: updated.pool.ownerId,
             recipientId: updated.user.id,
-            content: `Votre demande de réservation pour "${updated.pool.title}" a été acceptée !\n\nDu ${startDateFormatted} au ${endDateFormatted}\nMontant: ${updated.amount} €\n\nCliquez sur le bouton ci-dessous pour procéder au paiement.\n\nRESERVATION_ID:${updated.id}`,
+            content: `Votre demande de réservation pour "${updated.pool.title}" a été acceptée !\n\nDu ${startDateFormatted} au ${endDateFormatted}\nMontant: ${updated.amount} €\n\nCliquez sur le bouton ci-dessous ou utilisez ce lien pour procéder au paiement :\n${paymentUrl}\n\nRESERVATION_ID:${updated.id}`,
           },
         });
       } catch (msgError) {

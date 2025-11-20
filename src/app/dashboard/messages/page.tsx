@@ -422,7 +422,38 @@ export default function MessagesPage() {
                         }`}
                         style={{ wordBreak: 'break-word' }}
                       >
-                        <p className={`text-sm whitespace-pre-wrap break-words leading-relaxed ${isFromMe ? 'text-white' : 'text-gray-900'}`}>{content}</p>
+                        <p className={`text-sm whitespace-pre-wrap break-words leading-relaxed ${isFromMe ? 'text-white' : 'text-gray-900'}`}>
+                          {content.split('\n').map((line, idx) => {
+                            // Détecter les URLs dans le message et les rendre cliquables
+                            const urlRegex = /(https?:\/\/[^\s]+)/g;
+                            const parts = line.split(urlRegex);
+                            return (
+                              <span key={idx}>
+                                {parts.map((part, partIdx) => {
+                                  if (part.match(urlRegex)) {
+                                    return (
+                                      <a
+                                        key={partIdx}
+                                        href={part}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`underline hover:no-underline ${
+                                          isFromMe 
+                                            ? 'text-white hover:text-blue-100' 
+                                            : 'text-blue-600 hover:text-blue-800'
+                                        }`}
+                                      >
+                                        {part}
+                                      </a>
+                                    );
+                                  }
+                                  return <span key={partIdx}>{part}</span>;
+                                })}
+                                {idx < content.split('\n').length - 1 && <br />}
+                              </span>
+                            );
+                          })}
+                        </p>
                         {/* Afficher un bouton de paiement si c'est un message d'acceptation de réservation et qu'il est encore valide (moins de 24h) */}
                         {reservationId && !isFromMe && (
                           <div className="mt-3 pt-3 border-t border-gray-300 -mx-1 px-1">
