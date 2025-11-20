@@ -464,7 +464,7 @@ export default function Home() {
       </section>
 
       {/* Offre spéciale */}
-      <section className="py-16 bg-white w-full -mx-4 px-4">
+      <section className="py-16 bg-white w-full px-4">
         <div className="max-w-4xl mx-auto text-center space-y-6">
           <p className="text-sm font-semibold tracking-[0.3em] text-gray-500 uppercase">Offre spéciale lancement</p>
           <h2 className="text-3xl md:text-4xl font-bold">🔥 -20% sur votre première réservation</h2>
@@ -487,16 +487,16 @@ export default function Home() {
       </section>
 
       {/* Section FAQ et Contact */}
-      <section id="faq" className="py-12 w-full -mx-4 px-4">
+      <section id="faq" className="py-12 w-full px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8">
             
             {/* Colonne gauche - FAQ */}
-            <div className="rounded-lg p-8">
-              <h2 className="text-3xl text-center font-bold text-black mb-2">
+            <div className="rounded-lg p-8 max-w-lg mx-auto text-center">
+              <h2 className="text-3xl font-bold text-black mb-2">
                 Des questions ?
               </h2>
-              <h3 className="text-4xl text-center font-bold mb-8" style={{ color: BRAND_BLUE }}>
+              <h3 className="text-4xl font-bold mb-8" style={{ color: BRAND_BLUE }}>
                 YoumPool a tout prévu
               </h3>
 
@@ -576,7 +576,7 @@ export default function Home() {
             </div>
 
             {/* Colonne droite - Contact */}
-            <div className="bg-blue-500 rounded-lg p-8 relative overflow-hidden flex flex-col items-center justify-center" style={{ backgroundColor: BRAND_BLUE }}>
+            <div className="bg-blue-500 rounded-lg p-8 relative overflow-hidden flex flex-col items-center justify-center w-full max-w-md mx-auto" style={{ backgroundColor: BRAND_BLUE }}>
               <h2 className="text-2xl font-bold text-white text-center mb-8">
                 Plus simple en direct ?
               </h2>
