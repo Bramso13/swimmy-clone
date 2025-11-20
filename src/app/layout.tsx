@@ -41,7 +41,7 @@ export default function RootLayout({
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
                 {/* Logo et tagline */}
-                <div className="col-span-2 md:col-span-1">
+                <div className="col-span-2 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
                   <div className="mb-2">
                     <Image src="/yoompool-logo.svg" alt="Logo YoumPool" width={160} height={58} priority />
                   </div>

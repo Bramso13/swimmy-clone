@@ -597,7 +597,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
             {/* Texte à gauche */}
-            <div className="text-white text-left w-1/3">
+            <div className="text-white text-center md:text-left w-full md:w-1/3 max-w-md">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
                 Louez votre piscine avec YoumPool
               </h2>
