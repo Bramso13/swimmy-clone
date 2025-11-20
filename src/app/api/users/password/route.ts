@@ -3,6 +3,7 @@ import { prisma } from "../../../../../lib/prisma";
 import { auth } from "../../../../../lib/auth";
 import bcrypt from "bcryptjs";
 import { verify as argon2Verify, hash as argon2Hash } from "@node-rs/argon2";
+import { verifyPassword as betterVerifyPassword, hashPassword as betterHashPassword } from "better-auth/crypto";
 
 // Changement de mot de passe pour l'utilisateur connecté
 export async function POST(req: NextRequest) {
@@ -51,21 +52,18 @@ export async function POST(req: NextRequest) {
     let ok = false;
     let verificationMethod = "none";
     try {
-      // Essayer bcrypt d'abord (format le plus courant)
-      if (stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$")) {
+      if (stored.includes(":")) {
+        verificationMethod = "better-auth (scrypt)";
+        ok = await betterVerifyPassword({ hash: stored, password: currentPassword });
+      } else if (stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$")) {
         verificationMethod = "bcrypt (détecté)";
         ok = await bcrypt.compare(currentPassword, stored);
-      } 
-      // Essayer argon2
-      else if (stored.startsWith("$argon2")) {
+      } else if (stored.startsWith("$argon2")) {
         verificationMethod = "argon2 (détecté)";
         ok = await argon2Verify(stored, currentPassword);
-      }
-      // Si le format n'est pas reconnu, essayer quand même bcrypt (au cas où)
-      else {
+      } else {
         verificationMethod = "bcrypt (fallback)";
         ok = await bcrypt.compare(currentPassword, stored);
-        // Si ça ne fonctionne pas, essayer argon2
         if (!ok) {
           try {
             verificationMethod = "argon2 (fallback)";
@@ -87,10 +85,11 @@ export async function POST(req: NextRequest) {
 
     // Hasher le nouveau mot de passe avec le même format que l'existant
     let hashed: string;
-    if (stored.startsWith("$argon2")) {
+    if (stored.includes(":")) {
+      hashed = await betterHashPassword(newPassword);
+    } else if (stored.startsWith("$argon2")) {
       hashed = await argon2Hash(newPassword);
     } else {
-      // Par défaut, utiliser bcrypt (format le plus courant avec Better Auth)
       hashed = await bcrypt.hash(newPassword, 10);
     }
 
