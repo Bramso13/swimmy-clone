@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
+import { checkAndReactivatePool } from "../../../../lib/pool-availability";
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("userId");
@@ -131,10 +132,18 @@ export async function PATCH(req: NextRequest) {
 
     // Mettre à jour la disponibilité de la piscine selon le statut
     try {
-      if (updated?.poolId && ["accepted", "paid"].includes(status)) {
-        await prisma.pool.update({ where: { id: updated.poolId }, data: { isAvailable: false } });
+      if (updated?.poolId) {
+        if (["accepted", "paid"].includes(status)) {
+          // Marquer comme indisponible si la réservation est acceptée ou payée
+          await prisma.pool.update({ where: { id: updated.poolId }, data: { isAvailable: false } });
+        } else if (["cancelled", "refused", "rejected"].includes(status)) {
+          // Si la réservation est annulée/refusée, vérifier et réactiver si nécessaire
+          await checkAndReactivatePool(updated.poolId);
+        }
+        // Vérifier et réactiver automatiquement si toutes les réservations sont expirées
+        // (même si le statut n'a pas changé, on vérifie pour les cas où la date est passée)
+        await checkAndReactivatePool(updated.poolId);
       }
-      // IMPORTANT: ne pas réactiver automatiquement; l'owner gère manuellement via la checkbox
     } catch {}
 
     // Si la réservation est acceptée, envoyer un message au locataire avec un lien de paiement

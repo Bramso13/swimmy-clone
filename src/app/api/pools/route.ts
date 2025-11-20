@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { prisma } from "../../../../lib/prisma";
 import { auth } from "../../../../lib/auth";
+import { reactivateExpiredPools } from "../../../../lib/pool-availability";
 
 export async function GET(req: NextRequest) {
   try {
@@ -26,6 +27,12 @@ export async function GET(req: NextRequest) {
         }
       }
     }
+
+    // Réactiver automatiquement les piscines dont les réservations sont expirées
+    // On le fait en arrière-plan pour ne pas ralentir la réponse
+    reactivateExpiredPools().catch((err: unknown) => {
+      console.error("Erreur lors de la réactivation automatique des piscines:", err);
+    });
 
     const pools = await prisma.pool.findMany({
       where: ownerId ? { ownerId } : undefined,
