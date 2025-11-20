@@ -107,31 +107,29 @@ export default function MonProfilPage() {
   };
 
   return (
-    <main className="mx-auto max-w-5xl">
+    <main className="w-full md:mx-auto md:max-w-5xl">
       {/* Header bleu avec fil d’Ariane */}
-      <div className="py-8 px-6" style={{ backgroundColor: "var(--brand-blue)" }}>
-        <div className="max-w-5xl mx-auto text-white">
-          <div className="text-sm opacity-90 mb-2">
-            <Link href="/profile" className="underline">Mon compte</Link> <span className="mx-1">›</span> Mon profil
+      <div className="py-8 px-4 sm:px-6" style={{ backgroundColor: "var(--brand-blue)" }}>
+        <div className="w-full md:max-w-5xl md:mx-auto text-white">
+          <div className="text-sm opacity-90 mb-2 flex flex-wrap items-center gap-1">
+            <Link href="/profile" className="underline">Mon compte</Link>
+            <span className="mx-1">›</span>
+            <span>Mon profil</span>
           </div>
-          <h1 className="text-4xl font-bold">Mon profil</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold">Mon profil</h1>
         </div>
       </div>
 
-      <div className="px-6 py-10 grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
+      <div className="px-4 sm:px-6 py-10 grid md:grid-cols-3 gap-6 lg:gap-10 w-full md:max-w-5xl md:mx-auto">
         {/* Zone d’upload ronde */}
         <div className="md:col-span-2">
           <p className="mb-6 text-gray-700">
             YoumPool est une grande communauté. Aidez les autres à mieux vous connaître !
           </p>
 
-          <div className="flex items-center gap-10">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-10">
             <label 
-              className="relative flex items-center justify-center border-2 border-dashed cursor-pointer bg-gray-50 overflow-hidden rounded-full"
-              style={{ 
-                width: '256px', 
-                height: '256px'
-              }}
+              className="relative flex items-center justify-center border-2 border-dashed cursor-pointer bg-gray-50 overflow-hidden rounded-full w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 mx-auto sm:mx-0"
             >
               {local.image ? (
                 <img 
@@ -153,7 +151,7 @@ export default function MonProfilPage() {
               />
             </label>
 
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 text-center sm:text-left max-w-md">
               <div className="font-semibold mb-2">Faites vous connaître</div>
               <p>
                 Un profil avec photo a plus de chances de voir ses demandes de réservations acceptées. Et si votre visage est bien visible, c'est encore mieux !
@@ -185,7 +183,7 @@ export default function MonProfilPage() {
         </div>
 
         {/* Carte d’aide */}
-        <aside className="bg-white rounded-xl border p-6">
+        <aside className="bg-white rounded-xl border p-6 md:sticky md:top-8 h-fit">
           <div className="font-semibold mb-2">Faites vous connaître</div>
           <p className="text-gray-600 text-sm">
             Un profil avec photo a 70% plus de chances de voir ses demandes de réservations acceptées. Et si votre visage est bien visible, c'est encore mieux !
