@@ -127,7 +127,7 @@ export default function MonProfilPage() {
             YoumPool est une grande communauté. Aidez les autres à mieux vous connaître !
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-10">
+          <div className="flex flex-col items-center gap-6 sm:items-start">
             <label 
               className="relative flex items-center justify-center border-2 border-dashed cursor-pointer bg-gray-50 overflow-hidden rounded-full w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 mx-auto sm:mx-0"
             >
@@ -151,7 +151,7 @@ export default function MonProfilPage() {
               />
             </label>
 
-            <div className="text-sm text-gray-600 text-center sm:text-left max-w-md">
+            <div className="text-sm text-gray-600 text-center sm:text-left max-w-md w-full">
               <div className="font-semibold mb-2">Faites vous connaître</div>
               <p>
                 Un profil avec photo a plus de chances de voir ses demandes de réservations acceptées. Et si votre visage est bien visible, c'est encore mieux !
