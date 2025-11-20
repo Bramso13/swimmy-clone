@@ -9,6 +9,7 @@ type PoolItem = PoolCardType & {
   isRented?: boolean;
   renterName?: string | null;
   editHref?: string;
+  reservationEndDate?: string | null;
 };
 
 type ApprovalItem = PoolItem & {
@@ -22,7 +23,7 @@ const PoolsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pools, setPools] = useState<PoolItem[]>([]);
-  const [rented, setRented] = useState<Array<{ id: string; title: string; renter: string }>>([]);
+  const [rented, setRented] = useState<Array<{ id: string; title: string; renter: string; endDate?: string }>>([]);
   const [approvalRequests, setApprovalRequests] = useState<ApprovalItem[]>([]);
   const [approvedPools, setApprovedPools] = useState<ApprovalItem[]>([]);
   const [isMobile, setIsMobile] = useState(false);
@@ -44,13 +45,28 @@ const PoolsPage = () => {
         if (!res.ok) throw new Error("Impossible de charger vos piscines");
         const data = await res.json();
         const all: any[] = data.pools || [];
-        const rentedNow: Array<{ id: string; title: string; renter: string }> = [];
+        const rentedNow: Array<{ id: string; title: string; renter: string; endDate?: string }> = [];
         const allItems: PoolItem[] = [];
+        const now = new Date();
         for (const p of all) {
-          const accepted = (p.reservations || []).find((r: any) => r.status === 'accepted' || r.status === 'paid');
+          // Trouver une réservation acceptée ou payée dont la date de fin est dans le futur
+          const accepted = (p.reservations || []).find((r: any) => {
+            if (r.status !== 'accepted' && r.status !== 'paid') return false;
+            const endDate = new Date(r.endDate);
+            return endDate >= now; // Seulement si la date de fin est dans le futur ou aujourd'hui
+          });
           const approvedReq = (p.availabilityRequests || []).find((ar: any) => ar.status === 'approved');
           const renterName = (accepted?.user?.name || accepted?.user?.email) || (approvedReq?.user?.name || approvedReq?.user?.email) || null;
-          const isRented = Boolean(accepted || approvedReq || p.isAvailable === false);
+          const reservationEndDate = accepted?.endDate || null;
+          // Une piscine est réservée si :
+          // - Il y a une réservation acceptée/payée avec une date de fin dans le futur
+          // - OU il y a une demande de disponibilité approuvée
+          // - OU isAvailable est explicitement false (gestion manuelle)
+          const isRented = Boolean(
+            accepted || 
+            approvedReq || 
+            (p.isAvailable === false && !accepted) // Si isAvailable est false mais qu'il n'y a pas de réservation active, on garde l'indisponibilité
+          );
           const extras = p?.extras && typeof p.extras === 'object' ? p.extras : {};
           const equipments = Array.isArray((extras as any)?.equipments)
             ? (extras as any).equipments.filter((e: any) => typeof e === 'string' && e.trim().length > 0)
@@ -59,7 +75,12 @@ const PoolsPage = () => {
             ? (p.rules as any[]).filter((e) => typeof e === 'string' && e.trim().length > 0)
             : [];
           if (isRented && renterName) {
-            rentedNow.push({ id: p.id, title: p.title, renter: renterName });
+            rentedNow.push({ 
+              id: p.id, 
+              title: p.title, 
+              renter: renterName,
+              endDate: reservationEndDate || undefined
+            });
           }
           allItems.push({
             id: p.id,
@@ -74,6 +95,8 @@ const PoolsPage = () => {
             isRented,
             renterName,
             editHref: `/dashboard/pools/${p.id}/edit`,
+            // Ajouter la date de fin de réservation pour l'affichage
+            reservationEndDate: reservationEndDate || undefined,
           });
         }
         setPools(allItems);
@@ -275,7 +298,12 @@ const PoolsPage = () => {
               <div className="font-semibold mb-2">Actuellement louées</div>
               <ul className="space-y-1 text-sm text-gray-700">
                 {rented.map((r) => (
-                  <li key={r.id}>• {r.title} — louée par {r.renter}</li>
+                  <li key={r.id}>
+                    • {r.title} — louée par {r.renter}
+                    {r.endDate && (
+                      <span className="text-gray-500"> (jusqu'au {new Date(r.endDate).toLocaleDateString('fr-FR')})</span>
+                    )}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -297,8 +325,21 @@ const PoolsPage = () => {
                 </div>
                 {pool.isRented && (
                   <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm text-yellow-800">
-                    Actuellement indisponible
-                    {pool.renterName ? ` — louée par ${pool.renterName}` : ''}
+                    {pool.reservationEndDate ? (
+                      <>
+                        Réservé jusqu'au {new Date(pool.reservationEndDate).toLocaleDateString('fr-FR', { 
+                          day: 'numeric', 
+                          month: 'long', 
+                          year: 'numeric' 
+                        })}
+                        {pool.renterName ? ` — par ${pool.renterName}` : ''}
+                      </>
+                    ) : (
+                      <>
+                        Actuellement indisponible
+                        {pool.renterName ? ` — louée par ${pool.renterName}` : ''}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
