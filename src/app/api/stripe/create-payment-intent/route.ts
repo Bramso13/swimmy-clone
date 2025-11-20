@@ -44,12 +44,58 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Vérifier que la réservation est acceptée
+    if (reservation.status !== "accepted") {
+      return NextResponse.json(
+        { error: "Cette réservation n'est pas acceptée. Seules les réservations acceptées peuvent être payées." },
+        { status: 400 }
+      );
+    }
+
     // Vérifier que la réservation n'a pas déjà été payée
-    if (reservation.status === "paid" || reservation.status === "accepted") {
+    if (reservation.status === "paid") {
       return NextResponse.json(
         { error: "Cette réservation a déjà été payée" },
         { status: 400 }
       );
+    }
+
+    // Vérifier que moins de 24h se sont écoulées depuis l'acceptation
+    // On cherche le message d'acceptation le plus récent pour cette réservation
+    const acceptanceMessage = await prisma.message.findFirst({
+      where: {
+        content: {
+          contains: `RESERVATION_ID:${reservationId}`,
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    if (acceptanceMessage) {
+      const messageDate = new Date(acceptanceMessage.createdAt);
+      const now = new Date();
+      const hoursSinceAcceptance = (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+      
+      if (hoursSinceAcceptance >= 24) {
+        return NextResponse.json(
+          { error: "Le délai de paiement a expiré. Vous avez 24 heures après l'acceptation pour effectuer le paiement." },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Si on ne trouve pas le message, vérifier avec updatedAt de la réservation
+      const reservationDate = new Date(reservation.updatedAt);
+      const now = new Date();
+      const hoursSinceUpdate = (now.getTime() - reservationDate.getTime()) / (1000 * 60 * 60);
+      
+      if (hoursSinceUpdate >= 24) {
+        return NextResponse.json(
+          { error: "Le délai de paiement a expiré. Vous avez 24 heures après l'acceptation pour effectuer le paiement." },
+          { status: 400 }
+        );
+      }
     }
 
     // Créer ou récupérer le PaymentIntent

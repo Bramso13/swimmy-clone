@@ -91,8 +91,10 @@ export default function BookingForm({ poolId, pricePerHour }: Props) {
         const reservationId = data.reservation?.id;
         
         if (reservationId) {
-          // Rediriger vers la page de paiement
-          router.push(`/payment/${reservationId}`);
+          // Afficher un message de confirmation
+          alert("Votre demande de réservation a été envoyée au propriétaire. Vous recevrez un message dans vos messages une fois qu'il aura accepté votre demande, avec un lien pour procéder au paiement.");
+          // Recharger la page pour réinitialiser le formulaire
+          window.location.reload();
         } else {
           alert("Erreur lors de la création de la réservation.");
         }

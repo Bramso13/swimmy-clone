@@ -349,7 +349,7 @@ export default function MessagesPage() {
           );
         })()}
       </div>
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-50" style={{ minHeight: 0 }}>
         {loadingMessages ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-gray-500">Chargement des messages…</div>
@@ -362,13 +362,27 @@ export default function MessagesPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 pb-4">
             {messages.map((msg) => {
               const isFromMe = msg.senderId === currentUserId;
               const sender = isFromMe ? msg.sender : msg.recipient;
               const displayName = sender.name || sender.email || "Utilisateur";
-              const content = msg.content || "";
+              let content = msg.content || "";
               const isImage = (content.startsWith("/") || content.startsWith("http")) && /\.(png|jpe?g|gif|webp|svg)$/i.test(content);
+              
+              // Détecter si le message contient un reservationId pour afficher un bouton de paiement
+              const reservationIdMatch = content.match(/RESERVATION_ID:([a-f0-9-]+)/i);
+              const reservationId = reservationIdMatch ? reservationIdMatch[1] : null;
+              // Retirer le reservationId du contenu affiché
+              if (reservationId) {
+                content = content.replace(/\n?RESERVATION_ID:[a-f0-9-]+/i, '').trim();
+              }
+
+              // Vérifier si le message de paiement est encore valide (24h après l'envoi)
+              const messageDate = new Date(msg.createdAt);
+              const now = new Date();
+              const hoursSinceMessage = (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+              const isPaymentMessageValid = reservationId && !isFromMe && hoursSinceMessage < 24;
 
               return (
                 <div
@@ -382,7 +396,7 @@ export default function MessagesPage() {
                       className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                     />
                   )}
-                  <div className={`max-w-[70%] ${isFromMe ? "order-2" : ""}`}>
+                  <div className={`max-w-[70%] min-w-0 ${isFromMe ? "order-2" : ""}`}>
                     {!isFromMe && (
                       <div className="text-xs text-gray-500 mb-1 px-2">{displayName}</div>
                     )}
@@ -395,22 +409,46 @@ export default function MessagesPage() {
                             className="rounded-lg max-w-[280px] md:max-w-xs lg:max-w-sm object-cover border border-gray-200 bg-white"
                           />
                         </a>
-                        <div className={`text-xs mt-1 ${isFromMe ? "text-blue-300" : "text-gray-400"}`}>
+                        <div className={`text-xs mt-1 ${isFromMe ? "text-white" : "text-gray-400"}`}>
                           {new Date(msg.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                         </div>
                       </div>
                     ) : (
                       <div
-                        className={`rounded-lg px-4 py-2 ${
+                        className={`rounded-lg px-4 py-3 ${
                           isFromMe
                             ? "bg-blue-500 text-white"
-                            : "bg-white text-gray-900 border border-gray-200"
+                            : "bg-white text-gray-900 border border-gray-200 shadow-sm"
                         }`}
+                        style={{ wordBreak: 'break-word' }}
                       >
-                        <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                        <p className={`text-sm whitespace-pre-wrap break-words leading-relaxed ${isFromMe ? 'text-white' : 'text-gray-900'}`}>{content}</p>
+                        {/* Afficher un bouton de paiement si c'est un message d'acceptation de réservation et qu'il est encore valide (moins de 24h) */}
+                        {reservationId && !isFromMe && (
+                          <div className="mt-3 pt-3 border-t border-gray-300 -mx-1 px-1">
+                            {isPaymentMessageValid ? (
+                              <>
+                                <button
+                                  onClick={() => router.push(`/payment/${reservationId}`)}
+                                  className="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm shadow-sm active:bg-green-800"
+                                  type="button"
+                                >
+                                  💳 Procéder au paiement
+                                </button>
+                                <p className="text-xs text-gray-500 mt-2 text-center">
+                                  Valable pendant encore {Math.max(0, Math.floor(24 - hoursSinceMessage))}h {Math.max(0, Math.floor((24 - hoursSinceMessage) % 1 * 60))}min
+                                </p>
+                              </>
+                            ) : (
+                              <div className="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-center text-sm border border-gray-300">
+                                ⏰ Ce lien de paiement a expiré (valable 24h après l'acceptation)
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <div
-                          className={`text-xs mt-1 ${
-                            isFromMe ? "text-blue-100" : "text-gray-400"
+                          className={`text-xs mt-2 pt-1 ${
+                            isFromMe ? "text-white" : "text-gray-400"
                           }`}
                         >
                           {new Date(msg.createdAt).toLocaleTimeString("fr-FR", {
@@ -493,16 +531,20 @@ export default function MessagesPage() {
     </div>
   );
 
+  // Calculer la hauteur disponible en tenant compte du header
+  // Le header a environ 64px de hauteur (avec padding py-3)
+  const headerHeight = 64;
+  
   if (isMobile) {
     return (
-      <div className="flex flex-col h-screen bg-white">
+      <div className="flex flex-col bg-white" style={{ minHeight: `calc(100vh - ${headerHeight}px)`, marginTop: `${headerHeight}px`, paddingTop: 0 }}>
         {showMobileList && (
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
             {conversationListContent}
           </div>
         )}
         {!showMobileList && (
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
             {conversationArea}
           </div>
         )}
@@ -511,11 +553,22 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex bg-white">
-      <div className="w-80 border-r border-gray-200 flex flex-col">
+    <div 
+      className="absolute flex bg-white" 
+      style={{ 
+        top: `${headerHeight}px`, 
+        left: 0, 
+        right: 0, 
+        bottom: 0, 
+        zIndex: 20, 
+        height: `calc(100vh - ${headerHeight}px)`, 
+        width: '100%' 
+      }}
+    >
+      <div className="w-80 border-r border-gray-200 flex flex-col overflow-hidden h-full">
         {conversationListContent}
       </div>
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden h-full">
         {conversationArea}
       </div>
     </div>

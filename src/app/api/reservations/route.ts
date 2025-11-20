@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../../../lib/prisma";
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("userId");
@@ -40,7 +38,53 @@ export async function POST(req: NextRequest) {
         amount,
         status: "pending", // Toujours "pending" jusqu'à acceptation manuelle par le propriétaire
       },
+      include: {
+        pool: {
+          select: {
+            title: true,
+            ownerId: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
+
+    // Envoyer un message au propriétaire pour l'informer de la demande de réservation
+    if (reservation.pool.ownerId && reservation.pool.ownerId !== userId) {
+      try {
+        const startDateFormatted = new Date(startDate).toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        const endDateFormatted = new Date(endDate).toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        await prisma.message.create({
+          data: {
+            senderId: userId,
+            recipientId: reservation.pool.ownerId,
+            content: `Nouvelle demande de réservation pour "${reservation.pool.title}"\n\nDu ${startDateFormatted} au ${endDateFormatted}\nMontant: ${amount} €\n\nVeuillez accepter ou refuser cette demande dans votre tableau de bord.`,
+          },
+        });
+      } catch (msgError) {
+        console.error("Erreur lors de l'envoi du message au propriétaire:", msgError);
+        // Ne pas bloquer la création de la réservation si le message échoue
+      }
+    }
+
     return NextResponse.json({ reservation });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
@@ -66,7 +110,23 @@ export async function PATCH(req: NextRequest) {
     const updated = await prisma.reservation.update({
       where: { id },
       data: { status },
-      include: { pool: true, transaction: true },
+      include: { 
+        pool: {
+          select: {
+            id: true,
+            title: true,
+            ownerId: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        transaction: true,
+      },
     });
 
     // Mettre à jour la disponibilité de la piscine selon le statut
@@ -76,6 +136,37 @@ export async function PATCH(req: NextRequest) {
       }
       // IMPORTANT: ne pas réactiver automatiquement; l'owner gère manuellement via la checkbox
     } catch {}
+
+    // Si la réservation est acceptée, envoyer un message au locataire avec un lien de paiement
+    if (status === "accepted" && updated.user && updated.pool.ownerId) {
+      try {
+        const startDateFormatted = new Date(updated.startDate).toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        const endDateFormatted = new Date(updated.endDate).toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        await prisma.message.create({
+          data: {
+            senderId: updated.pool.ownerId,
+            recipientId: updated.user.id,
+            content: `Votre demande de réservation pour "${updated.pool.title}" a été acceptée !\n\nDu ${startDateFormatted} au ${endDateFormatted}\nMontant: ${updated.amount} €\n\nCliquez sur le bouton ci-dessous pour procéder au paiement.\n\nRESERVATION_ID:${updated.id}`,
+          },
+        });
+      } catch (msgError) {
+        console.error("Erreur lors de l'envoi du message au locataire:", msgError);
+        // Ne pas bloquer la mise à jour de la réservation si le message échoue
+      }
+    }
 
     return NextResponse.json({ reservation: updated });
   } catch (e: any) {
