@@ -163,35 +163,37 @@ export default function SearchPage() {
           signal: controller.signal,
         });
         if (!res.ok) {
-          throw new Error("Adresse API error");
+          console.warn("Adresse API error:", res.status);
+          setLocationSuggestions([]);
+        } else {
+          const data = await res.json();
+          const features = Array.isArray(data?.features) ? data.features : [];
+          setLocationSuggestions(
+            features
+              .map((feature: any) => {
+                const label = String(feature?.properties?.label ?? "");
+                if (!label) return null;
+                const coords = Array.isArray(feature?.geometry?.coordinates)
+                  ? feature.geometry.coordinates
+                  : null;
+                if (!coords || typeof coords[0] !== "number" || typeof coords[1] !== "number") {
+                  return null;
+                }
+                const props = feature?.properties ?? {};
+                const formatted = [props?.housenumber, props?.street, props?.locality, props?.postcode, props?.city]
+                  .map((part: any) => (typeof part === 'string' ? part : ''))
+                  .filter(Boolean)
+                  .join(', ');
+                return {
+                  label,
+                  context: formatted || (typeof props?.context === 'string' ? props.context : undefined),
+                  longitude: coords[0],
+                  latitude: coords[1],
+                };
+              })
+              .filter((item: LocationSuggestion | null): item is LocationSuggestion => Boolean(item))
+          );
         }
-        const data = await res.json();
-        const features = Array.isArray(data?.features) ? data.features : [];
-        setLocationSuggestions(
-          features
-            .map((feature: any) => {
-              const label = String(feature?.properties?.label ?? "");
-              if (!label) return null;
-              const coords = Array.isArray(feature?.geometry?.coordinates)
-                ? feature.geometry.coordinates
-                : null;
-              if (!coords || typeof coords[0] !== "number" || typeof coords[1] !== "number") {
-                return null;
-              }
-              const props = feature?.properties ?? {};
-              const formatted = [props?.housenumber, props?.street, props?.locality, props?.postcode, props?.city]
-                .map((part: any) => (typeof part === 'string' ? part : ''))
-                .filter(Boolean)
-                .join(', ');
-              return {
-                label,
-                context: formatted || (typeof props?.context === 'string' ? props.context : undefined),
-                longitude: coords[0],
-                latitude: coords[1],
-              };
-            })
-            .filter((item: LocationSuggestion | null): item is LocationSuggestion => Boolean(item))
-        );
       } catch (error) {
         if (controller.signal.aborted) {
           return;
@@ -341,6 +343,25 @@ export default function SearchPage() {
   const hasMin = !Number.isNaN(parsedMin) && minPrice !== "";
   const hasMax = !Number.isNaN(parsedMax) && maxPrice !== "";
 
+  const parseCoordinate = (value: any): number | null => {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const parsed = parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    if (value && typeof value === "object") {
+      if (typeof value.toNumber === "function") {
+        const parsed = value.toNumber();
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+      if ("value" in value && typeof (value as { value: number }).value === "number") {
+        const parsed = Number((value as { value: number }).value);
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+    }
+    return null;
+  };
+
   const displayedPools = pools
     .filter((p: any) => {
       const price: number = Number(p?.pricePerHour ?? 0);
@@ -382,19 +403,24 @@ export default function SearchPage() {
       return true;
     })
     .map((p: any) => {
-      const hasPoolCoords = typeof p?.latitude === 'number' && typeof p?.longitude === 'number';
-      const hasSelectedCoords = selectedLocationCoords && typeof selectedLocationCoords.latitude === 'number' && typeof selectedLocationCoords.longitude === 'number';
+      const lat = parseCoordinate(p?.latitude);
+      const lon = parseCoordinate(p?.longitude);
+      const hasPoolCoords = lat !== null && lon !== null;
+      const hasSelectedCoords =
+        selectedLocationCoords &&
+        typeof selectedLocationCoords.latitude === "number" &&
+        typeof selectedLocationCoords.longitude === "number";
       let distanceKm: number | null = null;
       if (hasPoolCoords && hasSelectedCoords) {
         const toRad = (value: number) => (value * Math.PI) / 180;
         const R = 6371; // rayon de la Terre en km
-        const dLat = toRad(p.latitude - selectedLocationCoords!.latitude);
-        const dLon = toRad(p.longitude - selectedLocationCoords!.longitude);
+        const dLat = toRad(lat! - selectedLocationCoords!.latitude);
+        const dLon = toRad(lon! - selectedLocationCoords!.longitude);
         const lat1 = toRad(selectedLocationCoords!.latitude);
-        const lat2 = toRad(p.latitude);
+        const lat2 = toRad(lat!);
         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        distanceKm = Math.round((R * c) * 10) / 10;
+        distanceKm = Math.round(R * c * 10) / 10;
       }
       return { ...p, distanceKm };
     })
@@ -446,7 +472,6 @@ export default function SearchPage() {
               onClick={() => setSearchDrawerOpen(true)}
               className="flex flex-1 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm"
             >
-              <span className="text-xl">◀</span>
               <span className="font-semibold">{selectedLocation || "France"}</span>
               <span className="text-gray-500 truncate">
                 {searchDate || "Ajoutez une date"}
@@ -476,9 +501,9 @@ export default function SearchPage() {
             <button 
               onClick={() => handleSortChange('closest')}
               className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
-                filters.sortBy === 'closest' 
-                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                  : 'text-gray-700'
+                filters.sortBy === 'closest'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                  : 'text-gray-900 bg-white border-gray-200'
               }`}
             >
               <span>🌍</span>
@@ -490,9 +515,9 @@ export default function SearchPage() {
             <button
               onClick={() => handleSortChange('top')}
               className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
-                filters.sortBy === 'top' 
-                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                  : 'text-gray-700'
+                filters.sortBy === 'top'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                  : 'text-gray-900 bg-white border-gray-200'
               }`}
             >
               <span>⭐</span>
@@ -501,9 +526,9 @@ export default function SearchPage() {
             <button
               onClick={() => handleSortChange('instant')}
               className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
-                filters.sortBy === 'instant' 
-                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                  : 'text-gray-700'
+                filters.sortBy === 'instant'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                  : 'text-gray-900 bg-white border-gray-200'
               }`}
             >
               <span>⚡</span>

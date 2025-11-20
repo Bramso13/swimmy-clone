@@ -233,7 +233,9 @@ export default function PoolCard({ pool }: { pool: Pool }) {
               <p className="text-sm text-gray-600 line-clamp-2">{locationText}</p>
             )}
             {distanceLabel && (
-              <p className="text-sm font-medium text-gray-800">{distanceLabel}</p>
+              <p className="text-sm font-semibold text-gray-800">
+                Distance : {distanceLabel}
+              </p>
             )}
           </div>
         )}
