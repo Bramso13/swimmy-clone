@@ -417,13 +417,13 @@ export default function Home() {
         </section>
       
       {/* Sécurité */}
-      <section className="py-16 bg-gray-100 w-full -mx-4 px-4">
+      <section className="py-16 bg-gray-100 w-full px-4">
         <div className="max-w-5xl mx-auto space-y-8 text-center">
           <div>
             <p className="text-sm font-semibold tracking-[0.3em] text-gray-500 uppercase">Sécurité & sérénité</p>
             <h2 className="text-3xl md:text-4xl font-bold mt-3">🧼 On a tout prévu pour que vous plongiez sereinement</h2>
           </div>
-          <div className="grid md:grid-cols-2 gap-4 text-left">
+          <div className="grid md:grid-cols-2 gap-4 text-left max-w-2xl mx-auto">
             {[
               { title: "Propriétaires vérifiés", desc: "Chaque hôte est vérifié avant de publier sa piscine." },
               { title: "Conditions d’hygiène claires", desc: "L’eau et les équipements répondent à un niveau d’exigence précis." },
