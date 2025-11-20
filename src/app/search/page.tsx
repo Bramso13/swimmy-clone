@@ -4,6 +4,32 @@ import PoolCard from "@/components/PoolCard";
 import SideMenu from "@/components/SideMenu";
 import { useSearchParams } from "next/navigation";
 
+const parseCoordinate = (value: any): number | null => {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (value && typeof value === "object") {
+    if (typeof value.toNumber === "function") {
+      const parsed = value.toNumber();
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    if ("value" in value && typeof (value as { value: number }).value === "number") {
+      const parsed = Number((value as { value: number }).value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+  }
+  return null;
+};
+
+const normalizeAddress = (value: unknown): string | null => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return trimmed.toLowerCase();
+};
+
 async function getPools() {
   const base =
     process.env.NEXT_PUBLIC_BASE_URL ||
@@ -53,6 +79,7 @@ export default function SearchPage() {
   const [locationLoading, setLocationLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [selectedLocationCoords, setSelectedLocationCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [addressCoords, setAddressCoords] = useState<Record<string, { latitude: number; longitude: number }>>({});
   const locationRef = React.useRef<HTMLDivElement | null>(null);
   const locationInputRef = React.useRef<HTMLInputElement | null>(null);
   const EQUIPMENT_OPTIONS: string[] = [
@@ -233,6 +260,63 @@ export default function SearchPage() {
     setLocationOpen(false);
   };
 
+  const applyLocationFromQuery = React.useCallback(async () => {
+    const query = locationQuery.trim();
+    if (query.length === 0) {
+      return;
+    }
+
+    if (
+      selectedLocation &&
+      selectedLocationCoords &&
+      selectedLocation.trim().toLowerCase() === query.toLowerCase()
+    ) {
+      return;
+    }
+
+    const matchingSuggestion =
+      locationSuggestions.find((s) => s.label.toLowerCase() === query.toLowerCase()) ||
+      locationSuggestions[0];
+    if (matchingSuggestion) {
+      handleLocationSelect(matchingSuggestion);
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        q: query,
+        limit: "1",
+        autocomplete: "1",
+        type: "housenumber,street,locality,municipality",
+      });
+      const res = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
+      if (!res.ok) {
+        return;
+      }
+      const data = await res.json();
+      const feature = Array.isArray(data?.features) ? data.features[0] : null;
+      const coords = Array.isArray(feature?.geometry?.coordinates)
+        ? feature.geometry.coordinates
+        : null;
+      if (
+        !feature ||
+        typeof coords?.[0] !== "number" ||
+        typeof coords?.[1] !== "number" ||
+        typeof feature?.properties?.label !== "string"
+      ) {
+        return;
+      }
+      handleLocationSelect({
+        label: feature.properties.label,
+        context: feature.properties.context,
+        longitude: coords[0],
+        latitude: coords[1],
+      });
+    } catch (error) {
+      console.error("Erreur géocodage manuel:", error);
+    }
+  }, [locationQuery, locationSuggestions, selectedLocation, selectedLocationCoords]);
+
   const handleLocationKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -343,24 +427,78 @@ export default function SearchPage() {
   const hasMin = !Number.isNaN(parsedMin) && minPrice !== "";
   const hasMax = !Number.isNaN(parsedMax) && maxPrice !== "";
 
-  const parseCoordinate = (value: any): number | null => {
-    if (typeof value === "number" && Number.isFinite(value)) return value;
-    if (typeof value === "string") {
-      const parsed = parseFloat(value);
-      return Number.isFinite(parsed) ? parsed : null;
+  const addressesNeedingCoords = React.useMemo(() => {
+    const needed = new Set<string>();
+    for (const pool of pools) {
+      const key = normalizeAddress(pool?.address);
+      if (!key) continue;
+      const lat = parseCoordinate(pool?.latitude);
+      const lon = parseCoordinate(pool?.longitude);
+      if (lat !== null && lon !== null) continue;
+      if (addressCoords[key]) continue;
+      needed.add(key);
     }
-    if (value && typeof value === "object") {
-      if (typeof value.toNumber === "function") {
-        const parsed = value.toNumber();
-        return Number.isFinite(parsed) ? parsed : null;
+    return Array.from(needed);
+  }, [pools, addressCoords]);
+
+  React.useEffect(() => {
+    if (addressesNeedingCoords.length === 0) return;
+    let cancelled = false;
+    const fetchCoords = async () => {
+      for (const address of addressesNeedingCoords) {
+        if (cancelled) break;
+        try {
+          const params = new URLSearchParams({
+            q: address,
+            limit: "1",
+            autocomplete: "1",
+            type: "housenumber,street,locality,municipality",
+          });
+          const res = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
+          if (!res.ok) {
+            continue;
+          }
+          const data = await res.json();
+          const feature = Array.isArray(data?.features) ? data.features[0] : null;
+          const coords = Array.isArray(feature?.geometry?.coordinates)
+            ? feature.geometry.coordinates
+            : null;
+          if (
+            !feature ||
+            !coords ||
+            typeof coords[0] !== "number" ||
+            typeof coords[1] !== "number"
+          ) {
+            continue;
+          }
+          setAddressCoords((prev) => {
+            if (cancelled || prev[address]) return prev;
+            return {
+              ...prev,
+              [address]: { latitude: coords[1], longitude: coords[0] },
+            };
+          });
+        } catch (error) {
+          if (!cancelled) {
+            console.error("Erreur géocodage piscine:", error);
+          }
+        }
+        await new Promise((resolve) => setTimeout(resolve, 150));
       }
-      if ("value" in value && typeof (value as { value: number }).value === "number") {
-        const parsed = Number((value as { value: number }).value);
-        return Number.isFinite(parsed) ? parsed : null;
-      }
-    }
-    return null;
-  };
+    };
+    fetchCoords();
+    return () => {
+      cancelled = true;
+    };
+  }, [addressesNeedingCoords]);
+
+  const shouldSortByDistance =
+    filters.sortBy === "closest" ||
+    Boolean(
+      selectedLocationCoords &&
+        typeof selectedLocationCoords.latitude === "number" &&
+        typeof selectedLocationCoords.longitude === "number"
+    );
 
   const displayedPools = pools
     .filter((p: any) => {
@@ -403,14 +541,20 @@ export default function SearchPage() {
       return true;
     })
     .map((p: any) => {
-      const lat = parseCoordinate(p?.latitude);
-      const lon = parseCoordinate(p?.longitude);
+      const addressKey = normalizeAddress(p?.address);
+      let lat = parseCoordinate(p?.latitude);
+      let lon = parseCoordinate(p?.longitude);
+      if ((lat === null || lon === null) && addressKey && addressCoords[addressKey]) {
+        lat = addressCoords[addressKey].latitude;
+        lon = addressCoords[addressKey].longitude;
+      }
       const hasPoolCoords = lat !== null && lon !== null;
       const hasSelectedCoords =
         selectedLocationCoords &&
         typeof selectedLocationCoords.latitude === "number" &&
         typeof selectedLocationCoords.longitude === "number";
       let distanceKm: number | null = null;
+      let distanceSort = hasSelectedCoords ? Number.POSITIVE_INFINITY : 0;
       if (hasPoolCoords && hasSelectedCoords) {
         const toRad = (value: number) => (value * Math.PI) / 180;
         const R = 6371; // rayon de la Terre en km
@@ -421,18 +565,26 @@ export default function SearchPage() {
         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         distanceKm = Math.round(R * c * 10) / 10;
+        distanceSort = distanceKm;
       }
-      return { ...p, distanceKm };
+      return { ...p, distanceKm, distanceSort };
     })
     .sort((a: any, b: any) => {
-      if (selectedLocationCoords) {
-        const aHas = typeof a.distanceKm === 'number';
-        const bHas = typeof b.distanceKm === 'number';
-        if (aHas && bHas) {
-          return a.distanceKm - b.distanceKm;
+      if (shouldSortByDistance) {
+        const aValue =
+          typeof a.distanceSort === "number" && Number.isFinite(a.distanceSort)
+            ? a.distanceSort
+            : Number.POSITIVE_INFINITY;
+        const bValue =
+          typeof b.distanceSort === "number" && Number.isFinite(b.distanceSort)
+            ? b.distanceSort
+            : Number.POSITIVE_INFINITY;
+        if (aValue !== bValue) {
+          return aValue - bValue;
         }
-        if (aHas) return -1;
-        if (bHas) return 1;
+        if (aValue === Number.POSITIVE_INFINITY && bValue === Number.POSITIVE_INFINITY) {
+          return 0;
+        }
       }
       return 0;
     });
@@ -563,8 +715,8 @@ export default function SearchPage() {
               onClick={() => handleFilterChange('jacuzzi')}
               className={`flex items-center gap-2 rounded-full border px-4 py-2 ${
                 filters.jacuzzi 
-                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                  : 'text-gray-700'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
+                  : 'text-gray-900 bg-white border-gray-200'
               }`}
             >
               <span>🛁</span>
@@ -574,7 +726,11 @@ export default function SearchPage() {
             <div className="relative">
               <button 
                 onClick={togglePricePanel}
-                className={`rounded-full border px-4 py-2 ${showPrice ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}`}
+                className={`rounded-full border px-4 py-2 ${
+                  showPrice
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'text-gray-900 bg-white border-gray-200'
+                }`}
               >
                 Prix
               </button>
@@ -834,7 +990,10 @@ export default function SearchPage() {
               </div>
               <button
                 className="w-full rounded-full bg-blue-600 px-4 py-3 text-white font-semibold"
-                onClick={() => setSearchDrawerOpen(false)}
+                onClick={async () => {
+                  await applyLocationFromQuery();
+                  setSearchDrawerOpen(false);
+                }}
               >
                 Afficher les résultats
               </button>
