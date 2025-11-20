@@ -317,10 +317,30 @@ const NewPoolPage = () => {
                             )}
                           </ul>
                         )}
+                        {!addressLoading && (
+                          <div
+                            className="border-t px-3 py-2 text-[11px] text-white"
+                            style={{ backgroundColor: BRAND_BLUE }}
+                          >
+                            Sélectionnez une suggestion pour enregistrer l’adresse exacte : c’est elle qui sera utilisée
+                            pour le filtre « Au plus proche ».
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Indiquez l'adresse complète pour que les locataires puissent vous trouver facilement</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Indiquez l'adresse complète pour que les locataires puissent vous trouver facilement
+                  </p>
+                  <div className="mt-2 rounded-lg border border-blue-500 p-3 text-xs text-white space-y-1" style={{ backgroundColor: BRAND_BLUE }}>
+                    <p className="font-semibold">Conseils adresse (utile pour le filtre « Au plus proche »)</p>
+                    <ul className="list-disc pl-4 space-y-1 text-white/90">
+                      <li>Saisissez une adresse complète : numéro, rue, code postal et ville.</li>
+                      <li>Sélectionnez l’une des suggestions proposées pour enregistrer les coordonnées GPS.</li>
+                      <li>Ces coordonnées permettent à votre annonce d’apparaître lorsque les locataires filtrent par adresse.</li>
+                    </ul>
+                    <p className="italic text-white/80">Exemple attendu : « 8 Quai Antoine Riboud, 69002 Lyon, France ».</p>
+                  </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                   <div>

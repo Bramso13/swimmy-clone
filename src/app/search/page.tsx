@@ -542,6 +542,7 @@ export default function SearchPage() {
     })
     .map((p: any) => {
       const addressKey = normalizeAddress(p?.address);
+      const hasAddress = Boolean(addressKey);
       let lat = parseCoordinate(p?.latitude);
       let lon = parseCoordinate(p?.longitude);
       if ((lat === null || lon === null) && addressKey && addressCoords[addressKey]) {
@@ -554,8 +555,8 @@ export default function SearchPage() {
         typeof selectedLocationCoords.latitude === "number" &&
         typeof selectedLocationCoords.longitude === "number";
       let distanceKm: number | null = null;
-      let distanceSort = hasSelectedCoords ? Number.POSITIVE_INFINITY : 0;
-      if (hasPoolCoords && hasSelectedCoords) {
+      let distanceSort = Number.POSITIVE_INFINITY;
+      if (hasPoolCoords && hasSelectedCoords && hasAddress) {
         const toRad = (value: number) => (value * Math.PI) / 180;
         const R = 6371; // rayon de la Terre en km
         const dLat = toRad(lat! - selectedLocationCoords!.latitude);
@@ -567,10 +568,14 @@ export default function SearchPage() {
         distanceKm = Math.round(R * c * 10) / 10;
         distanceSort = distanceKm;
       }
-      return { ...p, distanceKm, distanceSort };
+      const addressPenalty = hasAddress ? 0 : 1;
+      return { ...p, distanceKm, distanceSort, addressPenalty };
     })
     .sort((a: any, b: any) => {
       if (shouldSortByDistance) {
+        if (a.addressPenalty !== b.addressPenalty) {
+          return a.addressPenalty - b.addressPenalty;
+        }
         const aValue =
           typeof a.distanceSort === "number" && Number.isFinite(a.distanceSort)
             ? a.distanceSort
@@ -581,9 +586,6 @@ export default function SearchPage() {
             : Number.POSITIVE_INFINITY;
         if (aValue !== bValue) {
           return aValue - bValue;
-        }
-        if (aValue === Number.POSITIVE_INFINITY && bValue === Number.POSITIVE_INFINITY) {
-          return 0;
         }
       }
       return 0;
