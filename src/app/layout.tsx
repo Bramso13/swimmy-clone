@@ -45,9 +45,6 @@ export default function RootLayout({
                   <div className="mb-2">
                     <Image src="/yoompool-logo.svg" alt="Logo YoumPool" width={160} height={58} priority />
                   </div>
-                  <p className="text-sm" style={{ color: 'var(--brand-blue)' }}>
-                    Le premier site de location de piscines privées en France.
-                  </p>
                 </div>
 
                 {/* Colonne NEWS */}

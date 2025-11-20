@@ -121,8 +121,8 @@ const ProfilePage = () => {
           <div className="flex items-center gap-2">
             <span className={`px-4 py-2 rounded-full font-semibold text-sm ${
               fullUser.role === "owner" 
-                ? "bg-yellow-400 text-yellow-900" 
-                : "bg-blue-400 text-blue-900"
+                ? "bg-yellow-400 text-white" 
+                : "bg-blue-400 text-white"
             }`}>
               {fullUser.role === "owner" ? "👑 Propriétaire (Owner)" : "🏊 Locataire (Tenant)"}
             </span>
