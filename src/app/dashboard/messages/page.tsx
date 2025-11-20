@@ -57,6 +57,7 @@ export default function MessagesPage() {
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileList, setShowMobileList] = useState(true);
+  const [headerHeight, setHeaderHeight] = useState(64);
   const router = useRouter();
 
   // Récupérer l'ID de l'utilisateur connecté
@@ -129,6 +130,24 @@ export default function MessagesPage() {
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // Calculer la hauteur réelle du header
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.querySelector('nav[class*="sticky"]');
+      if (header) {
+        setHeaderHeight(header.getBoundingClientRect().height);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    // Vérifier après un court délai pour s'assurer que le header est rendu
+    const timeout = setTimeout(updateHeaderHeight, 100);
+    return () => {
+      window.removeEventListener('resize', updateHeaderHeight);
+      clearTimeout(timeout);
+    };
   }, []);
 
   useEffect(() => {
@@ -562,13 +581,15 @@ export default function MessagesPage() {
     </div>
   );
 
-  // Calculer la hauteur disponible en tenant compte du header
-  // Le header a environ 64px de hauteur (avec padding py-3)
-  const headerHeight = 64;
-  
   if (isMobile) {
     return (
-      <div className="flex flex-col bg-white" style={{ minHeight: `calc(100vh - ${headerHeight}px)`, marginTop: `${headerHeight}px`, paddingTop: 0 }}>
+      <div 
+        className="flex flex-col bg-white" 
+        style={{ 
+          height: `calc(100vh - ${headerHeight}px)`, 
+          marginTop: 0 
+        }}
+      >
         {showMobileList && (
           <div className="flex-1 flex flex-col overflow-hidden min-h-0">
             {conversationListContent}
@@ -585,21 +606,19 @@ export default function MessagesPage() {
 
   return (
     <div 
-      className="absolute flex bg-white" 
+      className="fixed left-0 right-0 flex bg-white"
       style={{ 
-        top: `${headerHeight}px`, 
-        left: 0, 
-        right: 0, 
-        bottom: 0, 
-        zIndex: 20, 
-        height: `calc(100vh - ${headerHeight}px)`, 
-        width: '100%' 
+        top: `${headerHeight}px`,
+        bottom: 0,
+        height: `calc(100vh - ${headerHeight}px)`,
+        width: '100%',
+        zIndex: 10
       }}
     >
-      <div className="w-80 border-r border-gray-200 flex flex-col overflow-hidden h-full">
+      <div className="w-80 border-r border-gray-200 flex flex-col overflow-hidden h-full flex-shrink-0">
         {conversationListContent}
       </div>
-      <div className="flex-1 flex flex-col overflow-hidden h-full">
+      <div className="flex-1 flex flex-col overflow-hidden h-full min-w-0">
         {conversationArea}
       </div>
     </div>
