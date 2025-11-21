@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "../../../../../lib/prisma";
-import { sendReservationConfirmationEmail } from "../../../../../lib/send-email";
+import { sendReservationConfirmationEmail } from "@/lib/send-email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-11-17.clover",
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       }
     } else if (event.type === "payment_intent.payment_failed") {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      
+
       await prisma.transaction.updateMany({
         where: { mangopayId: paymentIntent.id },
         data: { status: "failed" },
@@ -87,4 +87,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

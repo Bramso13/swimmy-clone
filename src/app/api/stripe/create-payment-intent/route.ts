@@ -4,7 +4,7 @@ import { prisma } from "../../../../../lib/prisma";
 import { auth } from "../../../../../lib/auth";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-11-17.clover",
 });
 
 export async function POST(req: NextRequest) {
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { reservationId } = await req.json();
-    
+
     if (!reservationId) {
       return NextResponse.json(
         { error: "reservationId est requis" },
@@ -47,55 +47,35 @@ export async function POST(req: NextRequest) {
     // Vérifier que la réservation est acceptée
     if (reservation.status !== "accepted") {
       return NextResponse.json(
-        { error: "Cette réservation n'est pas acceptée. Seules les réservations acceptées peuvent être payées." },
+        {
+          error:
+            "Cette réservation n'est pas acceptée. Seules les réservations acceptées peuvent être payées.",
+        },
         { status: 400 }
       );
     }
 
     // Vérifier que la réservation n'a pas déjà été payée
-    if (reservation.status === "paid") {
+    if (reservation.status === "accepted") {
       return NextResponse.json(
-        { error: "Cette réservation a déjà été payée" },
+        { error: "Cette réservation a déjà été acceptée" },
         { status: 400 }
       );
     }
 
-    // Vérifier que moins de 24h se sont écoulées depuis l'acceptation
-    // On cherche le message d'acceptation le plus récent pour cette réservation
-    const acceptanceMessage = await prisma.message.findFirst({
-      where: {
-        content: {
-          contains: `RESERVATION_ID:${reservationId}`,
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const reservationDate = new Date(reservation.updatedAt);
+    const now = new Date();
+    const hoursSinceUpdate =
+      (now.getTime() - reservationDate.getTime()) / (1000 * 60 * 60);
 
-    if (acceptanceMessage) {
-      const messageDate = new Date(acceptanceMessage.createdAt);
-      const now = new Date();
-      const hoursSinceAcceptance = (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
-      
-      if (hoursSinceAcceptance >= 24) {
-        return NextResponse.json(
-          { error: "Le délai de paiement a expiré. Vous avez 24 heures après l'acceptation pour effectuer le paiement." },
-          { status: 400 }
-        );
-      }
-    } else {
-      // Si on ne trouve pas le message, vérifier avec updatedAt de la réservation
-      const reservationDate = new Date(reservation.updatedAt);
-      const now = new Date();
-      const hoursSinceUpdate = (now.getTime() - reservationDate.getTime()) / (1000 * 60 * 60);
-      
-      if (hoursSinceUpdate >= 24) {
-        return NextResponse.json(
-          { error: "Le délai de paiement a expiré. Vous avez 24 heures après l'acceptation pour effectuer le paiement." },
-          { status: 400 }
-        );
-      }
+    if (hoursSinceUpdate >= 24) {
+      return NextResponse.json(
+        {
+          error:
+            "Le délai de paiement a expiré. Vous avez 24 heures après l'acceptation pour effectuer le paiement.",
+        },
+        { status: 400 }
+      );
     }
 
     // Créer ou récupérer le PaymentIntent
@@ -109,7 +89,9 @@ export async function POST(req: NextRequest) {
     if (existingTransaction?.mangopayId?.startsWith("pi_")) {
       // Récupérer le PaymentIntent existant
       try {
-        paymentIntent = await stripe.paymentIntents.retrieve(existingTransaction.mangopayId);
+        paymentIntent = await stripe.paymentIntents.retrieve(
+          existingTransaction.mangopayId
+        );
       } catch {
         // Si le PaymentIntent n'existe plus, en créer un nouveau
         paymentIntent = await stripe.paymentIntents.create({
@@ -169,4 +151,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
