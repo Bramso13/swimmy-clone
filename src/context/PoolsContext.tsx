@@ -8,6 +8,7 @@ type PoolsContextType = {
   poolsLoading: boolean;
   poolsError: string | null;
   fetchPools: () => Promise<void>;
+  fetchOwnerPools: (ownerId: string) => Promise<Pool[]>;
   getPoolById: (id: string) => Pool | undefined;
   searchPools: (query: string) => Pool[];
   clearPoolsError: () => void;
@@ -37,6 +38,22 @@ export const PoolsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const fetchOwnerPools = useCallback(async (ownerId: string): Promise<Pool[]> => {
+    try {
+      const response = await fetch(`/api/pools?ownerId=${encodeURIComponent(ownerId)}`, {
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des piscines du propriétaire");
+      }
+      const data = await response.json();
+      return Array.isArray(data.pools) ? data.pools : [];
+    } catch (error: any) {
+      setPoolsError(error.message || "Une erreur est survenue");
+      return [];
+    }
+  }, []);
+
   const getPoolById = useCallback(
     (id: string) => pools.find((pool) => pool.id === id),
     [pools]
@@ -63,6 +80,7 @@ export const PoolsProvider = ({ children }: { children: ReactNode }) => {
     poolsLoading,
     poolsError,
     fetchPools,
+    fetchOwnerPools,
     getPoolById,
     searchPools,
     clearPoolsError,
