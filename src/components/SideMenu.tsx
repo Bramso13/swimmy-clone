@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import MenuSection, { MenuEntry } from "@/components/navigation/MenuSection";
 
 export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -71,6 +72,47 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
     }
   };
 
+  const closeMenu = () => setOpen(false);
+
+  const guestMenu: MenuEntry[] = [
+    { key: "search", label: "Trouver une piscine", href: "/search" },
+    { key: "propose", label: "Proposer ma piscine", href: "/dashboard/pools/new", onClick: handleProposePool },
+    { key: "register", label: "Inscription", href: "/register" },
+    { key: "login", label: "Connexion", href: "/login" },
+    { key: "help", label: "Aide", href: "/settings" },
+    { key: "blog", label: "Blog", href: "/" },
+  ];
+
+  const authenticatedMenu: MenuEntry[] = [
+    { key: "dashboard", label: "Dashboard", href: "/dashboard" },
+    { key: "search", label: "Trouver ma piscine", href: "/search" },
+    { key: "new-pool", label: "Proposer ma piscine", href: "/dashboard/pools/new" },
+    { key: "messages", label: "Messages", href: "/dashboard/messages" },
+    { key: "reservations", label: "Réservations", href: "/dashboard/reservations" },
+    { key: "favorites", label: "Favoris", href: "/dashboard" },
+    { key: "account", label: "Compte", href: "/profile" },
+    { key: "help", label: "Aide", href: "/settings" },
+    { key: "blog", label: "Blog", href: "/" },
+  ];
+
+  const ownerMenu: MenuEntry[] =
+    user?.role === "owner"
+      ? [
+          { key: "availability", label: "📅 Vérifier la disponibilité", href: "/dashboard/availability", variant: "blue" },
+          { key: "users", label: "👥 Utilisateurs", href: "/dashboard/users", variant: "indigo" },
+          { key: "transactions", label: "📦 Vérifier les commandes", href: "/dashboard/transactions", variant: "emerald" },
+          { key: "accounting", label: "📊 Comptabilité", href: "/dashboard/comptabilite", variant: "purple" },
+        ]
+      : [];
+
+  const extraMessageShortcut: MenuEntry[] = [
+    { key: "inbox", label: "✉️ Messages", href: "/dashboard/messages" },
+  ];
+
+  const logoutItem: MenuEntry[] = [
+    { key: "logout", label: "Déconnexion", type: "button", onClick: handleLogout },
+  ];
+
   return (
     <>
       <button
@@ -122,127 +164,15 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
         <nav className="p-2">
           <ul className="flex flex-col">
             {/* Menu pour utilisateurs non connectés */}
-            {!user && !loading && [
-              { label: "Trouver une piscine", href: "/search" },
-              { 
-                label: "Proposer ma piscine", 
-                href: "/dashboard/pools/new",
-                requiresAuth: true 
-              },
-              { label: "Inscription", href: "/register" },
-              { label: "Connexion", href: "/login" },
-              { label: "Aide", href: "/settings" },
-              { label: "Blog", href: "/" },
-            ].map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  onClick={(e) => {
-                    setOpen(false);
-                    if (item.requiresAuth) {
-                      handleProposePool(e);
-                    }
-                  }}
-                  className="block px-4 py-3 hover:bg-muted rounded-md"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            {!user && !loading && <MenuSection items={guestMenu} onNavigate={closeMenu} />}
 
             {/* Menu pour utilisateurs connectés */}
             {user && !loading && (
               <>
-                {[
-                  { label: "Dashboard", href: "/dashboard" },
-                  { label: "Trouver ma piscine", href: "/search" },
-                  { label: "Proposer ma piscine", href: "/dashboard/pools/new" },
-                  { label: "Messages", href: "/dashboard/messages" },
-                  { label: "Reservations", href: "/dashboard/reservations" },
-                  { label: "Favoris", href: "/dashboard" },
-                  { label: "Compte", href: "/profile" },
-                  { label: "Aide", href: "/settings" },
-                  { label: "Blog", href: "/" },
-                ].map((item) => (
-                  <li key={item.label}>
-                    <Link
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className="block px-4 py-3 hover:bg-muted rounded-md"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-                {/* Bouton de déconnexion séparé */}
-                <li>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-3 hover:bg-muted rounded-md"
-                  >
-                    Déconnexion
-                  </button>
-                </li>
-                
-                {/* Option supplémentaire pour les owners/admins */}
-                {user.role === "owner" && (
-                  <>
-                    <li>
-                      <Link
-                        href="/dashboard/availability"
-                        onClick={() => setOpen(false)}
-                        className="block px-4 py-3 hover:bg-muted rounded-md bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
-                      >
-                        📅 Vérifier la disponibilité
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="/dashboard/users"
-                        onClick={() => setOpen(false)}
-                        className="block px-4 py-3 hover:bg-muted rounded-md bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-500"
-                      >
-                        👥 Utilisateurs
-                      </Link>
-                    </li>
-                  </>
-                )}
-
-                {/* Vérifier les commandes (owners) */}
-                {user.role === "owner" && (
-                  <li>
-                    <Link
-                      href="/dashboard/transactions"
-                      onClick={() => setOpen(false)}
-                      className="block px-4 py-3 hover:bg-muted rounded-md bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500"
-                    >
-                      📦 Vérifier les commandes
-                    </Link>
-                  </li>
-                )}
-
-                {user.role === "owner" && (
-                  <li>
-                    <Link
-                      href="/dashboard/comptabilite"
-                      onClick={() => setOpen(false)}
-                      className="block px-4 py-3 hover:bg-muted rounded-md bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500"
-                    >
-                      📊 Comptabilité
-                    </Link>
-                  </li>
-                )}
-
-                {/* Messages reçus */}
-                <li>
-                  <Link
-                    href="/dashboard/messages"
-                    onClick={() => setOpen(false)}
-                    className="block px-4 py-3 hover:bg-muted rounded-md"
-                  >
-                    ✉️ Messages
-                  </Link>
-                </li>
+                <MenuSection items={authenticatedMenu} onNavigate={closeMenu} />
+                {user.role === "owner" && <MenuSection items={ownerMenu} onNavigate={closeMenu} />}
+                <MenuSection items={logoutItem} onNavigate={closeMenu} />
+                <MenuSection items={extraMessageShortcut} onNavigate={closeMenu} />
               </>
             )}
 

@@ -1,5 +1,19 @@
 "use client";
 import Link from "next/link";
+import FormField from "@/components/forms/FormField";
+import TextInput from "@/components/forms/TextInput";
+import SelectInput from "@/components/forms/SelectInput";
+import TextAreaInput from "@/components/forms/TextAreaInput";
+import PrimaryButton from "@/components/forms/PrimaryButton";
+
+const subjectOptions = [
+  { value: "", label: "Sélectionnez un sujet" },
+  { value: "question", label: "Question générale" },
+  { value: "reservation", label: "Problème de réservation" },
+  { value: "paiement", label: "Problème de paiement" },
+  { value: "proprietaire", label: "Devenir propriétaire" },
+  { value: "autre", label: "Autre" },
+];
 
 export default function ContactPage() {
   return (
@@ -22,72 +36,25 @@ export default function ContactPage() {
             </h2>
             
             <form className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom complet
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Votre nom"
-                />
-              </div>
+              <FormField label="Nom complet" htmlFor="name">
+                <TextInput type="text" id="name" name="name" placeholder="Votre nom" />
+              </FormField>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="votre@email.com"
-                />
-              </div>
+              <FormField label="Email" htmlFor="email">
+                <TextInput type="email" id="email" name="email" placeholder="votre@email.com" />
+              </FormField>
 
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                  Sujet
-                </label>
-                <select
-                  id="subject"
-                  name="subject"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Sélectionnez un sujet</option>
-                  <option value="question">Question générale</option>
-                  <option value="reservation">Problème de réservation</option>
-                  <option value="paiement">Problème de paiement</option>
-                  <option value="proprietaire">Devenir propriétaire</option>
-                  <option value="autre">Autre</option>
-                </select>
-              </div>
+              <FormField label="Sujet" htmlFor="subject">
+                <SelectInput id="subject" name="subject" options={subjectOptions} />
+              </FormField>
 
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Décrivez votre demande..."
-                ></textarea>
-              </div>
+              <FormField label="Message" htmlFor="message">
+                <TextAreaInput id="message" name="message" rows={6} placeholder="Décrivez votre demande..." />
+              </FormField>
 
-              <button
-                type="submit"
-                className="w-full text-white py-3 px-6 rounded-lg font-medium transition"
-                style={{ backgroundColor: 'var(--brand-blue)' }}
-                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = 'color-mix(in srgb, var(--brand-blue) 85%, black)'}
-                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'var(--brand-blue)'}
-              >
+              <PrimaryButton type="submit" className="w-full justify-center">
                 Envoyer le message
-              </button>
+              </PrimaryButton>
             </form>
           </div>
 

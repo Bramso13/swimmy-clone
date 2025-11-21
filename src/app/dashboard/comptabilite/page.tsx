@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RevenueSnapshotCard from "@/components/dashboard/RevenueSnapshotCard";
 
 const revenueSnapshots = [
   {
@@ -49,19 +50,13 @@ const ComptabilitePage = () => {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           {revenueSnapshots.map((snapshot) => (
-            <div key={snapshot.label} className="rounded-2xl border bg-white shadow-sm p-5 flex flex-col gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-gray-500">{snapshot.period}</p>
-                <p className="text-lg font-semibold">{snapshot.label}</p>
-              </div>
-              <div className="text-3xl font-extrabold" style={{ color: "#08436A" }}>
-                {snapshot.value}
-              </div>
-              <p className="text-sm text-muted-foreground">{snapshot.hint}</p>
-              <span className="inline-flex w-fit items-center gap-1 rounded-full border border-dashed border-gray-300 px-2 py-1 text-xs text-gray-500">
-                Bientôt disponible
-              </span>
-            </div>
+            <RevenueSnapshotCard
+              key={snapshot.label}
+              label={snapshot.label}
+              period={snapshot.period}
+              value={snapshot.value}
+              hint={snapshot.hint}
+            />
           ))}
         </div>
       </section>

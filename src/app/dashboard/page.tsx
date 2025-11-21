@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import DashboardCard from "@/components/dashboard/DashboardCard";
+import QuickLinkCard from "@/components/dashboard/QuickLinkCard";
 
 const DashboardPage = () => {
   const [user, setUser] = useState<any>(null);
@@ -68,58 +70,63 @@ const DashboardPage = () => {
       </div>
 
       <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-xl border bg-white shadow-sm p-5">
-          <div className="text-xs uppercase text-gray-500 mb-1">Solde MangoPay</div>
-          <div className="text-2xl font-bold">[solde] €</div>
-          <div className="mt-3">
-            <Link href="/dashboard/transactions" className="text-sm font-medium" style={{ color: 'var(--brand-blue)' }}>
+        <DashboardCard
+          label="Solde MangoPay"
+          title="[solde] €"
+          footer={
+            <Link href="/dashboard/transactions" className="text-sm font-medium" style={{ color: "var(--brand-blue)" }}>
               Voir mes transactions →
             </Link>
-          </div>
-        </div>
+          }
+        />
 
-        <div className="rounded-xl border bg-white shadow-sm p-5">
-          <div className="text-xs uppercase text-gray-500 mb-1">Piscines</div>
-          <div className="text-2xl font-bold">Gérer mes piscines</div>
-          <div className="mt-3 flex gap-2">
-            <Link href="/dashboard/pools" className="px-3 py-1.5 rounded-md text-white" style={{ backgroundColor: '#08436A' }}>Mes piscines</Link>
-            <Link href="/dashboard/pools/new" className="px-3 py-1.5 rounded-md border" style={{ borderColor: '#08436A', color: '#08436A' }}>Ajouter</Link>
-          </div>
-        </div>
+        <DashboardCard
+          label="Piscines"
+          title="Gérer mes piscines"
+          footer={
+            <div className="mt-1 flex gap-2">
+              <Link href="/dashboard/pools" className="px-3 py-1.5 rounded-md text-white" style={{ backgroundColor: "#08436A" }}>
+                Mes piscines
+              </Link>
+              <Link
+                href="/dashboard/pools/new"
+                className="px-3 py-1.5 rounded-md border"
+                style={{ borderColor: "#08436A", color: "#08436A" }}
+              >
+                Ajouter
+              </Link>
+            </div>
+          }
+        />
 
-        <div className="rounded-xl border bg-white shadow-sm p-5">
-          <div className="text-xs uppercase text-gray-500 mb-1">Messages</div>
-          <div className="text-2xl font-bold">Mes conversations</div>
-          <div className="mt-3">
-            <Link href="/dashboard/messages" className="text-sm font-medium" style={{ color: 'var(--brand-blue)' }}>
+        <DashboardCard
+          label="Messages"
+          title="Mes conversations"
+          footer={
+            <Link href="/dashboard/messages" className="text-sm font-medium" style={{ color: "var(--brand-blue)" }}>
               Ouvrir la messagerie →
             </Link>
-          </div>
-        </div>
+          }
+        />
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <Link href="/dashboard/reservations" className="group rounded-xl border bg-white shadow-sm p-6 transition hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-500">Réservations</div>
-              <div className="text-xl font-semibold">Mes réservations</div>
-            </div>
-            <span className="text-2xl" style={{ color: 'var(--brand-blue)' }}>📅</span>
-          </div>
-          <div className="mt-3 text-sm text-gray-600 group-hover:underline" style={{ color: 'var(--brand-blue)' }}>Gérer →</div>
-        </Link>
+        <QuickLinkCard
+          href="/dashboard/reservations"
+          label="Réservations"
+          title="Mes réservations"
+          icon="📅"
+          description="Gérer →"
+        />
 
-        <Link href="/dashboard/favorites" className="group rounded-xl border bg-white shadow-sm p-6 transition hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-500">Favoris</div>
-              <div className="text-xl font-semibold">Mes favoris</div>
-            </div>
-            <span className="text-2xl text-pink-600">💗</span>
-          </div>
-          <div className="mt-3 text-sm text-gray-600 group-hover:underline" style={{ color: 'var(--brand-blue)' }}>Voir →</div>
-        </Link>
+        <QuickLinkCard
+          href="/dashboard/favorites"
+          label="Favoris"
+          title="Mes favoris"
+          icon="💗"
+          accentColor="#e11d48"
+          description="Voir →"
+        />
       </section>
 
       {user?.role === "owner" && (
