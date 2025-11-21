@@ -83,9 +83,7 @@ export async function POST(req: NextRequest) {
           },
         });
         messageSent = !!message;
-        console.log("✅ Message envoyé au propriétaire:", message.id);
       } catch (msgError) {
-        console.error("❌ Erreur lors de l'envoi du message au propriétaire:", msgError);
         // Ne pas bloquer la création de la réservation si le message échoue
       }
     }
@@ -184,11 +182,10 @@ export async function PATCH(req: NextRequest) {
         });
 
         // Envoyer un email avec le lien de paiement
-        sendPaymentRequestEmail(updated.id, paymentUrl).catch((err) => {
-          console.error("Erreur lors de l'envoi de l'email de paiement:", err);
+        sendPaymentRequestEmail(updated.id, paymentUrl).catch(() => {
+          // Erreur silencieuse lors de l'envoi de l'email
         });
       } catch (msgError) {
-        console.error("Erreur lors de l'envoi du message au locataire:", msgError);
         // Ne pas bloquer la mise à jour de la réservation si le message échoue
       }
     }

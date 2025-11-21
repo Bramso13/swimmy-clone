@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/context/NotificationContext";
+import { useReservations } from "@/context/ReservationsContext";
 
 interface Conversation {
   userId: string;
@@ -61,19 +62,26 @@ export default function MessagesPage() {
   const [showMobileList, setShowMobileList] = useState(true);
   const [headerHeight, setHeaderHeight] = useState(64);
   const router = useRouter();
+  const { reservations, fetchReservations } = useReservations();
 
-  // Récupérer l'ID de l'utilisateur connecté
+  // Récupérer l'ID de l'utilisateur connecté et charger les réservations
   useEffect(() => {
     const getUserId = async () => {
       try {
         const session = await authClient.getSession();
-        setCurrentUserId(session.data?.user?.id as string | undefined);
+        const userId = session.data?.user?.id as string | undefined;
+        setCurrentUserId(userId);
+        
+        // Charger les réservations pour pouvoir trouver l'ID correspondant aux messages d'acceptation
+        if (userId) {
+          fetchReservations(userId);
+        }
       } catch (e) {
-        console.error("Erreur récupération session:", e);
+        // Erreur silencieuse lors de la récupération de session
       }
     };
     getUserId();
-  }, []);
+  }, [fetchReservations]);
 
   // Charger les conversations
   useEffect(() => {
@@ -390,21 +398,64 @@ export default function MessagesPage() {
               const sender = isFromMe ? msg.sender : msg.recipient;
               const displayName = sender.name || sender.email || "Utilisateur";
               let content = msg.content || "";
+              const originalContent = content; // Garder le contenu original pour la détection
               const isImage = (content.startsWith("/") || content.startsWith("http")) && /\.(png|jpe?g|gif|webp|svg)$/i.test(content);
               
               // Détecter si le message contient un reservationId pour afficher un bouton de paiement
-              const reservationIdMatch = content.match(/RESERVATION_ID:([a-f0-9-]+)/i);
-              const reservationId = reservationIdMatch ? reservationIdMatch[1] : null;
-              // Retirer le reservationId du contenu affiché
-              if (reservationId) {
+              // Chercher RESERVATION_ID: dans le message
+              const reservationIdMatch = originalContent.match(/RESERVATION_ID:([a-f0-9-]+)/i);
+              // Sinon, chercher dans l'URL de paiement
+              const paymentUrlMatch = originalContent.match(/\/payment\/([a-f0-9-]+)/i);
+              let reservationId = reservationIdMatch ? reservationIdMatch[1] : (paymentUrlMatch ? paymentUrlMatch[1] : null);
+              
+              // Détecter si c'est un message d'acceptation de réservation basé sur le contenu original
+              const lowerContent = originalContent.toLowerCase();
+              const isAcceptanceMessage = lowerContent.includes('acceptée') || 
+                                         lowerContent.includes('acceptee') || 
+                                         lowerContent.includes('accepté') ||
+                                         (lowerContent.includes('reservation') && lowerContent.includes('accept'));
+              
+              // Si on n'a pas de reservationId mais que c'est un message d'acceptation, chercher dans les réservations
+              if (!reservationId && isAcceptanceMessage && !isFromMe && reservations.length > 0) {
+                // Extraire le montant du message si possible
+                const amountMatch = originalContent.match(/Montant:\s*([0-9,\.]+)\s*€/i);
+                const amountFromMessage = amountMatch ? parseFloat(amountMatch[1].replace(',', '.')) : null;
+                
+                // Chercher une réservation "accepted" qui correspond
+                const matchingReservation = reservations.find((r: any) => {
+                  if (r.status !== 'accepted') return false;
+                  if (amountFromMessage && Math.abs(r.amount - amountFromMessage) > 0.01) return false;
+                  return true;
+                });
+                
+                if (matchingReservation) {
+                  reservationId = matchingReservation.id;
+                }
+              }
+              
+              // Si on n'a toujours pas de reservationId mais que c'est un message d'acceptation, essayer d'extraire l'ID de l'URL
+              let finalReservationId = reservationId;
+              if (!finalReservationId && isAcceptanceMessage) {
+                const urlMatch = originalContent.match(/\/payment\/([a-f0-9-]+)/i);
+                finalReservationId = urlMatch ? urlMatch[1] : null;
+              }
+              
+              // Si on a un reservationId OU si c'est un message d'acceptation, on peut afficher le bouton
+              const shouldShowPaymentButton = (finalReservationId || isAcceptanceMessage) && !isFromMe;
+              
+              // Retirer le reservationId et le lien de paiement du contenu affiché
+              if (finalReservationId) {
                 content = content.replace(/\n?RESERVATION_ID:[a-f0-9-]+/i, '').trim();
+                // Masquer la ligne avec le lien de paiement et le texte avant
+                content = content.replace(/Cliquez sur le bouton ci-dessous ou utilisez ce lien pour procéder au paiement\s*:\s*/i, '');
+                content = content.replace(/https?:\/\/[^\s]*\/payment\/[a-f0-9-]+/gi, '').trim();
               }
 
               // Vérifier si le message de paiement est encore valide (24h après l'envoi)
               const messageDate = new Date(msg.createdAt);
               const now = new Date();
               const hoursSinceMessage = (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
-              const isPaymentMessageValid = reservationId && !isFromMe && hoursSinceMessage < 24;
+              const isPaymentMessageValid = shouldShowPaymentButton && hoursSinceMessage < 24;
 
               return (
                 <div
@@ -452,20 +503,33 @@ export default function MessagesPage() {
                             return (
                               <span key={idx}>
                                 {parts.map((part, partIdx) => {
+                                  // Rendre tous les liens cliquables, y compris les liens de paiement
                                   if (part.match(urlRegex)) {
+                                    const isPaymentLink = part.includes('/payment/');
                                     return (
                                       <a
                                         key={partIdx}
                                         href={part}
-                                        target="_blank"
+                                        target={isPaymentLink ? "_self" : "_blank"}
                                         rel="noopener noreferrer"
-                                        className={`underline hover:no-underline ${
-                                          isFromMe 
-                                            ? 'text-white hover:text-blue-100' 
-                                            : 'text-blue-600 hover:text-blue-800'
+                                        onClick={isPaymentLink ? (e) => {
+                                          e.preventDefault();
+                                          const paymentIdMatch = part.match(/\/payment\/([a-f0-9-]+)/i);
+                                          if (paymentIdMatch) {
+                                            router.push(`/payment/${paymentIdMatch[1]}`);
+                                          }
+                                        } : undefined}
+                                        className={`underline hover:no-underline font-semibold ${
+                                          isPaymentLink
+                                            ? isFromMe
+                                              ? 'text-white hover:text-blue-100 bg-blue-600/20 px-2 py-1 rounded'
+                                              : 'text-green-600 hover:text-green-800 bg-green-50 px-2 py-1 rounded'
+                                            : isFromMe 
+                                              ? 'text-white hover:text-blue-100' 
+                                              : 'text-blue-600 hover:text-blue-800'
                                         }`}
                                       >
-                                        {part}
+                                        {isPaymentLink ? '💳 Cliquez ici pour payer' : part}
                                       </a>
                                     );
                                   }
@@ -476,26 +540,27 @@ export default function MessagesPage() {
                             );
                           })}
                         </p>
-                        {/* Afficher un bouton de paiement si c'est un message d'acceptation de réservation et qu'il est encore valide (moins de 24h) */}
-                        {reservationId && !isFromMe && (
-                          <div className="mt-3 pt-3 border-t border-gray-300 -mx-1 px-1">
-                            {isPaymentMessageValid ? (
-                              <>
-                                <button
-                                  onClick={() => router.push(`/payment/${reservationId}`)}
-                                  className="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm shadow-sm active:bg-green-800"
-                                  type="button"
-                                >
-                                  💳 Procéder au paiement
-                                </button>
-                                <p className="text-xs text-gray-500 mt-2 text-center">
-                                  Valable pendant encore {Math.max(0, Math.floor(24 - hoursSinceMessage))}h {Math.max(0, Math.floor((24 - hoursSinceMessage) % 1 * 60))}min
-                                </p>
-                              </>
-                            ) : (
-                              <div className="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-center text-sm border border-gray-300">
-                                ⏰ Ce lien de paiement a expiré (valable 24h après l'acceptation)
-                              </div>
+                        {/* Ajouter un lien de paiement visible si c'est un message d'acceptation avec un reservationId */}
+                        {(finalReservationId || isAcceptanceMessage) && finalReservationId && (
+                          <div className="mt-3 pt-3 border-t border-gray-300">
+                            <a
+                              href={`/payment/${finalReservationId}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                router.push(`/payment/${finalReservationId}`);
+                              }}
+                              className={`inline-block w-full text-center px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                                isFromMe
+                                  ? 'bg-blue-400 text-white hover:bg-blue-300'
+                                  : 'bg-green-600 text-white hover:bg-green-700'
+                              }`}
+                            >
+                              💳 Cliquez ici pour procéder au paiement
+                            </a>
+                            {!isFromMe && hoursSinceMessage < 24 && (
+                              <p className="text-xs text-gray-500 mt-2 text-center">
+                                ⏱️ Valable pendant encore {Math.max(0, Math.floor(24 - hoursSinceMessage))}h {Math.max(0, Math.floor((24 - hoursSinceMessage) % 1 * 60))}min
+                              </p>
                             )}
                           </div>
                         )}
@@ -509,6 +574,45 @@ export default function MessagesPage() {
                             minute: "2-digit",
                           })}
                         </div>
+                      </div>
+                    )}
+                    {/* Afficher un bouton de paiement si c'est un message d'acceptation de réservation - après la div du message */}
+                    {shouldShowPaymentButton && (
+                      <div className="mt-3">
+                        {finalReservationId ? (
+                          hoursSinceMessage < 24 ? (
+                            <>
+                              <button
+                                onClick={() => router.push(`/payment/${finalReservationId}`)}
+                                className="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold text-base shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-2"
+                                type="button"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                                Procéder au paiement
+                              </button>
+                              <p className="text-xs text-gray-500 mt-3 text-center">
+                                ⏱️ Valable pendant encore {Math.max(0, Math.floor(24 - hoursSinceMessage))}h {Math.max(0, Math.floor((24 - hoursSinceMessage) % 1 * 60))}min
+                              </p>
+                            </>
+                          ) : (
+                            <div className="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-center text-sm border border-gray-300">
+                              ⏰ Ce lien de paiement a expiré (valable 24h après l'acceptation)
+                            </div>
+                          )
+                        ) : (
+                          <button
+                            onClick={() => router.push('/dashboard/reservations')}
+                            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold text-base shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-2"
+                            type="button"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            Voir mes réservations pour payer
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
