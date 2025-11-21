@@ -4,11 +4,13 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 
 const isProd = process.env.NODE_ENV === "production";
+const isBuild = process.env.NEXT_PHASE === "phase-production-build";
 const authSecret =
   process.env.BETTER_AUTH_SECRET ??
-  (!isProd ? "dev-secret-change-me" : undefined);
+  (isBuild ? "build-secret-temporary" : !isProd ? "dev-secret-change-me" : undefined);
 
-if (!authSecret) {
+// Ne pas lancer d'erreur lors du build, seulement à l'exécution
+if (!authSecret && !isBuild) {
   throw new Error(
     "BETTER_AUTH_SECRET est manquant. Ajoutez-le dans vos variables d'environnement pour lancer l'application."
   );
