@@ -151,6 +151,60 @@ export async function PATCH(req: NextRequest) {
       }
     } catch {}
 
+    // Mettre à jour le statut de la transaction selon le statut de la réservation
+    try {
+      const existingTransaction = await prisma.transaction.findUnique({
+        where: { reservationId: id },
+      });
+
+      if (status === "accepted") {
+        // Si la réservation est acceptée, créer ou mettre à jour la transaction avec status "accepted"
+        if (existingTransaction) {
+          // Ne mettre à jour que si le statut n'est pas déjà "pending" (en attente de paiement) ou "succeeded" (déjà payé)
+          if (existingTransaction.status !== "pending" && existingTransaction.status !== "succeeded") {
+            await prisma.transaction.update({
+              where: { id: existingTransaction.id },
+              data: { status: "accepted" },
+            });
+          }
+        } else {
+          // Créer une nouvelle transaction si elle n'existe pas encore
+          await prisma.transaction.create({
+            data: {
+              reservationId: id,
+              userId: updated.userId,
+              status: "accepted",
+              amount: updated.amount,
+            },
+          });
+        }
+      } else if (["refused", "rejected", "cancelled"].includes(status)) {
+        // Si la réservation est refusée/rejetée/annulée, mettre à jour la transaction
+        if (existingTransaction) {
+          // Ne mettre à jour que si ce n'est pas déjà payé
+          if (existingTransaction.status !== "succeeded") {
+            await prisma.transaction.update({
+              where: { id: existingTransaction.id },
+              data: { status: "refused" },
+            });
+          }
+        } else {
+          // Créer une transaction refusée si elle n'existe pas
+          await prisma.transaction.create({
+            data: {
+              reservationId: id,
+              userId: updated.userId,
+              status: "refused",
+              amount: updated.amount,
+            },
+          });
+        }
+      }
+      // Note: Le statut "paid" et "succeeded" sont gérés par le webhook Stripe
+    } catch (txError) {
+      // Ne pas bloquer la mise à jour de la réservation si la transaction échoue
+    }
+
     // Si la réservation est acceptée, envoyer un message au locataire avec un lien de paiement
     if (status === "accepted" && updated.user && updated.pool.ownerId) {
       try {
