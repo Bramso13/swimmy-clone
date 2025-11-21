@@ -221,6 +221,18 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
                   </li>
                 )}
 
+                {user.role === "owner" && (
+                  <li>
+                    <Link
+                      href="/dashboard/comptabilite"
+                      onClick={() => setOpen(false)}
+                      className="block px-4 py-3 hover:bg-muted rounded-md bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500"
+                    >
+                      📊 Comptabilité
+                    </Link>
+                  </li>
+                )}
+
                 {/* Messages reçus */}
                 <li>
                   <Link

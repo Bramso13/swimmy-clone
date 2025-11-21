@@ -121,6 +121,27 @@ const DashboardPage = () => {
           <div className="mt-3 text-sm text-gray-600 group-hover:underline" style={{ color: 'var(--brand-blue)' }}>Voir →</div>
         </Link>
       </section>
+
+      {user?.role === "owner" && (
+        <section className="mt-8">
+          <div className="rounded-xl border bg-white shadow-sm p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-sm text-gray-500 uppercase tracking-wide">Comptabilité</div>
+              <div className="text-xl font-semibold">Suivi des revenus et documents</div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Accédez à votre futur espace comptable pour gérer vos finances.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/comptabilite"
+              className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-white"
+              style={{ backgroundColor: "#08436A" }}
+            >
+              Ouvrir la section
+            </Link>
+          </div>
+        </section>
+      )}
     </main>
   );
 };
