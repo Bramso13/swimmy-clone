@@ -1,14 +1,30 @@
-import { Resend } from "resend";
-import { prisma } from "../../lib/prisma";
+import nodemailer from "nodemailer";
+import { prisma } from "@/lib/prisma";
 
-const resend = new Resend(process.env.RESEND_API_KEY || "");
+const smtpHost = process.env.SMTP_HOST;
+const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpUser = process.env.SMTP_USER;
+const smtpPass = process.env.SMTP_PASSWORD;
+const smtpFrom = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || "noreply@example.com";
+
+const transporter =
+  smtpHost && smtpUser && smtpPass
+    ? nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: process.env.SMTP_SECURE === "true" || smtpPort === 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+      })
+    : null;
 
 export async function sendReservationConfirmationEmail(reservationId: string) {
   try {
-    // Vérifier que la clé Resend est configurée
-    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.includes("REMPLACEZ")) {
-      console.error("⚠️ RESEND_API_KEY n'est pas configurée. L'email ne sera pas envoyé.");
-      return { success: false, error: "Configuration email manquante" };
+    if (!transporter) {
+      console.error("⚠️ Configuration SMTP manquante. L'email ne sera pas envoyé.");
+      return { success: false, error: "Configuration SMTP manquante" };
     }
 
     // Récupérer la réservation avec toutes les infos nécessaires
@@ -56,9 +72,8 @@ export async function sendReservationConfirmationEmail(reservationId: string) {
       minute: "2-digit",
     });
 
-    // Envoyer l'email
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+    const mailOptions = {
+      from: smtpFrom,
       to: reservation.user.email,
       subject: `Confirmation de réservation - ${reservation.pool?.title || "Piscine"}`,
       html: `
@@ -176,14 +191,11 @@ export async function sendReservationConfirmationEmail(reservationId: string) {
           </body>
         </html>
       `,
-    });
+    };
 
-    if (error) {
-      console.error("Erreur Resend:", error);
-      return { success: false, error: "Erreur lors de l'envoi de l'email" };
-    }
+    const result = await transporter.sendMail(mailOptions);
 
-    return { success: true, emailId: data?.id };
+    return { success: true, emailId: result.messageId };
   } catch (error: any) {
     console.error("Erreur envoi email:", error);
     return { success: false, error: error.message || "Erreur serveur" };
