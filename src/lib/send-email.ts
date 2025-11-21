@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "../../lib/prisma";
 
 const smtpHost = process.env.SMTP_HOST;
 const smtpPort = Number(process.env.SMTP_PORT || 587);
@@ -198,6 +198,212 @@ export async function sendReservationConfirmationEmail(reservationId: string) {
     return { success: true, emailId: result.messageId };
   } catch (error: any) {
     console.error("Erreur envoi email:", error);
+    return { success: false, error: error.message || "Erreur serveur" };
+  }
+}
+
+export async function sendPaymentRequestEmail(reservationId: string, paymentUrl: string) {
+  try {
+    if (!transporter) {
+      console.error("⚠️ Configuration SMTP manquante. L'email ne sera pas envoyé.");
+      return { success: false, error: "Configuration SMTP manquante" };
+    }
+
+    // Récupérer la réservation avec toutes les infos nécessaires
+    const reservation = await prisma.reservation.findUnique({
+      where: { id: reservationId },
+      include: {
+        user: {
+          select: {
+            email: true,
+            name: true,
+          },
+        },
+        pool: {
+          select: {
+            title: true,
+            address: true,
+            pricePerHour: true,
+          },
+        },
+      },
+    });
+
+    if (!reservation || !reservation.user?.email) {
+      return { success: false, error: "Réservation ou email introuvable" };
+    }
+
+    // Formater les dates
+    const startDate = new Date(reservation.startDate);
+    const endDate = new Date(reservation.endDate);
+    const formattedStartDate = startDate.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const formattedEndDate = endDate.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const mailOptions = {
+      from: smtpFrom,
+      to: reservation.user.email,
+      subject: `Votre réservation a été acceptée - Paiement requis - ${reservation.pool?.title || "Piscine"}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+              }
+              .header {
+                background: linear-gradient(to right, #08436A, #4f46e5);
+                color: white;
+                padding: 30px;
+                text-align: center;
+                border-radius: 10px 10px 0 0;
+              }
+              .content {
+                background: #f9f9f9;
+                padding: 30px;
+                border-radius: 0 0 10px 10px;
+              }
+              .success-icon {
+                font-size: 48px;
+                margin-bottom: 20px;
+              }
+              .details {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+              }
+              .detail-row {
+                margin: 15px 0;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #eee;
+              }
+              .detail-row:last-child {
+                border-bottom: none;
+              }
+              .label {
+                font-weight: bold;
+                color: #08436A;
+                display: block;
+                margin-bottom: 5px;
+              }
+              .value {
+                color: #666;
+              }
+              .amount {
+                font-size: 24px;
+                font-weight: bold;
+                color: #08436A;
+              }
+              .payment-button {
+                display: inline-block;
+                background: linear-gradient(to right, #08436A, #4f46e5);
+                color: white;
+                padding: 15px 30px;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: bold;
+                margin: 20px 0;
+                text-align: center;
+              }
+              .payment-button:hover {
+                opacity: 0.9;
+              }
+              .payment-link {
+                word-break: break-all;
+                color: #08436A;
+                font-size: 12px;
+                margin-top: 10px;
+              }
+              .footer {
+                text-align: center;
+                margin-top: 30px;
+                color: #999;
+                font-size: 12px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>✓ Réservation acceptée !</h1>
+              <p>Procédez au paiement pour confirmer</p>
+            </div>
+            <div class="content">
+              <div class="success-icon">🎉</div>
+              <h2>Bonjour ${reservation.user.name || "Cher client"},</h2>
+              <p>Votre demande de réservation a été acceptée ! Pour finaliser votre réservation, veuillez procéder au paiement.</p>
+              
+              <div class="details">
+                <h3 style="margin-top: 0; color: #08436A;">Détails de votre réservation</h3>
+                
+                <div class="detail-row">
+                  <span class="label">Piscine :</span>
+                  <span class="value">${reservation.pool?.title || "Non renseigné"}</span>
+                </div>
+                
+                <div class="detail-row">
+                  <span class="label">Adresse :</span>
+                  <span class="value">${reservation.pool?.address || "Non renseigné"}</span>
+                </div>
+                
+                <div class="detail-row">
+                  <span class="label">Date de début :</span>
+                  <span class="value">${formattedStartDate}</span>
+                </div>
+                
+                <div class="detail-row">
+                  <span class="label">Date de fin :</span>
+                  <span class="value">${formattedEndDate}</span>
+                </div>
+                
+                <div class="detail-row">
+                  <span class="label">Montant total :</span>
+                  <span class="amount">${reservation.amount} €</span>
+                </div>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${paymentUrl}" class="payment-button">Procéder au paiement</a>
+                <div class="payment-link">Ou copiez ce lien : ${paymentUrl}</div>
+              </div>
+              
+              <p style="margin-top: 30px;">Votre réservation sera confirmée une fois le paiement effectué.</p>
+              
+              <div class="footer">
+                <p>Vous pouvez consulter vos réservations dans votre tableau de bord.</p>
+                <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+
+    return { success: true, emailId: result.messageId };
+  } catch (error: any) {
+    console.error("Erreur envoi email de paiement:", error);
     return { success: false, error: error.message || "Erreur serveur" };
   }
 }

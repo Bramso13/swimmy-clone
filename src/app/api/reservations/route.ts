@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { checkAndReactivatePool } from "../../../../lib/pool-availability";
+import { sendPaymentRequestEmail } from "../../../../lib/send-email";
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("userId");
@@ -174,6 +175,11 @@ export async function PATCH(req: NextRequest) {
             recipientId: updated.user.id,
             content: `Votre demande de réservation pour "${updated.pool.title}" a été acceptée !\n\nDu ${startDateFormatted} au ${endDateFormatted}\nMontant: ${updated.amount} €\n\nCliquez sur le bouton ci-dessous ou utilisez ce lien pour procéder au paiement :\n${paymentUrl}\n\nRESERVATION_ID:${updated.id}`,
           },
+        });
+
+        // Envoyer un email avec le lien de paiement
+        sendPaymentRequestEmail(updated.id, paymentUrl).catch((err) => {
+          console.error("Erreur lors de l'envoi de l'email de paiement:", err);
         });
       } catch (msgError) {
         console.error("Erreur lors de l'envoi du message au locataire:", msgError);
