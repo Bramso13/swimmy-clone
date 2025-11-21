@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRenter } from "@/context/RenterContext";
+import { useNotification } from "@/context/NotificationContext";
 import { authClient } from "@/lib/auth-client";
 
 type ReservationStatus = "en-attente" | "acceptees" | "refusees" | "demandes" | "reservations-demandees";
@@ -10,6 +11,7 @@ const ReservationsPage = () => {
   const [activeTab, setActiveTab] = useState<ReservationStatus>("en-attente");
   const [user, setUser] = useState<any>(null);
   const { reservations, fetchReservations, loading, error } = useRenter();
+  const { success, error: notifyError } = useNotification();
   const [approvals, setApprovals] = useState<any[]>([]);
   const [approvalsToValidate, setApprovalsToValidate] = useState<any[]>([]);
   const [myRequests, setMyRequests] = useState<any[]>([]);
@@ -193,6 +195,7 @@ const ReservationsPage = () => {
       const data = await res.json();
       if (!res.ok) {
         setFeedbackByPool((prev) => ({ ...prev, [poolId]: { type: 'error', text: data?.error || 'Échec de l\'envoi' } }));
+        notifyError("Erreur", data?.error || "Impossible de publier le commentaire");
         return;
       }
       setCommentsByPool((prev) => ({
@@ -202,6 +205,7 @@ const ReservationsPage = () => {
       setCommentInputs((prev) => ({ ...prev, [poolId]: '' }));
       setRatingByPool((prev) => ({ ...prev, [poolId]: 5 }));
       setFeedbackByPool((prev) => ({ ...prev, [poolId]: { type: 'success', text: data?.message || 'Commentaire publié' } }));
+      success("Commentaire publié", "Votre commentaire a été ajouté avec succès");
     } catch {}
     finally {
       setSendingByPool((prev) => ({ ...prev, [poolId]: false }));
@@ -380,10 +384,14 @@ const ReservationsPage = () => {
                             body: JSON.stringify({ id: reservation.id, status: 'accepted' })
                           });
                           if (res.ok) {
+                            success("Réservation acceptée", "Un email de paiement a été envoyé au locataire");
                             await fetchRequestedReservations(user?.id);
+                          } else {
+                            notifyError("Erreur", "Impossible d'accepter la réservation");
                           }
                         } catch (error) {
                           console.error('Erreur lors de l\'acceptation:', error);
+                          notifyError("Erreur", "Une erreur est survenue lors de l'acceptation");
                         }
                       }}
                       className="px-4 py-2 rounded bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors"
@@ -399,10 +407,14 @@ const ReservationsPage = () => {
                             body: JSON.stringify({ id: reservation.id, status: 'rejected' })
                           });
                           if (res.ok) {
+                            success("Réservation refusée", "Le locataire a été notifié");
                             await fetchRequestedReservations(user?.id);
+                          } else {
+                            notifyError("Erreur", "Impossible de refuser la réservation");
                           }
                         } catch (error) {
                           console.error('Erreur lors du refus:', error);
+                          notifyError("Erreur", "Une erreur est survenue lors du refus");
                         }
                       }}
                       className="px-4 py-2 rounded bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors"
@@ -576,19 +588,37 @@ const ReservationsPage = () => {
                       </div>
                       <div className="flex gap-2">
                         <button onClick={async () => {
-                          await fetch(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'approved' }) });
-                          // rafraîchir
-                          const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
-                          const dataAll = await resAll.json();
-                          setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
-                          await fetchMyApprovals(user?.id);
+                          try {
+                            const res = await fetch(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'approved' }) });
+                            if (res.ok) {
+                              success("Annonce approuvée", "La piscine est maintenant visible sur le site");
+                              // rafraîchir
+                              const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+                              const dataAll = await resAll.json();
+                              setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
+                              await fetchMyApprovals(user?.id);
+                            } else {
+                              notifyError("Erreur", "Impossible d'approuver l'annonce");
+                            }
+                          } catch (error) {
+                            notifyError("Erreur", "Une erreur est survenue");
+                          }
                         }} className="px-3 py-1 rounded bg-green-600 text-white text-sm">Approuver</button>
                         <button onClick={async () => {
-                          await fetch(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected' }) });
-                          const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
-                          const dataAll = await resAll.json();
-                          setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
-                          await fetchMyApprovals(user?.id);
+                          try {
+                            const res = await fetch(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected' }) });
+                            if (res.ok) {
+                              success("Annonce refusée", "Le créateur a été notifié");
+                              const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+                              const dataAll = await resAll.json();
+                              setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
+                              await fetchMyApprovals(user?.id);
+                            } else {
+                              notifyError("Erreur", "Impossible de refuser l'annonce");
+                            }
+                          } catch (error) {
+                            notifyError("Erreur", "Une erreur est survenue");
+                          }
                         }} className="px-3 py-1 rounded bg-red-600 text-white text-sm">Refuser</button>
                       </div>
                     </div>

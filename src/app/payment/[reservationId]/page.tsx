@@ -12,6 +12,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useNotification } from "@/context/NotificationContext";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
@@ -19,6 +20,7 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
+  const { success, error: notifyError } = useNotification();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reservation, setReservation] = useState<any>(null);
@@ -100,9 +102,13 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
       );
 
       if (confirmError) {
-        setError(confirmError.message || "Erreur lors du paiement");
+        const errorMsg = confirmError.message || "Erreur lors du paiement";
+        setError(errorMsg);
+        notifyError("Paiement échoué", errorMsg);
         setLoading(false);
       } else if (paymentIntent?.status === "succeeded") {
+        success("Paiement réussi", "Votre réservation est confirmée. Un email de confirmation vous a été envoyé.");
+        
         // Envoyer l'email de confirmation (en arrière-plan, ne pas bloquer la redirection)
         fetch("/api/email/send-confirmation", {
           method: "POST",
@@ -112,11 +118,15 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
           console.error("Erreur lors de l'envoi de l'email:", err);
         });
 
-        // Rediriger vers une page de succès
-        router.push(`/payment/${reservationId}/success`);
+        // Rediriger vers une page de succès après un court délai pour voir la notification
+        setTimeout(() => {
+          router.push(`/payment/${reservationId}/success`);
+        }, 1500);
       }
     } catch (err: any) {
-      setError(err.message || "Une erreur est survenue");
+      const errorMsg = err.message || "Une erreur est survenue";
+      setError(errorMsg);
+      notifyError("Erreur", errorMsg);
       setLoading(false);
     }
   };

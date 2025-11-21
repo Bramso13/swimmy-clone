@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useNotification } from "@/context/NotificationContext";
 
 interface Conversation {
   userId: string;
@@ -48,6 +49,7 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const { success, error: notifyError } = useNotification();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -202,8 +204,9 @@ export default function MessagesPage() {
       }
 
       setNewMessage("");
+      success("Message envoyé", "Votre message a été envoyé avec succès");
     } catch (e: any) {
-      alert(e.message || "Erreur lors de l'envoi");
+      notifyError("Erreur", e.message || "Erreur lors de l'envoi");
     } finally {
       setSending(false);
     }

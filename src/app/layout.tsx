@@ -4,7 +4,9 @@ import "./globals.css";
 import Link from "next/link";
 import Image from "next/image";
 import { RenterProvider } from "@/context/RenterContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import HeaderWrapper from "@/components/HeaderWrapper";
+import NotificationContainer from "@/components/NotificationContainer";
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -34,11 +36,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background bg-gray-100 text-foreground min-h-screen flex flex-col`}
       >
         <Suspense fallback={<div>Loading...</div>}>
-          <RenterProvider>
-            <HeaderWrapper />
-            <main className="flex-1 w-full mx-auto max-w-7xl px-4">
-              {children}
-            </main>
+          <NotificationProvider>
+            <RenterProvider>
+              <HeaderWrapper />
+              <NotificationContainer />
+              <main className="flex-1 w-full mx-auto max-w-7xl px-4">
+                {children}
+              </main>
             <footer className="w-full bg-white py-12 px-4">
               <div className="max-w-6xl mx-auto">
                 <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
@@ -235,7 +239,8 @@ export default function RootLayout({
                 <span className="font-medium">Aide</span>
               </Link>
             </div>
-          </RenterProvider>
+            </RenterProvider>
+          </NotificationProvider>
         </Suspense>
       </body>
     </html>

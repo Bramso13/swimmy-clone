@@ -89,10 +89,14 @@ export default function BookingForm({ poolId, pricePerHour }: Props) {
       if (res.ok) {
         const data = await res.json();
         const reservationId = data.reservation?.id;
+        const messageSent = data.messageSent !== false; // true par défaut si non spécifié
         
         if (reservationId) {
-          // Afficher un message de confirmation
-          alert("Votre demande de réservation a été envoyée au propriétaire. Vous recevrez un message dans vos messages une fois qu'il aura accepté votre demande, avec un lien pour procéder au paiement.");
+          if (messageSent) {
+            alert("✅ Votre demande de réservation a été créée et un message a été envoyé au propriétaire. Vous recevrez un message une fois qu'il aura accepté votre demande, avec un lien pour procéder au paiement.");
+          } else {
+            alert("⚠️ Votre demande de réservation a été créée, mais le message au propriétaire n'a pas pu être envoyé. La réservation est enregistrée et le propriétaire pourra la voir dans son tableau de bord.");
+          }
           // Recharger la page pour réinitialiser le formulaire
           window.location.reload();
         } else {

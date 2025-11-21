@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { checkAndReactivatePool } from "../../../../lib/pool-availability";
-import { sendPaymentRequestEmail } from "../../../../lib/send-email";
+import { sendPaymentRequestEmail } from "../../../lib/send-email";
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("userId");
@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Envoyer un message au propriétaire pour l'informer de la demande de réservation
+    let messageSent = false;
     if (reservation.pool.ownerId && reservation.pool.ownerId !== userId) {
       try {
         const startDateFormatted = new Date(startDate).toLocaleDateString('fr-FR', {
@@ -74,20 +75,25 @@ export async function POST(req: NextRequest) {
           minute: '2-digit',
         });
 
-        await prisma.message.create({
+        const message = await prisma.message.create({
           data: {
             senderId: userId,
             recipientId: reservation.pool.ownerId,
             content: `Nouvelle demande de réservation pour "${reservation.pool.title}"\n\nDu ${startDateFormatted} au ${endDateFormatted}\nMontant: ${amount} €\n\nVeuillez accepter ou refuser cette demande dans votre tableau de bord.`,
           },
         });
+        messageSent = !!message;
+        console.log("✅ Message envoyé au propriétaire:", message.id);
       } catch (msgError) {
-        console.error("Erreur lors de l'envoi du message au propriétaire:", msgError);
+        console.error("❌ Erreur lors de l'envoi du message au propriétaire:", msgError);
         // Ne pas bloquer la création de la réservation si le message échoue
       }
     }
 
-    return NextResponse.json({ reservation });
+    return NextResponse.json({ 
+      reservation,
+      messageSent: messageSent || !reservation.pool.ownerId || reservation.pool.ownerId === userId
+    });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
