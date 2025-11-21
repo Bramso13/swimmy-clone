@@ -44,21 +44,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Vérifier que la réservation est acceptée
+    // Vérifier que la réservation est acceptée (on ne peut payer que si acceptée)
     if (reservation.status !== "accepted") {
       return NextResponse.json(
         {
           error:
             "Cette réservation n'est pas acceptée. Seules les réservations acceptées peuvent être payées.",
         },
-        { status: 400 }
-      );
-    }
-
-    // Vérifier que la réservation n'a pas déjà été payée
-    if (reservation.status === "accepted") {
-      return NextResponse.json(
-        { error: "Cette réservation a déjà été acceptée" },
         { status: 400 }
       );
     }
@@ -86,12 +78,28 @@ export async function POST(req: NextRequest) {
       where: { reservationId },
     });
 
+    // Si une transaction existe et est déjà payée, bloquer le paiement
+    if (existingTransaction && (existingTransaction.status === "paid" || existingTransaction.status === "completed")) {
+      return NextResponse.json(
+        { error: "Cette réservation a déjà été payée" },
+        { status: 400 }
+      );
+    }
+
     if (existingTransaction?.mangopayId?.startsWith("pi_")) {
       // Récupérer le PaymentIntent existant
       try {
         paymentIntent = await stripe.paymentIntents.retrieve(
           existingTransaction.mangopayId
         );
+        
+        // Si le PaymentIntent est déjà réussi, bloquer le paiement
+        if (paymentIntent.status === "succeeded") {
+          return NextResponse.json(
+            { error: "Cette réservation a déjà été payée" },
+            { status: 400 }
+          );
+        }
       } catch {
         // Si le PaymentIntent n'existe plus, en créer un nouveau
         paymentIntent = await stripe.paymentIntents.create({
@@ -144,7 +152,6 @@ export async function POST(req: NextRequest) {
       paymentIntentId: paymentIntent.id,
     });
   } catch (error: any) {
-    console.error("Erreur Stripe:", error);
     return NextResponse.json(
       { error: error.message || "Erreur lors de la création du paiement" },
       { status: 500 }
