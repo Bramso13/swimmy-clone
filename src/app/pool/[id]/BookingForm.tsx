@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useNotification } from "@/context/NotificationContext";
 
 type Props = {
   poolId: string;
@@ -11,6 +12,7 @@ type Props = {
 
 export default function BookingForm({ poolId, pricePerHour }: Props) {
   const router = useRouter();
+  const { success, error: notifyError } = useNotification();
   const [date, setDate] = useState<string>("");
   const [startTime, setStartTime] = useState<string>("10:00");
   const [endTime, setEndTime] = useState<string>("10:00");
@@ -59,7 +61,7 @@ export default function BookingForm({ poolId, pricePerHour }: Props) {
       const currentUserId = session.data?.user?.id as string | undefined;
       
       if (!currentUserId) {
-        alert("Vous devez être connecté pour effectuer une réservation.");
+        notifyError("Connexion requise", "Vous devez être connecté pour effectuer une réservation.");
         router.push("/login");
         return;
       }
@@ -93,22 +95,29 @@ export default function BookingForm({ poolId, pricePerHour }: Props) {
         
         if (reservationId) {
           if (messageSent) {
-            alert("✅ Votre demande de réservation a été créée et un message a été envoyé au propriétaire. Vous recevrez un message une fois qu'il aura accepté votre demande, avec un lien pour procéder au paiement.");
+            success(
+              "Demande envoyée",
+              "Votre demande de réservation a été créée et un message a été envoyé au propriétaire. Vous recevrez un message une fois qu'il aura accepté votre demande, avec un lien pour procéder au paiement."
+            );
           } else {
-            alert("⚠️ Votre demande de réservation a été créée, mais le message au propriétaire n'a pas pu être envoyé. La réservation est enregistrée et le propriétaire pourra la voir dans son tableau de bord.");
+            success(
+              "Demande créée",
+              "Votre demande de réservation a été créée. Le propriétaire pourra la voir dans son tableau de bord."
+            );
           }
           // Recharger la page pour réinitialiser le formulaire
-          window.location.reload();
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
         } else {
-          alert("Erreur lors de la création de la réservation.");
+          notifyError("Erreur", "Erreur lors de la création de la réservation.");
         }
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || "Impossible de créer la réservation.");
+        notifyError("Erreur", err.error || "Impossible de créer la réservation.");
       }
     } catch (error) {
-      console.error("Erreur:", error);
-      alert("Erreur réseau, veuillez réessayer.");
+      notifyError("Erreur réseau", "Erreur réseau, veuillez réessayer.");
     } finally {
       setLoading(false);
     }
