@@ -34,20 +34,25 @@ export async function GET(req: NextRequest) {
         },
       },
     };
-    const reservationWhere = {
-      pool: {
-        is: {
-          ownerId: userId,
-        },
-      },
-    };
+    const reservationWhere = userId
+      ? {
+          pool: {
+            is: {
+              ownerId: userId,
+            },
+          },
+        }
+      : {};
+
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const [currentMonth, rolling90Days, yearToDate, totalPaid, pendingReservations, lastPayout] = await Promise.all([
       prisma.reservation.aggregate({
         where: {
           ...reservationWhere,
           status: { in: SUCCESS_STATUSES },
-          updatedAt: { gte: startOfMonth, lt: startOfNextMonth },
+          createdAt: { gte: startOfMonth, lt: startOfNextMonth },
         },
         _sum: { amount: true },
       }),

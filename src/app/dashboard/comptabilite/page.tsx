@@ -27,6 +27,27 @@ const ComptabilitePage = () => {
   const [revenue, setRevenue] = useState<RevenueSummary | null>(null);
   const [revenueLoading, setRevenueLoading] = useState(true);
   const [revenueError, setRevenueError] = useState<string | null>(null);
+  const [poolRevenueLoading, setPoolRevenueLoading] = useState(false);
+  const [poolRevenueError, setPoolRevenueError] = useState<string | null>(null);
+  const [poolsRevenue, setPoolsRevenue] = useState<{ id: string; title: string | null; totalRevenue: number }[]>([]);
+  const [showPoolRevenue, setShowPoolRevenue] = useState(false);
+  const loadPoolRevenue = async () => {
+    try {
+      setPoolRevenueLoading(true);
+      setPoolRevenueError(null);
+      const res = await request("/api/dashboard/pools/revenue", { cache: "no-store" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Impossible de récupérer les revenus par piscine");
+      }
+      const data = await res.json();
+      setPoolsRevenue(Array.isArray(data?.pools) ? data.pools : []);
+    } catch (err: any) {
+      setPoolRevenueError(err.message || "Erreur lors du chargement des revenus par piscine");
+    } finally {
+      setPoolRevenueLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchPoolsCount = async () => {
@@ -184,6 +205,74 @@ const ComptabilitePage = () => {
             icon="💼"
             loading={revenueLoading}
           />
+        </div>
+        <div className="rounded-xl border bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-base font-semibold">Revenus par piscine</h3>
+              <p className="text-sm text-muted-foreground">
+                Analysez le cumul encaissé pour chacune de vos piscines.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowPoolRevenue((prev) => {
+                    const next = !prev;
+                    if (next && poolsRevenue.length === 0) {
+                      loadPoolRevenue();
+                    }
+                    return next;
+                  });
+                }}
+                className="border border-gray-300 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                {showPoolRevenue ? "Masquer" : "Voir"} les revenus par piscine
+              </button>
+              {showPoolRevenue && !poolRevenueLoading && (
+                <button
+                  onClick={loadPoolRevenue}
+                  className="border border-gray-300 rounded-full px-4 py-2 text-sm text-[var(--brand-blue)] hover:bg-gray-50"
+                >
+                  Rafraîchir
+                </button>
+              )}
+            </div>
+          </div>
+          {showPoolRevenue && (
+            <div className="mt-3">
+              {poolRevenueLoading ? (
+                <div className="text-sm text-muted-foreground">Chargement des revenus…</div>
+              ) : poolRevenueError ? (
+                <div className="text-sm text-red-600">Erreur : {poolRevenueError}</div>
+              ) : poolsRevenue.length === 0 ? (
+                <div className="text-sm text-muted-foreground">
+                  Aucune réservation payée enregistrée pour vos piscines.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-500 border-b">
+                        <th className="py-2">Piscine</th>
+                        <th className="py-2 text-right">Revenus cumulés</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {poolsRevenue.map((pool) => (
+                        <tr key={pool.id} className="border-b last:border-b-0">
+                          <td className="py-2 font-medium text-gray-800">{pool.title || "Sans titre"}</td>
+                          <td className="py-2 text-right font-semibold text-[var(--brand-blue)]">
+                            {formatCurrency(pool.totalRevenue)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
