@@ -1,10 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { usePools } from "@/context/PoolsContext";
 import RevenueSnapshotCard from "@/components/dashboard/RevenueSnapshotCard";
+import DashboardHero from "@/components/dashboard/DashboardHero";
+import SectionIntro from "@/components/dashboard/SectionIntro";
+import StatCard from "@/components/dashboard/StatCard";
+import DashboardCtaCard from "@/components/dashboard/DashboardCtaCard";
 
 const revenueSnapshots = [
   {
@@ -57,29 +60,18 @@ const ComptabilitePage = () => {
   }, [fetchOwnerPools]);
   return (
     <main className="max-w-4xl mx-auto p-6">
-      <div className="mb-8">
-        <p className="text-sm text-muted-foreground uppercase tracking-wide">Dashboard propriétaire</p>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-2">
-          <span
-            className="bg-clip-text text-transparent"
-            style={{ backgroundImage: "linear-gradient(90deg, #08436A, #4f46e5)" }}
-          >
-            Comptabilité
-          </span>
-        </h1>
-        <p className="text-muted-foreground">
-          Cette section sera disponible pour suivre vos revenus, charges et documents comptables.
-        </p>
-      </div>
+      <DashboardHero
+        eyebrow="Dashboard propriétaire"
+        title="Comptabilité"
+        description="Cette section sera disponible pour suivre vos revenus, charges et documents comptables."
+      />
 
       <section className="mb-10">
-        <div className="mb-4">
-          <p className="text-sm text-muted-foreground uppercase tracking-wide">Vue d'ensemble</p>
-          <h2 className="text-xl font-semibold mt-1">Revenus prévisionnels</h2>
-          <p className="text-sm text-muted-foreground">
-            Suivez vos revenus sur différentes périodes dès que les données comptables seront synchronisées.
-          </p>
-        </div>
+        <SectionIntro
+          eyebrow="Vue d'ensemble"
+          title="Revenus prévisionnels"
+          description="Suivez vos revenus sur différentes périodes dès que les données comptables seront synchronisées."
+        />
         <div className="grid gap-4 sm:grid-cols-2">
           {revenueSnapshots.map((snapshot) => (
             <RevenueSnapshotCard
@@ -94,39 +86,17 @@ const ComptabilitePage = () => {
       </section>
 
       <section className="mb-10">
-        <div className="mb-4">
-          <p className="text-sm text-muted-foreground uppercase tracking-wide">Statistiques</p>
-          <h2 className="text-xl font-semibold mt-1">Vos piscines</h2>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Nombre total de piscines</p>
-              {loading ? (
-                <p className="text-2xl font-bold text-gray-400">Chargement...</p>
-              ) : (
-                <p className="text-3xl font-extrabold" style={{ color: "#08436A" }}>
-                  {totalPools !== null ? totalPools : "—"}
-                </p>
-              )}
-            </div>
-            <div className="text-4xl">🏊</div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-4">
-            Nombre total de piscines que vous avez enregistrées sur la plateforme.
-          </p>
-        </div>
+        <SectionIntro eyebrow="Statistiques" title="Vos piscines" />
+        <StatCard
+          label="Nombre total de piscines"
+          value={totalPools ?? "—"}
+          helperText="Nombre total de piscines que vous avez enregistrées sur la plateforme."
+          icon="🏊"
+          loading={loading}
+        />
       </section>
 
-      <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-8 text-center shadow-sm">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-white"
-          style={{ backgroundColor: "#08436A" }}
-        >
-          Retour au tableau de bord
-        </Link>
-      </div>
+      <DashboardCtaCard href="/dashboard" label="Retour au tableau de bord" />
     </main>
   );
 };
