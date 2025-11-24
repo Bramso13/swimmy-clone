@@ -14,6 +14,7 @@ type RevenueSummary = {
   currentMonth: number;
   rolling90Days: number;
   yearToDate: number;
+  totalPaid: number;
   pending: number;
   lastPayoutAt: string | null;
 };
@@ -174,6 +175,13 @@ const ComptabilitePage = () => {
             value={revenueLoading ? "…" : formatCurrency(revenue?.pending)}
             helperText="Montant des réservations acceptées mais non encore payées."
             icon="💶"
+            loading={revenueLoading}
+          />
+          <StatCard
+            label="Revenus encaissés (total)"
+            value={revenueLoading ? "…" : formatCurrency(revenue?.totalPaid)}
+            helperText="Somme cumulée de toutes vos réservations déjà payées."
+            icon="💼"
             loading={revenueLoading}
           />
         </div>

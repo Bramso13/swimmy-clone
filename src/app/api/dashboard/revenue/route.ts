@@ -4,9 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
 import { auth } from "../../../../../lib/auth";
 
-const SUCCESS_STATUSES = ["succeeded", "paid"];
+const SUCCESS_STATUSES = ["paid"];
 const PENDING_RESERVATION_STATUSES = ["pending", "accepted"];
-const PENDING_TRANSACTION_STATUSES = ["pending", "accepted"];
 
 export async function GET(req: NextRequest) {
   try {
@@ -43,28 +42,34 @@ export async function GET(req: NextRequest) {
       },
     };
 
-    const [currentMonth, rolling90Days, yearToDate, pendingReservations, pendingTransactions, lastPayout] = await Promise.all([
-      prisma.transaction.aggregate({
+    const [currentMonth, rolling90Days, yearToDate, totalPaid, pendingReservations, lastPayout] = await Promise.all([
+      prisma.reservation.aggregate({
         where: {
-          ...transactionWhere,
+          ...reservationWhere,
           status: { in: SUCCESS_STATUSES },
-          createdAt: { gte: startOfMonth, lt: startOfNextMonth },
+          updatedAt: { gte: startOfMonth, lt: startOfNextMonth },
         },
         _sum: { amount: true },
       }),
-      prisma.transaction.aggregate({
+      prisma.reservation.aggregate({
         where: {
-          ...transactionWhere,
+          ...reservationWhere,
           status: { in: SUCCESS_STATUSES },
-          createdAt: { gte: ninetyDaysAgo },
+          updatedAt: { gte: ninetyDaysAgo },
         },
         _sum: { amount: true },
       }),
-      prisma.transaction.aggregate({
+      prisma.reservation.aggregate({
         where: {
-          ...transactionWhere,
+          ...reservationWhere,
           status: { in: SUCCESS_STATUSES },
-          createdAt: { gte: startOfYear },
+          updatedAt: { gte: startOfYear },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.reservation.aggregate({
+        where: {
+          status: { in: SUCCESS_STATUSES },
         },
         _sum: { amount: true },
       }),
@@ -75,19 +80,12 @@ export async function GET(req: NextRequest) {
         },
         _sum: { amount: true },
       }),
-      prisma.transaction.aggregate({
+      prisma.reservation.findFirst({
         where: {
-          ...transactionWhere,
-          status: { in: PENDING_TRANSACTION_STATUSES },
-        },
-        _sum: { amount: true },
-      }),
-      prisma.transaction.findFirst({
-        where: {
-          ...transactionWhere,
+          ...reservationWhere,
           status: { in: SUCCESS_STATUSES },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { updatedAt: "desc" },
         select: { createdAt: true },
       }),
     ]);
@@ -97,7 +95,8 @@ export async function GET(req: NextRequest) {
         currentMonth: currentMonth._sum.amount ?? 0,
         rolling90Days: rolling90Days._sum.amount ?? 0,
         yearToDate: yearToDate._sum.amount ?? 0,
-        pending: (pendingReservations._sum.amount ?? 0) + (pendingTransactions._sum.amount ?? 0),
+        totalPaid: totalPaid._sum.amount ?? 0,
+        pending: pendingReservations._sum.amount ?? 0,
         lastPayoutAt: lastPayout?.createdAt ?? null,
       },
     });
