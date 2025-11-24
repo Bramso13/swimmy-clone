@@ -1,6 +1,7 @@
 "use client";
 import React, { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useNotification } from "@/context/NotificationContext";
 
 const BRAND_BLUE = "var(--brand-blue)";
 const BRAND_BLUE_HOVER = "color-mix(in srgb, var(--brand-blue) 85%, black)";
@@ -20,6 +21,7 @@ const rhythmOptions = [
 
 const NewPoolPage = () => {
   const router = useRouter();
+  const { success, error: notifyError } = useNotification();
   const [region, setRegion] = useState("");
   const [persons, setPersons] = useState<number | null>(null);
   const [rhythm, setRhythm] = useState(rhythmOptions[0].value);
@@ -427,7 +429,7 @@ const NewPoolPage = () => {
                           if (res.ok) {
                             uploadedUrls.push(j.url);
                           } else {
-                            alert(j.error || "Upload échoué");
+                            notifyError("Upload échoué", j.error || "Impossible de téléverser cette photo.");
                           }
                         }
                         setPhotos((prev) => [...prev, ...uploadedUrls]);
@@ -667,43 +669,43 @@ const NewPoolPage = () => {
                   onClick={async () => {
                     // Validation des champs obligatoires
                     if (!title.trim()) {
-                      alert("Le titre est obligatoire");
+                      notifyError("Titre manquant", "Le titre est obligatoire pour créer votre annonce.");
                       return;
                     }
                     if (!address.trim()) {
-                      alert("L'adresse exacte est obligatoire");
+                      notifyError("Adresse obligatoire", "Merci d'indiquer l'adresse exacte de votre piscine.");
                       return;
                     }
                     if (latitude === "" || Number(latitude) <= 0) {
-                      alert("La latitude (en mètres) est obligatoire et doit être > 0");
+                      notifyError("Latitude invalide", "La latitude doit être renseignée et supérieure à 0.");
                       return;
                     }
                     if (longitude === "" || Number(longitude) <= 0) {
-                      alert("La longitude (en mètres) est obligatoire et doit être > 0");
+                      notifyError("Longitude invalide", "La longitude doit être renseignée et supérieure à 0.");
                       return;
                     }
                     if (!description.trim()) {
-                      alert("La description est obligatoire");
+                      notifyError("Description manquante", "Ajoutez une description pour votre annonce.");
                       return;
                     }
                     if (!pricePerHour || Number(pricePerHour) <= 0) {
-                      alert("Le prix par heure doit être supérieur à 0");
+                      notifyError("Tarif invalide", "Le prix par heure doit être supérieur à 0.");
                       return;
                     }
                     if (!region || region.trim() === "") {
-                      alert("La région est obligatoire");
+                      notifyError("Région obligatoire", "Sélectionnez la région de votre piscine.");
                       return;
                     }
                     if (persons === null || persons === undefined) {
-                      alert("Vous devez indiquer combien de personnes vous souhaitez accueillir");
+                      notifyError("Capacité requise", "Indiquez le nombre de personnes que vous souhaitez accueillir.");
                       return;
                     }
                     if (photos.length === 0) {
-                      alert("Au moins une photo est obligatoire");
+                      notifyError("Photos manquantes", "Ajoutez au moins une photo de votre piscine.");
                       return;
                     }
                     if (!product || !product.trim()) {
-                      alert("Le produit d'entretien est obligatoire");
+                      notifyError("Produit d'entretien requis", "Précisez le produit d'entretien utilisé.");
                       return;
                     }
                     
@@ -726,19 +728,23 @@ const NewPoolPage = () => {
                       const res = await fetch("/api/pools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
                       const j = await res.json();
                       
-                      if(res.ok || res.status === 202) {
+                      if (res.ok || res.status === 202) {
                         // Si c'est une demande d'approbation (status 202)
                         if (res.status === 202 || j.approval) {
+                          success(
+                            "Demande envoyée",
+                            "Votre annonce attend validation. Nous vous préviendrons dès qu'elle sera approuvée."
+                          );
                           setShowSuccessMessage(true);
                         } else if (j.pool) {
-                          // Si c'est une création directe (owner)
+                          success("Piscine créée", "Votre annonce est maintenant en ligne.");
                           router.push(`/pool/${j.pool.id}`);
                         }
                       } else {
-                        alert(j.error || "Erreur de création");
+                        notifyError("Erreur de création", j.error || "Impossible de créer l'annonce.");
                       }
                     } catch (error) {
-                      alert("Une erreur est survenue lors de la création");
+                      notifyError("Erreur de création", "Une erreur est survenue lors de la création.");
                     } finally {
                       setSubmitting(false);
                     }
