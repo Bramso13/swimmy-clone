@@ -199,6 +199,13 @@ export async function PATCH(req: NextRequest) {
             },
           });
         }
+      } else if (status === "paid") {
+        if (existingTransaction) {
+          await prisma.transaction.update({
+            where: { id: existingTransaction.id },
+            data: { status: "succeeded" },
+          });
+        }
       }
       // Note: Le statut "paid" et "succeeded" sont gérés par le webhook Stripe
     } catch (txError) {

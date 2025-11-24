@@ -109,8 +109,20 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
         notifyError("Paiement échoué", errorMsg);
         setLoading(false);
       } else if (paymentIntent?.status === "succeeded") {
-        success("Paiement réussi", "Votre réservation est confirmée. Un email de confirmation vous a été envoyé.");
-        
+        success(
+          "Paiement réussi",
+          "Votre réservation est confirmée. Un email de confirmation vous a été envoyé."
+        );
+
+        // Marquer immédiatement la réservation comme payée (webhook peut arriver plus tard)
+        request("/api/reservations", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: reservationId, status: "paid" }),
+        }).catch((err) => {
+          console.error("Erreur lors de la mise à jour du statut payé:", err);
+        });
+
         // Envoyer l'email de confirmation (en arrière-plan, ne pas bloquer la redirection)
         request("/api/email/send-confirmation", {
           method: "POST",
