@@ -6,6 +6,7 @@ import { auth } from "../../../../../lib/auth";
 
 const SUCCESS_STATUSES = ["succeeded", "paid"];
 const PENDING_RESERVATION_STATUSES = ["pending", "accepted"];
+const PENDING_TRANSACTION_STATUSES = ["pending", "accepted"];
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,18 +24,29 @@ export async function GET(req: NextRequest) {
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 89);
     const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-    const baseWhere = {
+    const transactionWhere = {
       reservation: {
-        pool: {
+        is: {
+          pool: {
+            is: {
+              ownerId: userId,
+            },
+          },
+        },
+      },
+    };
+    const reservationWhere = {
+      pool: {
+        is: {
           ownerId: userId,
         },
       },
     };
 
-    const [currentMonth, rolling90Days, yearToDate, pendingReservations, lastPayout] = await Promise.all([
+    const [currentMonth, rolling90Days, yearToDate, pendingReservations, pendingTransactions, lastPayout] = await Promise.all([
       prisma.transaction.aggregate({
         where: {
-          ...baseWhere,
+          ...transactionWhere,
           status: { in: SUCCESS_STATUSES },
           createdAt: { gte: startOfMonth, lt: startOfNextMonth },
         },
@@ -42,7 +54,7 @@ export async function GET(req: NextRequest) {
       }),
       prisma.transaction.aggregate({
         where: {
-          ...baseWhere,
+          ...transactionWhere,
           status: { in: SUCCESS_STATUSES },
           createdAt: { gte: ninetyDaysAgo },
         },
@@ -50,7 +62,7 @@ export async function GET(req: NextRequest) {
       }),
       prisma.transaction.aggregate({
         where: {
-          ...baseWhere,
+          ...transactionWhere,
           status: { in: SUCCESS_STATUSES },
           createdAt: { gte: startOfYear },
         },
@@ -58,14 +70,21 @@ export async function GET(req: NextRequest) {
       }),
       prisma.reservation.aggregate({
         where: {
-          ...baseWhere,
+          ...reservationWhere,
           status: { in: PENDING_RESERVATION_STATUSES },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.transaction.aggregate({
+        where: {
+          ...transactionWhere,
+          status: { in: PENDING_TRANSACTION_STATUSES },
         },
         _sum: { amount: true },
       }),
       prisma.transaction.findFirst({
         where: {
-          ...baseWhere,
+          ...transactionWhere,
           status: { in: SUCCESS_STATUSES },
         },
         orderBy: { createdAt: "desc" },
@@ -78,7 +97,7 @@ export async function GET(req: NextRequest) {
         currentMonth: currentMonth._sum.amount ?? 0,
         rolling90Days: rolling90Days._sum.amount ?? 0,
         yearToDate: yearToDate._sum.amount ?? 0,
-        pending: pendingReservations._sum.amount ?? 0,
+        pending: (pendingReservations._sum.amount ?? 0) + (pendingTransactions._sum.amount ?? 0),
         lastPayoutAt: lastPayout?.createdAt ?? null,
       },
     });
