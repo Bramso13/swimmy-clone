@@ -10,7 +10,7 @@ type RevenueSnapshotCardProps = {
   badge?: string;
 };
 
-const RevenueSnapshotCard = ({ label, period, value, hint, badge = "Bientôt disponible" }: RevenueSnapshotCardProps) => {
+const RevenueSnapshotCard = ({ label, period, value, hint, badge }: RevenueSnapshotCardProps) => {
   return (
     <div className="rounded-2xl border bg-white shadow-sm p-5 flex flex-col gap-3">
       <div>
