@@ -35,13 +35,31 @@ const ComptabilitePage = () => {
     try {
       setPoolRevenueLoading(true);
       setPoolRevenueError(null);
-      const res = await request("/api/dashboard/pools/revenue", { cache: "no-store" });
+      const session = await authClient.getSession();
+      const ownerId = session.data?.user?.id as string | undefined;
+      if (!ownerId) {
+        throw new Error("Utilisateur non authentifié");
+      }
+      const res = await request(
+        `/api/pools?ownerId=${encodeURIComponent(ownerId)}&includeReservations=true`,
+        { cache: "no-store" }
+      );
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Impossible de récupérer les revenus par piscine");
       }
       const data = await res.json();
-      setPoolsRevenue(Array.isArray(data?.pools) ? data.pools : []);
+      const poolsData = Array.isArray(data?.pools) ? data.pools : [];
+      const formatted = poolsData.map((pool: any) => ({
+        id: pool.id,
+        title: pool.title,
+        totalRevenue: Array.isArray(pool?.reservations)
+          ? pool.reservations
+              .filter((reservation: any) => reservation?.status === "paid")
+              .reduce((sum: number, reservation: any) => sum + Number(reservation?.amount || 0), 0)
+          : 0,
+      }));
+      setPoolsRevenue(formatted);
     } catch (err: any) {
       setPoolRevenueError(err.message || "Erreur lors du chargement des revenus par piscine");
     } finally {

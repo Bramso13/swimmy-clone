@@ -36,27 +36,6 @@ const PoolsPage = () => {
   const [approvedPools, setApprovedPools] = useState<ApprovalItem[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-  const [showRevenue, setShowRevenue] = useState(false);
-  const [revenueLoading, setRevenueLoading] = useState(false);
-  const [revenues, setRevenues] = useState<PoolRevenue[]>([]);
-  const [revenueError, setRevenueError] = useState<string | null>(null);
-  const loadRevenues = async () => {
-    try {
-      setRevenueLoading(true);
-      setRevenueError(null);
-      const res = await request("/api/dashboard/pools/revenue", { cache: "no-store" });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Impossible de récupérer les revenus par piscine");
-      }
-      const data = await res.json();
-      setRevenues(Array.isArray(data?.pools) ? data.pools : []);
-    } catch (err: any) {
-      setRevenueError(err.message || "Erreur lors du chargement des revenus");
-    } finally {
-      setRevenueLoading(false);
-    }
-  };
 
 
   useEffect(() => {
@@ -231,31 +210,15 @@ const PoolsPage = () => {
       )}
       <div className="mb-6 flex items-center justify-between">
         {!isMobile && <h1 className="text-2xl font-bold">Mes piscines</h1>}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <button
-            onClick={() => {
-              setShowRevenue((prev) => {
-                const next = !prev;
-                if (!prev && revenues.length === 0) {
-                  loadRevenues();
-                }
-                return next;
-              });
-            }}
-            className="border border-gray-300 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            {showRevenue ? "Masquer les revenus par piscine" : "Voir les revenus par piscine"}
-          </button>
-          <a
-            href="/dashboard/pools/new"
-            className="text-white px-4 py-2 rounded text-center"
-            style={{ backgroundColor: "#08436A" }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = "#062F4B")}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = "#08436A")}
-          >
-            Ajouter une piscine
-          </a>
-        </div>
+        <a
+          href="/dashboard/pools/new"
+          className="text-white px-4 py-2 rounded"
+          style={{ backgroundColor: "#08436A" }}
+          onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = "#062F4B")}
+          onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = "#08436A")}
+        >
+          Ajouter une piscine
+        </a>
       </div>
 
       {loading ? (
@@ -354,57 +317,6 @@ const PoolsPage = () => {
               </ul>
             </div>
           )}
-          {showRevenue && (
-            <section className="mb-8 rounded-xl border bg-white p-4 shadow-sm">
-              <div className="mb-2 flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-semibold text-gray-800">Revenus par piscine</h3>
-                  <p className="text-sm text-gray-500">Somme cumulée des réservations payées.</p>
-                </div>
-                {!revenueLoading && (
-                  <button
-                    onClick={loadRevenues}
-                    className="text-sm text-[var(--brand-blue)] hover:underline"
-                  >
-                    Rafraîchir
-                  </button>
-                )}
-              </div>
-              {revenueLoading ? (
-                <div className="text-sm text-gray-500">Chargement des revenus…</div>
-              ) : revenueError ? (
-                <div className="text-sm text-red-600">Erreur : {revenueError}</div>
-              ) : revenues.length === 0 ? (
-                <div className="text-sm text-gray-500">Aucune réservation payée n'a encore été enregistrée.</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-gray-500 border-b">
-                        <th className="py-2">Piscine</th>
-                        <th className="py-2 text-right">Revenus cumulés</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {revenues.map((rev) => (
-                        <tr key={rev.id} className="border-b last:border-b-0">
-                          <td className="py-2 font-medium text-gray-800">{rev.title || "Sans titre"}</td>
-                          <td className="py-2 text-right font-semibold text-[var(--brand-blue)]">
-                            {rev.totalRevenue.toLocaleString("fr-FR", {
-                              style: "currency",
-                              currency: "EUR",
-                              minimumFractionDigits: 2,
-                            })}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </section>
-          )}
-
           {pools.length > 0 && (
             <section className="mb-8">
               <h2 className="text-lg font-semibold mb-4">Toutes vos piscines</h2>
