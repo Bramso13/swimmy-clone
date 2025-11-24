@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { useApi } from "@/context/ApiContext";
 
 type UserItem = {
   id: string;
@@ -21,10 +22,11 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
+  const { request } = useApi();
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
-  const fetchUsers = async (opts?: { page?: number; q?: string }) => {
+  const fetchUsers = useCallback(async (opts?: { page?: number; q?: string }) => {
     try {
       setLoading(true);
       setError(null);
@@ -32,7 +34,7 @@ export default function UsersPage() {
       url.searchParams.set("page", String(opts?.page ?? page));
       url.searchParams.set("pageSize", String(pageSize));
       if ((opts?.q ?? q).trim()) url.searchParams.set("q", (opts?.q ?? q).trim());
-      const res = await fetch(url.toString(), { cache: "no-store" });
+      const res = await request(url.toString(), { cache: "no-store" });
       if (!res.ok) throw new Error("Impossible de charger les utilisateurs");
       const data = await res.json();
       setUsers(data.users || []);
@@ -42,12 +44,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize, q, request]);
 
   useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [fetchUsers]);
 
   const onSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +64,7 @@ export default function UsersPage() {
     if (newRole !== null && newRole !== user.role) payload.role = newRole;
     if (Object.keys(payload).length === 0) return;
 
-    const res = await fetch(`/api/users/${user.id}`, {
+    const res = await request(`/api/users/${user.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -78,7 +79,7 @@ export default function UsersPage() {
 
   const handleDelete = async (user: UserItem) => {
     if (!window.confirm(`Supprimer l’utilisateur ${user.email} ?`)) return;
-    const res = await fetch(`/api/users/${user.id}`, { method: "DELETE" });
+    const res = await request(`/api/users/${user.id}`, { method: "DELETE" });
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
       alert(j.error || "Échec de la suppression");
@@ -90,7 +91,7 @@ export default function UsersPage() {
   const handleSendMessage = async (user: UserItem) => {
     const content = window.prompt(`Message à envoyer à ${user.email}`);
     if (!content) return;
-    const res = await fetch(`/api/messages`, {
+    const res = await request(`/api/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ recipientId: user.id, content }),

@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useApi } from "@/context/ApiContext";
 
 type LocalProfile = {
   about?: string;
@@ -24,6 +25,7 @@ const STORAGE_KEY = "profile.local";
 
 const ProfilePage = () => {
   const { data: session } = authClient.useSession?.() ?? { data: undefined };
+  const { request } = useApi();
   const user = (session as any)?.user as
     | { emailVerified?: boolean; image?: string; name?: string; id?: string }
     | undefined;
@@ -48,7 +50,7 @@ const ProfilePage = () => {
       }
 
       try {
-        const response = await fetch(`/api/users/${user.id}`);
+        const response = await request(`/api/users/${user.id}`);
         if (response.ok) {
           const data = await response.json();
           setFullUser(data.user);
@@ -61,7 +63,7 @@ const ProfilePage = () => {
     };
 
     fetchFullUser();
-  }, [user?.id]);
+  }, [request, user?.id]);
 
   useEffect(() => {
     try {

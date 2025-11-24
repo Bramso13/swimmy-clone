@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useApi } from "@/context/ApiContext";
 
 type LocalProfile = {
   about?: string;
@@ -17,6 +18,8 @@ export default function MonProfilPage() {
   const [saving, setSaving] = useState(false);
   const [serverLoaded, setServerLoaded] = useState(false);
 
+  const { request } = useApi();
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -31,7 +34,7 @@ export default function MonProfilPage() {
         const session = await authClient.getSession();
         const userId = session.data?.user?.id as string | undefined;
         if (!userId) return;
-        const res = await fetch(`/api/users/${userId}`);
+        const res = await request(`/api/users/${userId}`);
         if (res.ok) {
           const j = await res.json();
           const u = j.user || {};
@@ -46,7 +49,7 @@ export default function MonProfilPage() {
         setServerLoaded(true);
       }
     })();
-  }, []);
+  }, [request]);
 
   useEffect(() => {
     try {
@@ -60,7 +63,7 @@ export default function MonProfilPage() {
     form.append("file", file);
     setUploading(true);
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const res = await request("/api/upload", { method: "POST", body: form });
       const j = await res.json();
       if (res.ok && j.url) {
         setLocal((p) => ({ ...p, image: j.url }));
@@ -89,7 +92,7 @@ export default function MonProfilPage() {
         alert("Aucun changement à enregistrer.");
         return;
       }
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await request(`/api/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

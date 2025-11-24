@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import PoolCard, { type Pool as PoolCardType } from "@/components/PoolCard";
+import { useApi } from "@/context/ApiContext";
 
 type PoolItem = PoolCardType & {
   isRented?: boolean;
@@ -25,6 +26,7 @@ const PoolsPage = () => {
   const [pools, setPools] = useState<PoolItem[]>([]);
   const [rented, setRented] = useState<Array<{ id: string; title: string; renter: string; endDate?: string }>>([]);
   const [approvalRequests, setApprovalRequests] = useState<ApprovalItem[]>([]);
+  const { request } = useApi();
   const [approvedPools, setApprovedPools] = useState<ApprovalItem[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -41,7 +43,7 @@ const PoolsPage = () => {
           setLoading(false);
           return;
         }
-        const res = await fetch(`/api/pools?ownerId=${encodeURIComponent(userId)}&includeReservations=true`, { cache: "no-store" });
+        const res = await request(`/api/pools?ownerId=${encodeURIComponent(userId)}&includeReservations=true`, { cache: "no-store" });
         if (!res.ok) throw new Error("Impossible de charger vos piscines");
         const data = await res.json();
         const all: any[] = data.pools || [];
@@ -104,7 +106,7 @@ const PoolsPage = () => {
 
         // Récupérer également les piscines en attente (demandes d'approbation)
         try {
-          const approvalsRes = await fetch(`/api/pools/approvals`, { cache: "no-store" });
+          const approvalsRes = await request(`/api/pools/approvals`, { cache: "no-store" });
           if (approvalsRes.ok) {
             const approvalsData = await approvalsRes.json();
             const mapped: ApprovalItem[] = Array.isArray(approvalsData?.requests)
@@ -156,7 +158,7 @@ const PoolsPage = () => {
       }
     };
     load();
-  }, []);
+  }, [request]);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");

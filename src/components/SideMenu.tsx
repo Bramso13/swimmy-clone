@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import MenuSection, { MenuEntry } from "@/components/navigation/MenuSection";
+import { useApi } from "@/context/ApiContext";
 
 export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: boolean }) {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { request } = useApi();
 
   useEffect(() => {
     // Vérifier le statut de connexion + récupérer le rôle depuis l'API utilisateur
@@ -21,7 +23,7 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
           setUser(null);
         } else {
           try {
-            const res = await fetch(`/api/users/${baseUser.id}`);
+            const res = await request(`/api/users/${baseUser.id}`);
             if (res.ok) {
               const data = await res.json();
               setUser(data.user);
@@ -49,7 +51,7 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open]);
+  }, [open, request]);
 
   const handleProposePool = (e: React.MouseEvent) => {
     if (!user) {

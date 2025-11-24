@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import PoolCard from "@/components/PoolCard";
 import SideMenu from "@/components/SideMenu";
 import { useSearchParams } from "next/navigation";
+import { useApi } from "@/context/ApiContext";
 
 const parseCoordinate = (value: any): number | null => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -30,15 +31,6 @@ const normalizeAddress = (value: unknown): string | null => {
   return trimmed.toLowerCase();
 };
 
-async function getPools() {
-  const base =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-  const res = await fetch(`${base}/api/pools`, { cache: "no-store" });
-  const j = await res.json();
-  return j.pools ?? [];
-}
-
 type LocationSuggestion = {
   label: string;
   context?: string;
@@ -48,6 +40,7 @@ type LocationSuggestion = {
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
+  const { request } = useApi();
   const [pools, setPools] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -125,7 +118,7 @@ export default function SearchPage() {
       try {
         const base = process.env.NEXT_PUBLIC_BASE_URL || 
           (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-        const res = await fetch(`${base}/api/pools`, { cache: "no-store" });
+        const res = await request(`${base}/api/pools`, { cache: "no-store" });
         const data = await res.json();
         setPools(data.pools ?? []);
       } catch (error) {
@@ -135,7 +128,7 @@ export default function SearchPage() {
       }
     };
     loadPools();
-  }, []);
+  }, [request]);
 
   React.useEffect(() => {
     if (!locationOpen) {
@@ -186,7 +179,7 @@ export default function SearchPage() {
           autocomplete: "1",
           type: "housenumber,street,locality,municipality",
         });
-        const res = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`, {
+        const res = await request(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) {
@@ -237,7 +230,7 @@ export default function SearchPage() {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [locationQuery, locationOpen]);
+  }, [locationOpen, locationQuery, request]);
 
   React.useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -289,7 +282,7 @@ export default function SearchPage() {
         autocomplete: "1",
         type: "housenumber,street,locality,municipality",
       });
-      const res = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
+      const res = await request(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
       if (!res.ok) {
         return;
       }
@@ -315,7 +308,7 @@ export default function SearchPage() {
     } catch (error) {
       console.error("Erreur géocodage manuel:", error);
     }
-  }, [locationQuery, locationSuggestions, selectedLocation, selectedLocationCoords]);
+  }, [locationQuery, locationSuggestions, request, selectedLocation, selectedLocationCoords]);
 
   const handleLocationKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -367,7 +360,7 @@ export default function SearchPage() {
           autocomplete: "1",
           type: "housenumber,street,locality,municipality",
         });
-        const res = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
+        const res = await request(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
         if (!res.ok) {
           throw new Error("Adresse API error");
         }
@@ -402,7 +395,7 @@ export default function SearchPage() {
     return () => {
       cancelled = true;
     };
-  }, [searchParams]);
+  }, [request, searchParams]);
 
   const handleSortChange = (sortType: string) => {
     setFilters(prev => ({ ...prev, sortBy: sortType }));
@@ -454,7 +447,7 @@ export default function SearchPage() {
             autocomplete: "1",
             type: "housenumber,street,locality,municipality",
           });
-          const res = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
+          const res = await request(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
           if (!res.ok) {
             continue;
           }
@@ -490,7 +483,7 @@ export default function SearchPage() {
     return () => {
       cancelled = true;
     };
-  }, [addressesNeedingCoords]);
+  }, [addressesNeedingCoords, request]);
 
   const shouldSortByDistance =
     filters.sortBy === "closest" ||

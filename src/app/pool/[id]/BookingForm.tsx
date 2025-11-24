@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/context/NotificationContext";
+import { useApi } from "@/context/ApiContext";
 
 type Props = {
   poolId: string;
@@ -13,6 +14,7 @@ type Props = {
 export default function BookingForm({ poolId, pricePerHour }: Props) {
   const router = useRouter();
   const { success, error: notifyError } = useNotification();
+  const { request } = useApi();
   const [date, setDate] = useState<string>("");
   const [startTime, setStartTime] = useState<string>("10:00");
   const [endTime, setEndTime] = useState<string>("10:00");
@@ -76,7 +78,7 @@ export default function BookingForm({ poolId, pricePerHour }: Props) {
       }
 
       // Créer la réservation
-      const res = await fetch("/api/reservations", {
+      const res = await request("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

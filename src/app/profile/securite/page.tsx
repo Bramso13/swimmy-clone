@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useApi } from "@/context/ApiContext";
 
 export default function SecuritePage() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -10,6 +11,7 @@ export default function SecuritePage() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { request } = useApi();
 
   const handleUpdate = async () => {
     if (newPassword !== confirmPassword) {
@@ -22,7 +24,7 @@ export default function SecuritePage() {
     }
     try {
       setSaving(true);
-      const res = await fetch("/api/users/password", {
+      const res = await request("/api/users/password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword, newPassword }),

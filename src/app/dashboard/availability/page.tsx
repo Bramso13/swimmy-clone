@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useApi } from "@/context/ApiContext";
 
 interface Pool {
   id: string;
@@ -38,6 +39,7 @@ export default function AvailabilityPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const router = useRouter();
+  const { request } = useApi();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,7 +54,7 @@ export default function AvailabilityPage() {
         }
 
         // Récupérer les informations complètes de l'utilisateur avec le rôle
-        const userResponse = await fetch(`/api/users/${authUser.id}`);
+        const userResponse = await request(`/api/users/${authUser.id}`);
         if (!userResponse.ok) {
           throw new Error("Impossible de récupérer les informations utilisateur");
         }
@@ -68,7 +70,7 @@ export default function AvailabilityPage() {
         }
 
         // Récupérer les piscines du propriétaire avec leurs réservations
-        const response = await fetch(
+        const response = await request(
           `/api/pools?includeReservations=true&ownerId=${userData.user.id}`
         );
         if (!response.ok) {
@@ -79,14 +81,14 @@ export default function AvailabilityPage() {
         setPools(data.pools || []);
 
         // Charger les demandes de disponibilité pour cet owner
-        const reqRes = await fetch(`/api/availability/requests?ownerId=${userData.user.id}`);
+        const reqRes = await request(`/api/availability/requests?ownerId=${userData.user.id}`);
         if (reqRes.ok) {
           const reqJson = await reqRes.json();
           setRequests(reqJson.requests || []);
         }
 
         // Charger les demandes d'approbation de piscines (toutes les pending pour owner)
-        const apprRes = await fetch(`/api/pools/approvals?scope=all&status=pending`);
+        const apprRes = await request(`/api/pools/approvals?scope=all&status=pending`);
         if (apprRes.ok) {
           const apprJson = await apprRes.json();
           setPoolApprovals(apprJson.requests || []);
@@ -99,7 +101,7 @@ export default function AvailabilityPage() {
     };
 
     fetchData();
-  }, []);
+  }, [request, router]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -264,7 +266,7 @@ export default function AvailabilityPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={async () => {
-                            await fetch(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved" }) });
+                            await request(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved" }) });
                             setPoolApprovals((prev) => prev.filter((x) => x.id !== p.id));
                           }}
                           className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
@@ -273,7 +275,7 @@ export default function AvailabilityPage() {
                         </button>
                         <button
                           onClick={async () => {
-                            await fetch(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected" }) });
+                            await request(`/api/pools/approvals/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected" }) });
                             setPoolApprovals((prev) => prev.filter((x) => x.id !== p.id));
                           }}
                           className="px-3 py-2 rounded bg-red-600 text-white text-sm"
@@ -314,7 +316,7 @@ export default function AvailabilityPage() {
                         />
                         <button
                           onClick={async () => {
-                            await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved", message: (r as any).__msg }) });
+                            await request(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved", message: (r as any).__msg }) });
                             setRequests((prev) => prev.filter((x) => x.id !== r.id));
                           }}
                           className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
@@ -323,7 +325,7 @@ export default function AvailabilityPage() {
                         </button>
                         <button
                           onClick={async () => {
-                            await fetch(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected", message: (r as any).__msg }) });
+                            await request(`/api/availability/requests/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected", message: (r as any).__msg }) });
                             setRequests((prev) => prev.filter((x) => x.id !== r.id));
                           }}
                           className="px-3 py-2 rounded bg-red-600 text-white text-sm"
@@ -362,7 +364,7 @@ export default function AvailabilityPage() {
                             const next = e.target.checked;
                             // Optimistic update
                             setPools((prev) => prev.map((p) => p.id === pool.id ? ({ ...p, isAvailable: next } as any) : p));
-                            await fetch(`/api/pools/${pool.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isAvailable: next }) });
+                            await request(`/api/pools/${pool.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isAvailable: next }) });
                           }}
                         />
                       </div>

@@ -13,6 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useNotification } from "@/context/NotificationContext";
+import { useApi } from "@/context/ApiContext";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
@@ -21,6 +22,7 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
   const elements = useElements();
   const router = useRouter();
   const { success, error: notifyError } = useNotification();
+  const { request } = useApi();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reservation, setReservation] = useState<any>(null);
@@ -31,7 +33,7 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
     const loadData = async () => {
       try {
         // Charger la réservation
-        const res = await fetch(`/api/reservations/${reservationId}`);
+        const res = await request(`/api/reservations/${reservationId}`);
         if (res.ok) {
           const data = await res.json();
           setReservation(data.reservation);
@@ -47,7 +49,7 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
       }
     };
     loadData();
-  }, [reservationId]);
+  }, [request, reservationId]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -61,7 +63,7 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
 
     try {
       // Créer le PaymentIntent
-      const res = await fetch("/api/stripe/create-payment-intent", {
+      const res = await request("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reservationId }),
@@ -110,7 +112,7 @@ function PaymentForm({ reservationId }: { reservationId: string }) {
         success("Paiement réussi", "Votre réservation est confirmée. Un email de confirmation vous a été envoyé.");
         
         // Envoyer l'email de confirmation (en arrière-plan, ne pas bloquer la redirection)
-        fetch("/api/email/send-confirmation", {
+        request("/api/email/send-confirmation", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ reservationId }),

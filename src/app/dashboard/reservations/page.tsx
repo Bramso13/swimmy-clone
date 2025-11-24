@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRenter } from "@/context/RenterContext";
 import { useNotification } from "@/context/NotificationContext";
 import { authClient } from "@/lib/auth-client";
+import { useApi } from "@/context/ApiContext";
 
 type ReservationStatus = "en-attente" | "acceptees" | "refusees" | "demandes" | "reservations-demandees";
 
@@ -12,6 +13,7 @@ const ReservationsPage = () => {
   const [user, setUser] = useState<any>(null);
   const { reservations, fetchReservations, loading, error } = useRenter();
   const { success, error: notifyError } = useNotification();
+  const { request } = useApi();
   const [approvals, setApprovals] = useState<any[]>([]);
   const [approvalsToValidate, setApprovalsToValidate] = useState<any[]>([]);
   const [myRequests, setMyRequests] = useState<any[]>([]);
@@ -25,21 +27,21 @@ const ReservationsPage = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const fetchMyApprovals = async (currentUserId?: string) => {
+  const fetchMyApprovals = useCallback(async (currentUserId?: string) => {
     try {
-      const res = await fetch('/api/pools/approvals', { cache: 'no-store' });
+      const res = await request('/api/pools/approvals', { cache: 'no-store' });
       const data = await res.json();
       const all = Array.isArray(data?.requests) ? data.requests : [];
       const mine = currentUserId ? all.filter((r: any) => r?.requesterId === currentUserId) : all;
       setApprovals(mine);
     } catch {}
-  };
+  }, [request]);
 
-  const fetchRequestedReservations = async (currentUserId?: string) => {
+  const fetchRequestedReservations = useCallback(async (currentUserId?: string) => {
     if (!currentUserId) return;
     try {
       setLoadingRequested(true);
-      const res = await fetch(`/api/pools?ownerId=${encodeURIComponent(currentUserId)}&includeReservations=true`, { cache: 'no-store' });
+      const res = await request(`/api/pools?ownerId=${encodeURIComponent(currentUserId)}&includeReservations=true`, { cache: 'no-store' });
       if (!res.ok) throw new Error('Erreur lors du chargement');
       const data = await res.json();
       const pools = Array.isArray(data?.pools) ? data.pools : [];
@@ -59,7 +61,7 @@ const ReservationsPage = () => {
     } finally {
       setLoadingRequested(false);
     }
-  };
+  }, [request]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -74,14 +76,14 @@ const ReservationsPage = () => {
           await fetchRequestedReservations(currentUser.id);
           // Si owner, charger aussi les demandes à valider
           try {
-            const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+            const resAll = await request('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
             const dataAll = await resAll.json();
             setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
           } catch {}
 
           // Charger mes demandes de réservation (availability requests)
           try {
-            const resMine = await fetch('/api/availability/requests?mine=true', { cache: 'no-store' });
+            const resMine = await request('/api/availability/requests?mine=true', { cache: 'no-store' });
             const dataMine = await resMine.json();
             setMyRequests(Array.isArray(dataMine?.requests) ? dataMine.requests : []);
           } catch {}
@@ -92,7 +94,7 @@ const ReservationsPage = () => {
     };
 
     checkAuth();
-  }, [fetchReservations]);
+  }, [fetchReservations, fetchMyApprovals, fetchRequestedReservations, request]);
 
   // Rafraîchir automatiquement les demandes d'annonce quand l'onglet "demandes" est actif
   useEffect(() => {
@@ -102,7 +104,7 @@ const ReservationsPage = () => {
     const refresh = async () => {
       await fetchMyApprovals(user.id);
       try {
-        const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+        const resAll = await request('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
         const dataAll = await resAll.json();
         setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
       } catch {}
@@ -126,7 +128,7 @@ const ReservationsPage = () => {
       }
       cancelled = true;
     };
-  }, [activeTab, user?.id]);
+  }, [activeTab, fetchMyApprovals, request, user?.id]);
 
   // Rafraîchir automatiquement les réservations demandées quand l'onglet correspondant est actif
   useEffect(() => {
@@ -155,7 +157,7 @@ const ReservationsPage = () => {
       }
       cancelled = true;
     };
-  }, [activeTab, user?.id]);
+  }, [activeTab, fetchRequestedReservations, user?.id]);
 
   // Charger les commentaires pour les piscines visibles dans l'onglet "Acceptées"
   useEffect(() => {
@@ -167,7 +169,7 @@ const ReservationsPage = () => {
     const load = async () => {
       const entries = await Promise.all(uniquePoolIds.map(async (pid) => {
         try {
-          const res = await fetch(`/api/comments?poolId=${encodeURIComponent(pid as string)}`, { cache: 'no-store' });
+          const res = await request(`/api/comments?poolId=${encodeURIComponent(pid as string)}`, { cache: 'no-store' });
           const data = await res.json();
           return [pid as string, Array.isArray(data?.comments) ? data.comments : []] as const;
         } catch {
@@ -179,7 +181,7 @@ const ReservationsPage = () => {
       setCommentsByPool(map);
     };
     load();
-  }, [activeTab, myRequests]);
+  }, [activeTab, myRequests, request]);
 
   const submitComment = async (poolId: string, reservationId?: string) => {
     const content = (commentInputs[poolId] || '').trim();
@@ -187,7 +189,7 @@ const ReservationsPage = () => {
     try {
       setSendingByPool((prev) => ({ ...prev, [poolId]: true }));
       setFeedbackByPool((prev) => ({ ...prev, [poolId]: undefined }));
-      const res = await fetch('/api/comments', {
+      const res = await request('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ poolId, reservationId, content, rating: ratingByPool[poolId] || 5 })
@@ -378,7 +380,7 @@ const ReservationsPage = () => {
                     <button
                       onClick={async () => {
                         try {
-                          const res = await fetch('/api/reservations', {
+                          const res = await request('/api/reservations', {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ id: reservation.id, status: 'accepted' })
@@ -401,7 +403,7 @@ const ReservationsPage = () => {
                     <button
                       onClick={async () => {
                         try {
-                          const res = await fetch('/api/reservations', {
+                          const res = await request('/api/reservations', {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ id: reservation.id, status: 'rejected' })
@@ -589,11 +591,11 @@ const ReservationsPage = () => {
                       <div className="flex gap-2">
                         <button onClick={async () => {
                           try {
-                            const res = await fetch(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'approved' }) });
+                            const res = await request(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'approved' }) });
                             if (res.ok) {
                               success("Annonce approuvée", "La piscine est maintenant visible sur le site");
                               // rafraîchir
-                              const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+                              const resAll = await request('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
                               const dataAll = await resAll.json();
                               setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
                               await fetchMyApprovals(user?.id);
@@ -606,10 +608,10 @@ const ReservationsPage = () => {
                         }} className="px-3 py-1 rounded bg-green-600 text-white text-sm">Approuver</button>
                         <button onClick={async () => {
                           try {
-                            const res = await fetch(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected' }) });
+                            const res = await request(`/api/pools/approvals/${req.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected' }) });
                             if (res.ok) {
                               success("Annonce refusée", "Le créateur a été notifié");
-                              const resAll = await fetch('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
+                              const resAll = await request('/api/pools/approvals?scope=all&status=pending', { cache: 'no-store' });
                               const dataAll = await resAll.json();
                               setApprovalsToValidate(Array.isArray(dataAll?.requests) ? dataAll.requests : []);
                               await fetchMyApprovals(user?.id);

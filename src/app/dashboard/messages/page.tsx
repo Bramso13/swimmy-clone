@@ -5,6 +5,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/context/NotificationContext";
 import { useReservations } from "@/context/ReservationsContext";
+import { useApi } from "@/context/ApiContext";
 
 interface Conversation {
   userId: string;
@@ -51,6 +52,7 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const { success, error: notifyError } = useNotification();
+  const { request } = useApi();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -92,7 +94,7 @@ export default function MessagesPage() {
           router.replace("/login");
           return;
         }
-        const res = await fetch("/api/messages");
+        const res = await request("/api/messages");
         const j = await res.json();
         if (!res.ok) throw new Error(j.error || "Erreur chargement");
         setConversations(j.conversations || []);
@@ -107,7 +109,7 @@ export default function MessagesPage() {
       }
     };
     load();
-  }, []);
+  }, [request, router]);
 
   // Charger les messages de la conversation sélectionnée
   useEffect(() => {
@@ -119,7 +121,7 @@ export default function MessagesPage() {
     const loadMessages = async () => {
       setLoadingMessages(true);
       try {
-        const res = await fetch(`/api/messages/${selectedConversation}`);
+        const res = await request(`/api/messages/${selectedConversation}`);
         const j = await res.json();
         if (!res.ok) throw new Error(j.error || "Erreur chargement");
         setMessages(j.messages || []);
@@ -131,7 +133,7 @@ export default function MessagesPage() {
     };
 
     loadMessages();
-  }, [selectedConversation]);
+  }, [request, selectedConversation]);
 
   // Détecter la largeur pour bascule mobile
   useEffect(() => {
@@ -185,7 +187,7 @@ export default function MessagesPage() {
 
     setSending(true);
     try {
-      const res = await fetch("/api/messages", {
+      const res = await request("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -198,14 +200,14 @@ export default function MessagesPage() {
       if (!res.ok) throw new Error(j.error || "Erreur envoi");
 
       // Recharger les messages
-      const messagesRes = await fetch(`/api/messages/${selectedConversation}`);
+      const messagesRes = await request(`/api/messages/${selectedConversation}`);
       const messagesData = await messagesRes.json();
       if (messagesRes.ok) {
         setMessages(messagesData.messages || []);
       }
 
       // Recharger les conversations pour mettre à jour le dernier message
-      const convRes = await fetch("/api/messages");
+      const convRes = await request("/api/messages");
       const convData = await convRes.json();
       if (convRes.ok) {
         setConversations(convData.conversations || []);
@@ -231,12 +233,12 @@ export default function MessagesPage() {
       setUploadingImage(true);
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const res = await request("/api/upload", { method: "POST", body: form });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "Upload échoué");
       const imageUrl = j.url as string;
       // Envoyer le message image (contenu = URL)
-      const sendRes = await fetch("/api/messages", {
+      const sendRes = await request("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ recipientId: selectedConversation, content: imageUrl }),
@@ -245,8 +247,8 @@ export default function MessagesPage() {
       if (!sendRes.ok) throw new Error(sendJ.error || "Envoi image échoué");
       // Refresh messages & conversations
       const [messagesRes, convRes] = await Promise.all([
-        fetch(`/api/messages/${selectedConversation}`),
-        fetch("/api/messages"),
+        request(`/api/messages/${selectedConversation}`),
+        request("/api/messages"),
       ]);
       const [messagesData, convData] = await Promise.all([
         messagesRes.json(),

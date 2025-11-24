@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DashboardCard from "@/components/dashboard/DashboardCard";
 import QuickLinkCard from "@/components/dashboard/QuickLinkCard";
+import { useApi } from "@/context/ApiContext";
 
 const DashboardPage = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { request } = useApi();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -22,7 +24,7 @@ const DashboardPage = () => {
           return;
         }
         try {
-          const res = await fetch(`/api/users/${baseUser.id}`);
+          const res = await request(`/api/users/${baseUser.id}`);
           if (res.ok) {
             const data = await res.json();
             setUser(data.user);
@@ -39,7 +41,7 @@ const DashboardPage = () => {
       }
     };
     loadUser();
-  }, []);
+  }, [request, router]);
 
   const userName = user?.name || user?.email || "Utilisateur";
 

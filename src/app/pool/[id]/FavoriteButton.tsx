@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useApi } from "@/context/ApiContext";
 
 interface FavoriteButtonProps {
   poolId: string;
@@ -13,6 +14,7 @@ export default function FavoriteButton({ poolId }: FavoriteButtonProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const { request } = useApi();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -23,7 +25,7 @@ export default function FavoriteButton({ poolId }: FavoriteButtonProps) {
       // Vérifier si la piscine est dans les favoris
       if (isAuth) {
         try {
-          const response = await fetch(`/api/favorites/check?poolId=${poolId}`);
+          const response = await request(`/api/favorites/check?poolId=${poolId}`);
           const data = await response.json();
           setIsFavorite(data.isFavorite || false);
         } catch (error) {
@@ -32,7 +34,7 @@ export default function FavoriteButton({ poolId }: FavoriteButtonProps) {
       }
     };
     checkAuth();
-  }, [poolId]);
+  }, [poolId, request]);
 
   const toggleFavorite = async () => {
     if (!isAuthenticated) {
@@ -44,13 +46,13 @@ export default function FavoriteButton({ poolId }: FavoriteButtonProps) {
     try {
       if (isFavorite) {
         // Supprimer des favoris
-        await fetch(`/api/favorites?poolId=${poolId}`, {
+        await request(`/api/favorites?poolId=${poolId}`, {
           method: "DELETE",
         });
         setIsFavorite(false);
       } else {
         // Ajouter aux favoris
-        await fetch("/api/favorites", {
+        await request("/api/favorites", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ poolId }),

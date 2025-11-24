@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useApi } from "@/context/ApiContext";
 
 const EQUIPMENT_OPTIONS: string[] = [
   "Barbecue",
@@ -56,6 +57,7 @@ export default function EditPoolPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pool, setPool] = useState<EditablePool | null>(null);
+  const { request } = useApi();
 
   useEffect(() => {
     let cancelled = false;
@@ -63,7 +65,7 @@ export default function EditPoolPage({ params }: { params: { id: string } }) {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/pools/${id}`, { cache: "no-store" });
+        const res = await request(`/api/pools/${id}`, { cache: "no-store" });
         if (!res.ok) {
           throw new Error(res.status === 404 ? "Piscine introuvable" : "Impossible de charger la piscine");
         }
@@ -105,7 +107,7 @@ export default function EditPoolPage({ params }: { params: { id: string } }) {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, request]);
 
   const updateField = <K extends keyof EditablePool>(key: K, value: EditablePool[K]) => {
     setPool((prev) => (prev ? { ...prev, [key]: value } : prev));
@@ -148,7 +150,7 @@ export default function EditPoolPage({ params }: { params: { id: string } }) {
     setError(null);
     setSuccess(null);
     try {
-      const res = await fetch(`/api/pools/${pool.id}`, {
+      const res = await request(`/api/pools/${pool.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

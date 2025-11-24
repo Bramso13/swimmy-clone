@@ -5,6 +5,7 @@ import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import PoolCard from "@/components/PoolCard";
 import { useRouter } from "next/navigation";
+import { useApi } from "@/context/ApiContext";
 
 interface Favorite {
   id: string;
@@ -26,6 +27,7 @@ export default function FavoritesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { request } = useApi();
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -36,7 +38,7 @@ export default function FavoritesPage() {
           return;
         }
 
-        const response = await fetch("/api/favorites");
+        const response = await request("/api/favorites");
         if (!response.ok) {
           throw new Error("Erreur lors du chargement des favoris");
         }
@@ -51,7 +53,7 @@ export default function FavoritesPage() {
     };
 
     fetchFavorites();
-  }, []);
+  }, [request, router]);
 
   if (loading) {
     return (

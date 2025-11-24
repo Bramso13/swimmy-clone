@@ -5,11 +5,13 @@ import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useApi } from "@/context/ApiContext";
 
 export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolean }) {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { request } = useApi();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -20,7 +22,7 @@ export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolea
           setUser(null);
         } else {
           try {
-            const res = await fetch(`/api/users/${baseUser.id}`);
+            const res = await request(`/api/users/${baseUser.id}`);
             if (res.ok) {
               const data = await res.json();
               setUser(data.user);
@@ -39,7 +41,7 @@ export default function NavBar({ isHeaderBlue = false }: { isHeaderBlue?: boolea
     };
 
     checkAuth();
-  }, []);
+  }, [request]);
 
   const handleLogout = async () => {
     try {

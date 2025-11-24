@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { useApi } from "@/context/ApiContext";
 
 const BRAND_BLUE = "#08436A";
 const BRAND_BLUE_HOVER = "#06324B";
@@ -28,12 +29,13 @@ export default function Home() {
   }>>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showStickySearch, setShowStickySearch] = useState(false);
+  const { request } = useApi();
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await fetch("/api/pools", { cache: "no-store" });
+        const res = await request("/api/pools", { cache: "no-store" });
         const data = await res.json();
         const all = Array.isArray(data?.pools) ? data.pools : [];
         const approvedOnly = all.filter((p: any) => p?.approved !== false);
@@ -47,7 +49,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [request]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -72,7 +74,7 @@ export default function Home() {
   }, []);
 
   const handleTest = async () => {
-    const res = await fetch("/api/test", {
+    const res = await request("/api/test", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -91,7 +93,7 @@ export default function Home() {
       let cancelled = false;
       (async () => {
         try {
-          const res = await fetch('/api/comments/recent?limit=10', { cache: 'no-store' });
+          const res = await request('/api/comments/recent?limit=10', { cache: 'no-store' });
           const data = await res.json();
           const list = Array.isArray(data?.comments) ? data.comments : [];
           const mapped = list.map((c: any) => ({

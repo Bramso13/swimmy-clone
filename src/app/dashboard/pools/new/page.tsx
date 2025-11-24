@@ -2,6 +2,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/context/NotificationContext";
+import { useApi } from "@/context/ApiContext";
 
 const BRAND_BLUE = "var(--brand-blue)";
 const BRAND_BLUE_HOVER = "color-mix(in srgb, var(--brand-blue) 85%, black)";
@@ -22,6 +23,7 @@ const rhythmOptions = [
 const NewPoolPage = () => {
   const router = useRouter();
   const { success, error: notifyError } = useNotification();
+  const { request } = useApi();
   const [region, setRegion] = useState("");
   const [persons, setPersons] = useState<number | null>(null);
   const [rhythm, setRhythm] = useState(rhythmOptions[0].value);
@@ -140,7 +142,7 @@ const NewPoolPage = () => {
           limit: "5",
           countrycodes: "fr",
         });
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+        const res = await request(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
           signal: addrAbortRef.current.signal,
           headers: {
             "Accept-Language": "fr",
@@ -165,7 +167,7 @@ const NewPoolPage = () => {
     return () => {
       if (addrTimerRef.current) clearTimeout(addrTimerRef.current);
     };
-  }, [address]);
+  }, [address, request]);
 
   return (
     <div className="relative">
@@ -424,7 +426,7 @@ const NewPoolPage = () => {
                         for (const file of files) {
                           const form = new FormData();
                           form.append("file", file);
-                          const res = await fetch("/api/upload", { method: "POST", body: form });
+                          const res = await request("/api/upload", { method: "POST", body: form });
                           const j = await res.json();
                           if (res.ok) {
                             uploadedUrls.push(j.url);
@@ -725,7 +727,7 @@ const NewPoolPage = () => {
                         extras: { equipments },
                         location,
                       };
-                      const res = await fetch("/api/pools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                      const res = await request("/api/pools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
                       const j = await res.json();
                       
                       if (res.ok || res.status === 202) {

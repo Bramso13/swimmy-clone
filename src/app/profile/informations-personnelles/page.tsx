@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useApi } from "@/context/ApiContext";
 
 type PersonalInfo = {
   firstName?: string;
@@ -17,6 +18,7 @@ const STORAGE_KEY = "profile.personal";
 
 export default function InformationsPersonnellesPage() {
   const { data: session } = authClient.useSession?.() ?? { data: undefined };
+  const { request } = useApi();
   const user = (session as any)?.user as
     | { emailVerified?: boolean; email?: string; name?: string; id?: string }
     | undefined;
@@ -59,7 +61,7 @@ export default function InformationsPersonnellesPage() {
       try {
         const userId = user?.id as string | undefined;
         if (!userId) return;
-        const res = await fetch(`/api/users/${userId}`);
+        const res = await request(`/api/users/${userId}`);
         if (res.ok) {
           const j = await res.json();
           const u = j.user || {};
@@ -74,7 +76,7 @@ export default function InformationsPersonnellesPage() {
         setServerLoaded(true);
       }
     })();
-  }, [user?.id]);
+  }, [request, user?.id]);
 
   useEffect(() => {
     try {
@@ -93,7 +95,7 @@ export default function InformationsPersonnellesPage() {
       const payload: any = {};
       if (info.dob) payload.dateOfBirth = info.dob;
       if (info.firstName || info.lastName) payload.name = `${info.firstName ?? ''} ${info.lastName ?? ''}`.trim();
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await request(`/api/users/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
