@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
 import { auth } from "../../../../../lib/auth";
+import { rejectExpiredPaymentRequests } from "../../../../../lib/reservation-expiration";
 
 const SUCCESS_STATUSES = ["paid"];
 // On ne compte que les réservations déjà acceptées (en attente de paiement)
@@ -16,6 +17,9 @@ export async function GET(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
+
+    // Expirer automatiquement les paiements acceptés depuis trop longtemps
+    await rejectExpiredPaymentRequests();
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);

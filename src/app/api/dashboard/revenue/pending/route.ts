@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../../lib/prisma";
 import { auth } from "../../../../../../lib/auth";
+import { rejectExpiredPaymentRequests } from "../../../../../../lib/reservation-expiration";
 
 const PENDING_RESERVATION_STATUSES = ["accepted"];
 
@@ -14,6 +15,9 @@ export async function GET(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
+
+    // Avant de calculer les montants, expirer les demandes trop anciennes
+    await rejectExpiredPaymentRequests();
 
     const [pendingAggregate, pendingCount] = await Promise.all([
       prisma.reservation.aggregate({
