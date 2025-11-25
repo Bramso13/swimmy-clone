@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
           reservations: {
             include: {
               user: { select: { id: true, name: true, email: true } },
+              transaction: true,
             },
             orderBy: { startDate: "desc" },
           },

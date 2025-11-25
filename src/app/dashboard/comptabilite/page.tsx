@@ -41,34 +41,49 @@ const ComptabilitePage = () => {
   const [poolsRevenue, setPoolsRevenue] = useState<
     { id: string; title: string | null; totalRevenue: number }[]
   >([]);
+  const isPaidReservation = (reservation: any) => {
+    if (!reservation) return false;
+    const reservationStatus = reservation.status;
+    const transactionStatus = reservation.transaction?.status;
+    return (
+      reservationStatus === "paid" ||
+      transactionStatus === "succeeded" ||
+      transactionStatus === "paid" ||
+      transactionStatus === "completed"
+    );
+  };
+
   const loadPoolRevenue = useCallback(async () => {
     try {
       setPoolRevenueLoading(true);
       setPoolRevenueError(null);
       const session = await authClient.getSession();
-      const ownerId = session.data?.user?.id as string | undefined;
-      if (!ownerId) {
+      if (!session.data?.user?.id) {
         throw new Error("Utilisateur non authentifié");
       }
-      const res = await request(
-        `/api/pools?ownerId=${encodeURIComponent(ownerId)}&includeReservations=true`,
-        { cache: "no-store" }
-      );
+      const res = await request(`/api/pools?includeReservations=true`, { cache: "no-store" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Impossible de récupérer les revenus par piscine");
       }
       const data = await res.json();
       const poolsData = Array.isArray(data?.pools) ? data.pools : [];
-      const formatted = poolsData.map((pool: any) => ({
-        id: pool.id,
-        title: pool.title,
-        totalRevenue: Array.isArray(pool?.reservations)
-          ? pool.reservations
-              .filter((reservation: any) => reservation?.status === "paid")
-              .reduce((sum: number, reservation: any) => sum + Number(reservation?.amount || 0), 0)
-          : 0,
-      }));
+      const formatted = poolsData.map((pool: any) => {
+        const paidReservations = Array.isArray(pool?.reservations)
+          ? pool.reservations.filter(isPaidReservation)
+          : [];
+
+        const totalRevenue = paidReservations.reduce(
+          (sum: number, reservation: any) => sum + Number(reservation?.amount || 0),
+          0
+        );
+
+        return {
+          id: pool.id,
+          title: pool.title,
+          totalRevenue,
+        };
+      });
       setPoolsRevenue(formatted);
     } catch (err: any) {
       setPoolRevenueError(err.message || "Erreur lors du chargement des revenus par piscine");
