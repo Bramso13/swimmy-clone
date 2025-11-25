@@ -28,29 +28,7 @@ export async function GET(req: NextRequest) {
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 89);
     const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-    const transactionWhere = {
-      reservation: {
-        is: {
-          pool: {
-            is: {
-              ownerId: userId,
-            },
-          },
-        },
-      },
-    };
-    const reservationWhere = userId
-      ? {
-          pool: {
-            is: {
-              ownerId: userId,
-            },
-          },
-        }
-      : {};
-
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const reservationWhere = {};
 
     const [
       currentMonth,
