@@ -48,7 +48,15 @@ export async function GET(req: NextRequest) {
     const thirtyDaysAgo = new Date(now);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const [currentMonth, rolling90Days, yearToDate, totalPaid, pendingReservations, lastPayout] = await Promise.all([
+    const [
+      currentMonth,
+      rolling90Days,
+      yearToDate,
+      totalPaid,
+      pendingReservations,
+      lastPayout,
+      pendingReservationCount,
+    ] = await Promise.all([
       prisma.reservation.aggregate({
         where: {
           ...reservationWhere,
@@ -94,6 +102,12 @@ export async function GET(req: NextRequest) {
         orderBy: { updatedAt: "desc" },
         select: { createdAt: true },
       }),
+      prisma.reservation.count({
+        where: {
+          ...reservationWhere,
+          status: { in: PENDING_RESERVATION_STATUSES },
+        },
+      }),
     ]);
 
     return NextResponse.json({
@@ -103,6 +117,7 @@ export async function GET(req: NextRequest) {
         yearToDate: yearToDate._sum.amount ?? 0,
         totalPaid: totalPaid._sum.amount ?? 0,
         pending: pendingReservations._sum.amount ?? 0,
+        pendingCount: pendingReservationCount,
         lastPayoutAt: lastPayout?.createdAt ?? null,
       },
     });

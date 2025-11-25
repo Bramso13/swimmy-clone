@@ -5,17 +5,34 @@ import { sendPaymentRequestEmail } from "../../../lib/send-email";
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("userId");
-  let reservations;
+  const ownerId = req.nextUrl.searchParams.get("ownerId");
+  const status = req.nextUrl.searchParams.get("status");
+
+  const where: any = {};
+
   if (userId) {
-    reservations = await prisma.reservation.findMany({
-      where: { userId },
-      include: { pool: true, transaction: true },
-    });
-  } else {
-    reservations = await prisma.reservation.findMany({
-      include: { pool: true, transaction: true },
-    });
+    where.userId = userId;
   }
+
+  if (ownerId) {
+    where.pool = {
+      ...(where.pool ?? {}),
+      is: {
+        ...(where.pool?.is ?? {}),
+        ownerId,
+      },
+    };
+  }
+
+  if (status) {
+    where.status = status;
+  }
+
+  const reservations = await prisma.reservation.findMany({
+    where,
+    include: { pool: true, transaction: true },
+  });
+
   return NextResponse.json({ reservations });
 }
 

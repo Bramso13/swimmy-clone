@@ -16,7 +16,13 @@ type RevenueSummary = {
   yearToDate: number;
   totalPaid: number;
   pending: number;
+  pendingCount: number;
   lastPayoutAt: string | null;
+};
+
+type PendingRevenue = {
+  total: number;
+  count: number;
 };
 
 const ComptabilitePage = () => {
@@ -27,9 +33,9 @@ const ComptabilitePage = () => {
   const [revenue, setRevenue] = useState<RevenueSummary | null>(null);
   const [revenueLoading, setRevenueLoading] = useState(true);
   const [revenueError, setRevenueError] = useState<string | null>(null);
-  const [pendingAcceptedStats, setPendingAcceptedStats] = useState<{ total: number; count: number } | null>(null);
-  const [pendingAcceptedLoading, setPendingAcceptedLoading] = useState(true);
-  const [pendingAcceptedError, setPendingAcceptedError] = useState<string | null>(null);
+  const [pendingRevenue, setPendingRevenue] = useState<PendingRevenue | null>(null);
+  const [pendingLoading, setPendingLoading] = useState(true);
+  const [pendingError, setPendingError] = useState<string | null>(null);
   const [poolRevenueLoading, setPoolRevenueLoading] = useState(false);
   const [poolRevenueError, setPoolRevenueError] = useState<string | null>(null);
   const [poolsRevenue, setPoolsRevenue] = useState<{ id: string; title: string | null; totalRevenue: number }[]>([]);
@@ -106,6 +112,9 @@ const ComptabilitePage = () => {
           throw new Error(data?.error || "Impossible de récupérer les revenus Stripe.");
         }
         if (!cancelled) {
+          if (process.env.NODE_ENV !== "production") {
+            console.log("[Comptabilité] Revenue API response", data);
+          }
           setRevenue(data.revenue);
         }
       } catch (error: any) {
@@ -129,56 +138,34 @@ const ComptabilitePage = () => {
   useEffect(() => {
     let aborted = false;
 
-    const fetchPendingAcceptedRevenue = async () => {
-      setPendingAcceptedLoading(true);
-      setPendingAcceptedError(null);
+    const fetchPending = async () => {
+      setPendingLoading(true);
+      setPendingError(null);
       try {
-        const session = await authClient.getSession();
-        const ownerId = session.data?.user?.id as string | undefined;
-        if (!ownerId) {
-          if (!aborted) setPendingAcceptedStats({ total: 0, count: 0 });
-          return;
-        }
-
-        const res = await request(
-          `/api/pools?ownerId=${encodeURIComponent(ownerId)}&includeReservations=true`,
-          { cache: "no-store" }
-        );
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data?.error || "Impossible de récupérer les réservations acceptées.");
-        }
-
+        const res = await request("/api/dashboard/revenue/pending", { cache: "no-store" });
         const data = await res.json();
-        const pools = Array.isArray(data?.pools) ? data.pools : [];
-        const acceptedReservations = pools.flatMap((pool: any) =>
-          Array.isArray(pool?.reservations)
-            ? pool.reservations.filter((reservation: any) => reservation?.status === "accepted")
-            : []
-        );
-
-        const total = acceptedReservations.reduce((sum: number, reservation: any) => {
-          const amount = Number(reservation?.amount);
-          return sum + (Number.isFinite(amount) ? amount : 0);
-        }, 0);
-        const count = acceptedReservations.length;
-
+        if (!res.ok) {
+          throw new Error(data?.error || "Impossible de récupérer les revenus en attente.");
+        }
         if (!aborted) {
-          setPendingAcceptedStats({ total, count });
+          setPendingRevenue({
+            total: typeof data?.pending === "number" ? data.pending : 0,
+            count: typeof data?.count === "number" ? data.count : 0,
+          });
         }
       } catch (error: any) {
         if (!aborted) {
-          setPendingAcceptedError(error.message || "Erreur lors du calcul des revenus en attente.");
-          setPendingAcceptedStats(null);
+          setPendingRevenue(null);
+          setPendingError(error.message || "Erreur lors du calcul des revenus en attente.");
         }
       } finally {
         if (!aborted) {
-          setPendingAcceptedLoading(false);
+          setPendingLoading(false);
         }
       }
     };
 
-    fetchPendingAcceptedRevenue();
+    fetchPending();
     return () => {
       aborted = true;
     };
@@ -273,21 +260,21 @@ const ComptabilitePage = () => {
           <StatCard
             label="Revenus en attente"
             value={
-              pendingAcceptedLoading
+              pendingLoading
                 ? "…"
-                : pendingAcceptedError
+                : pendingError
                 ? "—"
-                : formatCurrency(pendingAcceptedStats?.total)
+                : formatCurrency(pendingRevenue?.total)
             }
             helperText={
-              pendingAcceptedError
-                ? pendingAcceptedError
-                : pendingAcceptedStats
-                ? `${pendingAcceptedStats.count} réservation(s) acceptée(s) en attente de paiement.`
+              pendingError
+                ? pendingError
+                : pendingRevenue
+                ? `${pendingRevenue.count} réservation(s) acceptée(s) en attente de paiement.`
                 : "Montant des réservations acceptées mais non encore payées."
             }
             icon="💶"
-            loading={pendingAcceptedLoading}
+            loading={pendingLoading}
           />
           <StatCard
             label="Revenus encaissés (total)"
