@@ -5,7 +5,8 @@ import { prisma } from "../../../../../lib/prisma";
 import { auth } from "../../../../../lib/auth";
 
 const SUCCESS_STATUSES = ["paid"];
-const PENDING_RESERVATION_STATUSES = ["pending", "accepted"];
+// On ne compte que les réservations déjà acceptées (en attente de paiement)
+const PENDING_RESERVATION_STATUSES = ["accepted"];
 
 export async function GET(req: NextRequest) {
   try {

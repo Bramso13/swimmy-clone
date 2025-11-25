@@ -27,6 +27,9 @@ const ComptabilitePage = () => {
   const [revenue, setRevenue] = useState<RevenueSummary | null>(null);
   const [revenueLoading, setRevenueLoading] = useState(true);
   const [revenueError, setRevenueError] = useState<string | null>(null);
+  const [pendingAcceptedStats, setPendingAcceptedStats] = useState<{ total: number; count: number } | null>(null);
+  const [pendingAcceptedLoading, setPendingAcceptedLoading] = useState(true);
+  const [pendingAcceptedError, setPendingAcceptedError] = useState<string | null>(null);
   const [poolRevenueLoading, setPoolRevenueLoading] = useState(false);
   const [poolRevenueError, setPoolRevenueError] = useState<string | null>(null);
   const [poolsRevenue, setPoolsRevenue] = useState<{ id: string; title: string | null; totalRevenue: number }[]>([]);
@@ -123,6 +126,64 @@ const ComptabilitePage = () => {
     };
   }, [request]);
 
+  useEffect(() => {
+    let aborted = false;
+
+    const fetchPendingAcceptedRevenue = async () => {
+      setPendingAcceptedLoading(true);
+      setPendingAcceptedError(null);
+      try {
+        const session = await authClient.getSession();
+        const ownerId = session.data?.user?.id as string | undefined;
+        if (!ownerId) {
+          if (!aborted) setPendingAcceptedStats({ total: 0, count: 0 });
+          return;
+        }
+
+        const res = await request(
+          `/api/pools?ownerId=${encodeURIComponent(ownerId)}&includeReservations=true`,
+          { cache: "no-store" }
+        );
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || "Impossible de récupérer les réservations acceptées.");
+        }
+
+        const data = await res.json();
+        const pools = Array.isArray(data?.pools) ? data.pools : [];
+        const acceptedReservations = pools.flatMap((pool: any) =>
+          Array.isArray(pool?.reservations)
+            ? pool.reservations.filter((reservation: any) => reservation?.status === "accepted")
+            : []
+        );
+
+        const total = acceptedReservations.reduce((sum: number, reservation: any) => {
+          const amount = Number(reservation?.amount);
+          return sum + (Number.isFinite(amount) ? amount : 0);
+        }, 0);
+        const count = acceptedReservations.length;
+
+        if (!aborted) {
+          setPendingAcceptedStats({ total, count });
+        }
+      } catch (error: any) {
+        if (!aborted) {
+          setPendingAcceptedError(error.message || "Erreur lors du calcul des revenus en attente.");
+          setPendingAcceptedStats(null);
+        }
+      } finally {
+        if (!aborted) {
+          setPendingAcceptedLoading(false);
+        }
+      }
+    };
+
+    fetchPendingAcceptedRevenue();
+    return () => {
+      aborted = true;
+    };
+  }, [request]);
+
   const formatCurrency = (amount?: number | null) => {
     const safeAmount = typeof amount === "number" ? amount : 0;
     return `${safeAmount.toLocaleString("fr-FR", {
@@ -211,10 +272,22 @@ const ComptabilitePage = () => {
           />
           <StatCard
             label="Revenus en attente"
-            value={revenueLoading ? "…" : formatCurrency(revenue?.pending)}
-            helperText="Montant des réservations acceptées mais non encore payées."
+            value={
+              pendingAcceptedLoading
+                ? "…"
+                : pendingAcceptedError
+                ? "—"
+                : formatCurrency(pendingAcceptedStats?.total)
+            }
+            helperText={
+              pendingAcceptedError
+                ? pendingAcceptedError
+                : pendingAcceptedStats
+                ? `${pendingAcceptedStats.count} réservation(s) acceptée(s) en attente de paiement.`
+                : "Montant des réservations acceptées mais non encore payées."
+            }
             icon="💶"
-            loading={revenueLoading}
+            loading={pendingAcceptedLoading}
           />
           <StatCard
             label="Revenus encaissés (total)"
