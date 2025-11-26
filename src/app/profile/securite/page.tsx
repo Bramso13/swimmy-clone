@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useApi } from "@/context/ApiContext";
+import { useUsers } from "@/context/UsersContext";
 
 export default function SecuritePage() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -10,8 +10,7 @@ export default function SecuritePage() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const { request } = useApi();
+  const { changePassword, changingPassword } = useUsers();
 
   const handleUpdate = async () => {
     if (newPassword !== confirmPassword) {
@@ -23,24 +22,17 @@ export default function SecuritePage() {
       return;
     }
     try {
-      setSaving(true);
-      const res = await request("/api/users/password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
-      const j = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(j.error || "Impossible de changer le mot de passe");
+      const success = await changePassword(currentPassword, newPassword);
+      if (success) {
+        alert("Mot de passe mis à jour avec succès");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        alert("Erreur lors de la mise à jour");
       }
-      alert("Mot de passe mis à jour avec succès");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
     } catch (e: any) {
       alert(e?.message || "Erreur lors de la mise à jour");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -129,10 +121,10 @@ export default function SecuritePage() {
             <div className="flex justify-center mt-8">
               <button
                 onClick={handleUpdate}
-                disabled={saving || !currentPassword || !newPassword || !confirmPassword}
+                disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
                 className="px-8 py-3 rounded-lg text-white disabled:opacity-60 bg-gray-400"
               >
-                {saving ? "Mise à jour..." : "Mettre à jour"}
+                {changingPassword ? "Mise à jour..." : "Mettre à jour"}
               </button>
             </div>
           </div>

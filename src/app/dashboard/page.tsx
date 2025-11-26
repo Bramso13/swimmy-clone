@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DashboardCard from "@/components/dashboard/DashboardCard";
 import QuickLinkCard from "@/components/dashboard/QuickLinkCard";
-import { useApi } from "@/context/ApiContext";
+import { useUsers } from "@/context/UsersContext";
 
 const DashboardPage = () => {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { request } = useApi();
+  const { user, userLoading, fetchUser } = useUsers();
+
+  const [fallbackUser, setFallbackUser] = React.useState<any>(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -23,29 +23,23 @@ const DashboardPage = () => {
           router.replace("/login");
           return;
         }
-        try {
-          const res = await request(`/api/users/${baseUser.id}`);
-          if (res.ok) {
-            const data = await res.json();
-            setUser(data.user);
-          } else {
-            setUser(baseUser);
-          }
-        } catch {
-          setUser(baseUser);
+        setFallbackUser(baseUser); // Garder en fallback
+        const fetchedUser = await fetchUser(baseUser.id);
+        if (!fetchedUser) {
+          // Si l'API échoue, on utilisera fallbackUser
         }
       } catch (error) {
         router.replace("/login");
-      } finally {
-        setLoading(false);
       }
     };
     loadUser();
-  }, [request, router]);
+  }, [fetchUser, router]);
 
-  const userName = user?.name || user?.email || "Utilisateur";
+  // Utiliser user du contexte s'il existe, sinon fallbackUser
+  const displayUser = user || fallbackUser;
+  const userName = displayUser?.name || displayUser?.email || "Utilisateur";
 
-  if (loading) {
+  if (userLoading) {
     return (
       <main className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
@@ -131,7 +125,7 @@ const DashboardPage = () => {
         />
       </section>
 
-      {user?.role === "owner" && (
+      {displayUser?.role === "owner" && (
         <section className="mt-8">
           <div className="rounded-xl border bg-white shadow-sm p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>

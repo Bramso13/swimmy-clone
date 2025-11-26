@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { useApi } from "@/context/ApiContext";
+import { useUsers } from "@/context/UsersContext";
 
 type LocalProfile = {
   about?: string;
@@ -15,10 +16,10 @@ const STORAGE_KEY = "profile.local";
 export default function MonProfilPage() {
   const [local, setLocal] = useState<LocalProfile>({});
   const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [serverLoaded, setServerLoaded] = useState(false);
 
   const { request } = useApi();
+  const { fetchUser, updateUser, updating } = useUsers();
 
   useEffect(() => {
     try {
@@ -34,22 +35,20 @@ export default function MonProfilPage() {
         const session = await authClient.getSession();
         const userId = session.data?.user?.id as string | undefined;
         if (!userId) return;
-        const res = await request(`/api/users/${userId}`);
-        if (res.ok) {
-          const j = await res.json();
-          const u = j.user || {};
+        const userData = await fetchUser(userId);
+        if (userData) {
           setLocal((p) => ({
             ...p,
-            image: u.image ?? p.image,
-            about: u.bio ?? p.about,
-            dob: u.dateOfBirth ? String(u.dateOfBirth).slice(0, 10) : p.dob,
+            image: userData.image ?? p.image,
+            about: userData.bio ?? p.about,
+            dob: userData.dateOfBirth ? String(userData.dateOfBirth).slice(0, 10) : p.dob,
           }));
         }
       } finally {
         setServerLoaded(true);
       }
     })();
-  }, [request]);
+  }, [fetchUser]);
 
   useEffect(() => {
     try {
@@ -77,7 +76,6 @@ export default function MonProfilPage() {
 
   const onSave = async () => {
     try {
-      setSaving(true);
       const session = await authClient.getSession();
       const userId = session.data?.user?.id as string | undefined;
       if (!userId) {
@@ -92,20 +90,15 @@ export default function MonProfilPage() {
         alert("Aucun changement à enregistrer.");
         return;
       }
-      const res = await request(`/api/users/${userId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
-        throw new Error(j.error || "Enregistrement impossible");
+      
+      const success = await updateUser(userId, payload);
+      if (success) {
+        alert("Profil enregistré avec succès.");
+      } else {
+        alert("Erreur lors de l'enregistrement");
       }
-      alert("Profil enregistré avec succès.");
     } catch (e: any) {
       alert(e.message || "Erreur lors de l'enregistrement");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -175,12 +168,12 @@ export default function MonProfilPage() {
 
           <div className="mt-6">
             <button
-              disabled={uploading || saving}
+              disabled={uploading || updating}
               onClick={onSave}
               className="px-8 py-3 rounded-full text-white disabled:opacity-60"
               style={{ backgroundColor: "var(--brand-blue)" }}
             >
-              {uploading || saving ? "Enregistrement…" : "Enregistrer"}
+              {uploading || updating ? "Enregistrement…" : "Enregistrer"}
             </button>
           </div>
         </div>

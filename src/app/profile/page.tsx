@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-import { useApi } from "@/context/ApiContext";
+import { useUsers } from "@/context/UsersContext";
 
 type LocalProfile = {
   about?: string;
@@ -25,14 +25,12 @@ const STORAGE_KEY = "profile.local";
 
 const ProfilePage = () => {
   const { data: session } = authClient.useSession?.() ?? { data: undefined };
-  const { request } = useApi();
-  const user = (session as any)?.user as
+  const { user: fullUser, userLoading, fetchUser } = useUsers();
+  const sessionUser = (session as any)?.user as
     | { emailVerified?: boolean; image?: string; name?: string; id?: string }
     | undefined;
 
   const [local, setLocal] = useState<LocalProfile>({});
-  const [fullUser, setFullUser] = useState<FullUser | null>(null);
-  const [loadingRole, setLoadingRole] = useState(true);
 
   useEffect(() => {
     try {
@@ -43,27 +41,14 @@ const ProfilePage = () => {
 
   // Récupérer les informations complètes de l'utilisateur (rôle, image, bio, date)
   useEffect(() => {
-    const fetchFullUser = async () => {
-      if (!user?.id) {
-        setLoadingRole(false);
+    const loadUser = async () => {
+      if (!sessionUser?.id) {
         return;
       }
-
-      try {
-        const response = await request(`/api/users/${user.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setFullUser(data.user);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération du rôle:", error);
-      } finally {
-        setLoadingRole(false);
-      }
+      await fetchUser(sessionUser.id);
     };
-
-    fetchFullUser();
-  }, [request, user?.id]);
+    loadUser();
+  }, [fetchUser, sessionUser?.id]);
 
   useEffect(() => {
     try {
@@ -73,7 +58,7 @@ const ProfilePage = () => {
 
   const requirements = useMemo(() => {
     const items: { key: string; label: string; href: string }[] = [];
-    if (!user?.emailVerified) {
+    if (!fullUser?.emailVerified) {
       items.push({
         key: "email",
         label:
@@ -82,7 +67,7 @@ const ProfilePage = () => {
       });
     }
     // Photo de profil (on privilégie la donnée serveur)
-    if (!(fullUser?.image || user?.image || local.image)) {
+    if (!(fullUser?.image || sessionUser?.image || local.image)) {
       items.push({
         key: "photo",
         label: "Votre profil (Photo de profil, À propos de vous)",
@@ -106,7 +91,7 @@ const ProfilePage = () => {
       });
     }
     return items;
-  }, [user?.emailVerified, user?.image, local.image, fullUser?.image, fullUser?.bio, fullUser?.dateOfBirth]);
+  }, [fullUser?.emailVerified, fullUser?.image, sessionUser?.image, local.image, fullUser?.bio, fullUser?.dateOfBirth]);
 
   const showAlert = requirements.length > 0;
 
@@ -118,8 +103,8 @@ const ProfilePage = () => {
         <h2 className="text-5xl font-semibold mb-2">Mon compte</h2>
       </div>
       <div className="flex flex-col items-center justify-between">
-        <p className="text-xl mb-3">{user?.name ?? "Utilisateur"}, {(user as { email?: string })?.email ?? "Utilisateur email"}</p>
-        {!loadingRole && fullUser && (
+        <p className="text-xl mb-3">{fullUser?.name ?? sessionUser?.name ?? "Utilisateur"}, {fullUser?.email ?? (sessionUser as { email?: string })?.email ?? "Utilisateur email"}</p>
+        {!userLoading && fullUser && (
           <div className="flex items-center gap-2">
             <span className={`px-4 py-2 rounded-full font-semibold text-sm ${
               fullUser.role === "owner" 
@@ -130,7 +115,7 @@ const ProfilePage = () => {
             </span>
           </div>
         )}
-        {loadingRole && (
+        {userLoading && (
           <div className="animate-pulse bg-blue-400 h-8 w-48 rounded-full"></div>
         )}
       </div>

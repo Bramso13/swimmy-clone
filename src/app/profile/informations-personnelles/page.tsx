@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-import { useApi } from "@/context/ApiContext";
+import { useUsers } from "@/context/UsersContext";
 
 type PersonalInfo = {
   firstName?: string;
@@ -18,8 +18,8 @@ const STORAGE_KEY = "profile.personal";
 
 export default function InformationsPersonnellesPage() {
   const { data: session } = authClient.useSession?.() ?? { data: undefined };
-  const { request } = useApi();
-  const user = (session as any)?.user as
+  const { user: fullUser, fetchUser, updateUser, updating } = useUsers();
+  const sessionUser = (session as any)?.user as
     | { emailVerified?: boolean; email?: string; name?: string; id?: string }
     | undefined;
 
@@ -27,7 +27,6 @@ export default function InformationsPersonnellesPage() {
     phoneCountry: "FR",
     language: "fr-FR",
   });
-  const [saving, setSaving] = useState(false);
   const [serverLoaded, setServerLoaded] = useState(false);
 
   useEffect(() => {
@@ -42,8 +41,8 @@ export default function InformationsPersonnellesPage() {
         });
       } else {
         // Séparer le nom si disponible
-        if (user?.name) {
-          const parts = user.name.split(" ");
+        if (sessionUser?.name) {
+          const parts = sessionUser.name.split(" ");
           setInfo({
             phoneCountry: "FR",
             language: "fr-FR",
@@ -53,30 +52,28 @@ export default function InformationsPersonnellesPage() {
         }
       }
     } catch {}
-  }, [user?.name]);
+  }, [sessionUser?.name]);
 
   // Charger dateOfBirth et name depuis le serveur
   useEffect(() => {
     (async () => {
       try {
-        const userId = user?.id as string | undefined;
+        const userId = sessionUser?.id as string | undefined;
         if (!userId) return;
-        const res = await request(`/api/users/${userId}`);
-        if (res.ok) {
-          const j = await res.json();
-          const u = j.user || {};
+        const userData = await fetchUser(userId);
+        if (userData) {
           setInfo((p) => ({
             ...p,
-            dob: u.dateOfBirth ? String(u.dateOfBirth).slice(0,10) : p.dob,
-            firstName: p.firstName ?? (u.name ? String(u.name).split(" ")[0] : undefined),
-            lastName: p.lastName ?? (u.name ? String(u.name).split(" ").slice(1).join(" ") : undefined),
+            dob: userData.dateOfBirth ? String(userData.dateOfBirth).slice(0,10) : p.dob,
+            firstName: p.firstName ?? (userData.name ? String(userData.name).split(" ")[0] : undefined),
+            lastName: p.lastName ?? (userData.name ? String(userData.name).split(" ").slice(1).join(" ") : undefined),
           }));
         }
       } finally {
         setServerLoaded(true);
       }
     })();
-  }, [request, user?.id]);
+  }, [fetchUser, sessionUser?.id]);
 
   useEffect(() => {
     try {
@@ -86,8 +83,7 @@ export default function InformationsPersonnellesPage() {
 
   const handleSave = async () => {
     try {
-      setSaving(true);
-      const userId = user?.id as string | undefined;
+      const userId = sessionUser?.id as string | undefined;
       if (!userId) {
         alert("Vous devez être connecté");
         return;
@@ -95,20 +91,15 @@ export default function InformationsPersonnellesPage() {
       const payload: any = {};
       if (info.dob) payload.dateOfBirth = info.dob;
       if (info.firstName || info.lastName) payload.name = `${info.firstName ?? ''} ${info.lastName ?? ''}`.trim();
-      const res = await request(`/api/users/${userId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
-        throw new Error(j.error || 'Enregistrement impossible');
+      
+      const success = await updateUser(userId, payload);
+      if (success) {
+        alert('Informations enregistrées');
+      } else {
+        alert('Erreur lors de l\'enregistrement');
       }
-      alert('Informations enregistrées');
     } catch (e: any) {
       alert(e.message || 'Erreur');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -175,10 +166,10 @@ export default function InformationsPersonnellesPage() {
             <input
               type="email"
               className="w-full border rounded-lg px-4 py-3"
-              value={user?.email ?? ""}
+                  value={fullUser?.email ?? sessionUser?.email ?? ""}
               disabled
             />
-            {!user?.emailVerified && (
+            {!fullUser?.emailVerified && (
               <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
                 <span>✓</span>
                 <span>
@@ -258,10 +249,10 @@ export default function InformationsPersonnellesPage() {
           <div className="flex justify-center mt-8">
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={updating}
               className="px-8 py-3 rounded-lg text-white disabled:opacity-60 bg-gray-400"
             >
-              {saving ? "Enregistrement..." : "Enregistrer"}
+              {updating ? "Enregistrement..." : "Enregistrer"}
             </button>
           </div>
         </div>

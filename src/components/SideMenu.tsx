@@ -4,14 +4,13 @@ import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import MenuSection, { MenuEntry } from "@/components/navigation/MenuSection";
-import { useApi } from "@/context/ApiContext";
+import { useUsers } from "@/context/UsersContext";
 
 export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: boolean }) {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [fallbackUser, setFallbackUser] = useState<any>(null);
   const router = useRouter();
-  const { request } = useApi();
+  const { user, userLoading, fetchUser } = useUsers();
 
   useEffect(() => {
     // Vérifier le statut de connexion + récupérer le rôle depuis l'API utilisateur
@@ -20,24 +19,13 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
         const session = await authClient.getSession();
         const baseUser = session.data?.user || null;
         if (!baseUser) {
-          setUser(null);
-        } else {
-          try {
-            const res = await request(`/api/users/${baseUser.id}`);
-            if (res.ok) {
-              const data = await res.json();
-              setUser(data.user);
-            } else {
-              setUser(baseUser);
-            }
-          } catch {
-            setUser(baseUser);
-          }
+          setFallbackUser(null);
+          return;
         }
+        setFallbackUser(baseUser); // Garder en fallback
+        await fetchUser(baseUser.id);
       } catch (error) {
-        setUser(null);
-      } finally {
-        setLoading(false);
+        // Erreur gérée par le contexte
       }
     };
 
@@ -51,10 +39,13 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open, request]);
+  }, [open, fetchUser]);
+
+  // Utiliser user du contexte s'il existe, sinon fallbackUser
+  const displayUser = user || fallbackUser;
 
   const handleProposePool = (e: React.MouseEvent) => {
-    if (!user) {
+    if (!displayUser) {
       e.preventDefault();
       router.push("/register");
       return;
@@ -66,7 +57,6 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
     e.preventDefault();
     try {
       await authClient.signOut();
-      setUser(null);
       setOpen(false);
       router.push("/");
     } catch (error) {
@@ -98,7 +88,7 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
   ];
 
   const ownerMenu: MenuEntry[] =
-    user?.role === "owner"
+    displayUser?.role === "owner"
       ? [
           { key: "availability", label: "📅 Vérifier la disponibilité", href: "/dashboard/availability", variant: "blue" },
           { key: "users", label: "👥 Utilisateurs", href: "/dashboard/users", variant: "indigo" },
@@ -126,8 +116,8 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
       >
         <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white uppercase" style={{ backgroundColor: '#08436A' }}>
           {(() => {
-            if (!user) return '≡';
-            const source = String(user?.name || user?.email || '').trim();
+            if (!displayUser) return '≡';
+            const source = String(displayUser?.name || displayUser?.email || '').trim();
             if (!source) return '≡';
             const parts = source.split(/\s+/).filter(Boolean);
             const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || (source.includes('@') ? source[0] : ''));
@@ -166,20 +156,20 @@ export default function SideMenu({ isHeaderBlue = false }: { isHeaderBlue?: bool
         <nav className="p-2">
           <ul className="flex flex-col">
             {/* Menu pour utilisateurs non connectés */}
-            {!user && !loading && <MenuSection items={guestMenu} onNavigate={closeMenu} />}
+            {!displayUser && !userLoading && <MenuSection items={guestMenu} onNavigate={closeMenu} />}
 
             {/* Menu pour utilisateurs connectés */}
-            {user && !loading && (
+            {displayUser && !userLoading && (
               <>
                 <MenuSection items={authenticatedMenu} onNavigate={closeMenu} />
-                {user.role === "owner" && <MenuSection items={ownerMenu} onNavigate={closeMenu} />}
+                {displayUser.role === "owner" && <MenuSection items={ownerMenu} onNavigate={closeMenu} />}
                 <MenuSection items={logoutItem} onNavigate={closeMenu} />
                 <MenuSection items={extraMessageShortcut} onNavigate={closeMenu} />
               </>
             )}
 
             {/* Affichage de chargement */}
-            {loading && (
+            {userLoading && (
               <li className="px-4 py-3 text-gray-500">
                 Chargement...
               </li>

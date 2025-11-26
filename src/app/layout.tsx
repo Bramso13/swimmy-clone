@@ -10,6 +10,7 @@ import { ComptabiliteProvider } from "@/context/ComptabiliteContext";
 import { MessagesProvider } from "@/context/MessagesContext";
 import { ReservationsDashboardProvider } from "@/context/ReservationsDashboardContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
+import { UsersProvider } from "@/context/UsersContext";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import NotificationContainer from "@/components/NotificationContainer";
 import { Suspense } from "react";
@@ -42,12 +43,13 @@ export default function RootLayout({
       >
         <Suspense fallback={<div>Loading...</div>}>
           <ApiProvider>
-            <ComptabiliteProvider>
-              <MessagesProvider>
-                <ReservationsDashboardProvider>
-                  <FavoritesProvider>
-                    <NotificationProvider>
-                      <RenterProvider>
+            <UsersProvider>
+              <ComptabiliteProvider>
+                <MessagesProvider>
+                  <ReservationsDashboardProvider>
+                    <FavoritesProvider>
+                      <NotificationProvider>
+                        <RenterProvider>
                 <HeaderWrapper />
                 <NotificationContainer />
                 <main className="flex-1 w-full mx-auto max-w-7xl px-4">
@@ -249,12 +251,13 @@ export default function RootLayout({
                 <span className="font-medium">Aide</span>
               </Link>
             </div>
-                      </RenterProvider>
-                    </NotificationProvider>
-                  </FavoritesProvider>
-                </ReservationsDashboardProvider>
-              </MessagesProvider>
-            </ComptabiliteProvider>
+                        </RenterProvider>
+                      </NotificationProvider>
+                    </FavoritesProvider>
+                  </ReservationsDashboardProvider>
+                </MessagesProvider>
+              </ComptabiliteProvider>
+            </UsersProvider>
           </ApiProvider>
         </Suspense>
       </body>
