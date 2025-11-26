@@ -93,6 +93,14 @@ export default function SearchPage() {
     "Éclairage de nuit",
   ];
   const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
+  const DISTANCE_FILTERS = [
+    { label: "Tous", value: null },
+    { label: "10 km", value: 10 },
+    { label: "25 km", value: 25 },
+    { label: "50 km", value: 50 },
+    { label: "100 km", value: 100 },
+  ] as const;
+  const [distanceRadius, setDistanceRadius] = useState<number | null>(null);
   const equipmentIcon = (label: string) => {
     const s = label.toLowerCase();
     if (s.includes('intérieure')) return '🏠';
@@ -177,9 +185,8 @@ export default function SearchPage() {
           q: query,
           limit: "12",
           autocomplete: "1",
-          type: "housenumber,street,locality,municipality",
         });
-        const res = await request(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`, {
+        const res = await request(`/api/geocode?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) {
@@ -245,6 +252,7 @@ export default function SearchPage() {
       setSelectedLocation("");
       setSelectedLocationCoords(null);
       setLocationQuery("");
+      setDistanceRadius(null);
     } else {
       setSelectedLocation(suggestion.label);
       setSelectedLocationCoords({ latitude: suggestion.latitude, longitude: suggestion.longitude });
@@ -280,9 +288,8 @@ export default function SearchPage() {
         q: query,
         limit: "1",
         autocomplete: "1",
-        type: "housenumber,street,locality,municipality",
       });
-      const res = await request(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
+      const res = await request(`/api/geocode?${params.toString()}`);
       if (!res.ok) {
         return;
       }
@@ -358,9 +365,8 @@ export default function SearchPage() {
           q: query,
           limit: "1",
           autocomplete: "1",
-          type: "housenumber,street,locality,municipality",
         });
-        const res = await request(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
+        const res = await request(`/api/geocode?${params.toString()}`);
         if (!res.ok) {
           throw new Error("Adresse API error");
         }
@@ -445,9 +451,8 @@ export default function SearchPage() {
             q: address,
             limit: "1",
             autocomplete: "1",
-            type: "housenumber,street,locality,municipality",
           });
-          const res = await request(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`);
+          const res = await request(`/api/geocode?${params.toString()}`);
           if (!res.ok) {
             continue;
           }
@@ -491,6 +496,13 @@ export default function SearchPage() {
       selectedLocationCoords &&
         typeof selectedLocationCoords.latitude === "number" &&
         typeof selectedLocationCoords.longitude === "number"
+    );
+  const locationRadiusActive =
+    Boolean(
+      selectedLocationCoords &&
+        typeof selectedLocationCoords.latitude === "number" &&
+        typeof selectedLocationCoords.longitude === "number" &&
+        typeof distanceRadius === "number"
     );
 
   const displayedPools = pools
@@ -563,6 +575,18 @@ export default function SearchPage() {
       }
       const addressPenalty = hasAddress ? 0 : 1;
       return { ...p, distanceKm, distanceSort, addressPenalty };
+    })
+    .filter((p: any) => {
+      if (!selectedLocationCoords) {
+        return true;
+      }
+      if (!locationRadiusActive) {
+        return true;
+      }
+      if (typeof p.distanceKm !== "number") {
+        return false;
+      }
+      return p.distanceKm <= (distanceRadius as number);
     })
     .sort((a: any, b: any) => {
       if (shouldSortByDistance) {
@@ -704,6 +728,22 @@ export default function SearchPage() {
               >
                 🏡 Intérieur
               </button>
+            </div>
+
+            <div className={`flex items-center gap-2 rounded-full border px-3 py-2 ${!selectedLocationCoords ? 'opacity-60 cursor-not-allowed' : ''}`}>
+              <span className="text-gray-700">Rayon</span>
+              {DISTANCE_FILTERS.map(({ label, value }) => (
+                <button
+                  key={label}
+                  disabled={!selectedLocationCoords}
+                  onClick={() => setDistanceRadius(value)}
+                  className={`rounded-full px-3 py-1 text-sm ${
+                    distanceRadius === value ? 'bg-blue-600 text-white' : 'text-gray-700'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             <button 
@@ -982,6 +1022,27 @@ export default function SearchPage() {
                     />
                   </div>
                 </div>
+              <div className="border-t border-gray-200 px-4 py-3">
+                <span className="text-sm text-gray-500">Rayon</span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {DISTANCE_FILTERS.map(({ label, value }) => (
+                    <button
+                      key={`mobile-distance-${label}`}
+                      type="button"
+                      disabled={!selectedLocationCoords}
+                      onClick={() => setDistanceRadius(value)}
+                      className={`rounded-full px-3 py-1 text-sm border ${
+                        distanceRadius === value ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-700'
+                      } ${!selectedLocationCoords ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {!selectedLocationCoords && (
+                  <p className="mt-2 text-xs text-gray-500">Sélectionnez d’abord un lieu pour activer le filtrage par adresse.</p>
+                )}
+              </div>
               </div>
               <button
                 className="w-full rounded-full bg-blue-600 px-4 py-3 text-white font-semibold"
