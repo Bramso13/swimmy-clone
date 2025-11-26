@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { usePools } from "@/context/PoolsContext";
 import { useApi } from "@/context/ApiContext";
 
 const BRAND_BLUE = "#08436A";
@@ -19,7 +20,7 @@ export default function Home() {
   const router = useRouter();
   const [openCard, setOpenCard] = useState<"share" | "swim" | null>(null);
   const [openFaq, setOpenFaq] = useState<"children" | "contact" | "clean" | null>(null);
-  const [pools, setPools] = useState<Array<{
+  const [displayPools, setDisplayPools] = useState<Array<{
     id: string;
     title: string;
     address: string;
@@ -29,27 +30,29 @@ export default function Home() {
   }>>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showStickySearch, setShowStickySearch] = useState(false);
+  const { fetchPools, poolsLoading } = usePools();
   const { request } = useApi();
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await request("/api/pools", { cache: "no-store" });
-        const data = await res.json();
-        const all = Array.isArray(data?.pools) ? data.pools : [];
-        const approvedOnly = all.filter((p: any) => p?.approved !== false);
-        const top3 = approvedOnly.slice(0, 3);
-        if (!cancelled) setPools(top3);
+        const all = await fetchPools();
+        if (!cancelled) {
+          const approvedOnly = all.filter((p: any) => p?.approved !== false);
+          const top3 = approvedOnly.slice(0, 3);
+          setDisplayPools(top3);
+        }
       } catch (e) {
         // ignore, laisser vide si erreur
+        if (!cancelled) setDisplayPools([]);
       }
     };
     load();
     return () => {
       cancelled = true;
     };
-  }, [request]);
+  }, [fetchPools]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -336,9 +339,9 @@ export default function Home() {
         <p className="md:hidden text-sm text-gray-500 text-center mb-4">
           Glissez vers la gauche pour découvrir les piscines disponibles.
         </p>
-        {pools.length > 0 ? (
+        {displayPools.length > 0 ? (
           <div className="flex justify-center gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-4 md:justify-start md:px-0 md:grid md:grid-cols-3 md:overflow-visible">
-            {pools.map((p) => (
+            {displayPools.map((p) => (
               <div key={p.id} className="flex-shrink-0 w-[85vw] max-w-sm snap-center md:w-auto md:max-w-none md:snap-start">
                 <PoolCard
                   pool={{

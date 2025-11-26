@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import PoolCard from "@/components/PoolCard";
 import SideMenu from "@/components/SideMenu";
 import { useSearchParams } from "next/navigation";
+import { usePools } from "@/context/PoolsContext";
 import { useApi } from "@/context/ApiContext";
 
 const parseCoordinate = (value: any): number | null => {
@@ -40,9 +41,8 @@ type LocationSuggestion = {
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
+  const { pools, poolsLoading, fetchPools } = usePools();
   const { request } = useApi();
-  const [pools, setPools] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     sortBy: 'closest', // 'closest', 'top', 'instant'
     topSelection: false,
@@ -124,19 +124,13 @@ export default function SearchPage() {
   React.useEffect(() => {
     const loadPools = async () => {
       try {
-        const base = process.env.NEXT_PUBLIC_BASE_URL || 
-          (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-        const res = await request(`${base}/api/pools`, { cache: "no-store" });
-        const data = await res.json();
-        setPools(data.pools ?? []);
+        await fetchPools();
       } catch (error) {
         console.error('Erreur lors du chargement des piscines:', error);
-      } finally {
-        setLoading(false);
       }
     };
     loadPools();
-  }, [request]);
+  }, [fetchPools]);
 
   React.useEffect(() => {
     if (!locationOpen) {
@@ -623,7 +617,7 @@ export default function SearchPage() {
     }
   }, [isMobile, mobilePage, totalMobilePages]);
 
-  if (loading) {
+  if (poolsLoading) {
     return (
       <main className="w-full p-0 overflow-x-hidden">
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen box-border px-3 sm:px-4 md:px-6">
