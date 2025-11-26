@@ -5,59 +5,28 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/context/NotificationContext";
 import { useReservations } from "@/context/ReservationsContext";
-import { useApi } from "@/context/ApiContext";
-
-interface Conversation {
-  userId: string;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-    image: string | null;
-    avatarUrl: string | null;
-  };
-  lastMessage: {
-    id: string;
-    content: string;
-    createdAt: string;
-    senderId: string;
-  };
-}
-
-interface Message {
-  id: string;
-  content: string;
-  createdAt: string;
-  senderId: string;
-  sender: {
-    id: string;
-    name: string | null;
-    email: string;
-    image: string | null;
-    avatarUrl: string | null;
-  };
-  recipient: {
-    id: string;
-    name: string | null;
-    email: string;
-    image: string | null;
-    avatarUrl: string | null;
-  };
-}
+import { useMessages, Conversation, Message } from "@/context/MessagesContext";
 
 export default function MessagesPage() {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const {
+    conversations,
+    conversationsLoading,
+    conversationsError,
+    fetchConversations,
+    messages,
+    messagesLoading,
+    fetchMessages,
+    sendMessage,
+    sending,
+    uploadAndSendImage,
+    uploadingImage,
+    clearMessages,
+  } = useMessages();
+  
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [uploadingImage, setUploadingImage] = useState(false);
   const { success, error: notifyError } = useNotification();
-  const { request } = useApi();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadingMessages, setLoadingMessages] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
   const [isMobile, setIsMobile] = useState(false);
@@ -94,46 +63,29 @@ export default function MessagesPage() {
           router.replace("/login");
           return;
         }
-        const res = await request("/api/messages");
-        const j = await res.json();
-        if (!res.ok) throw new Error(j.error || "Erreur chargement");
-        setConversations(j.conversations || []);
-        // Sélectionner la première conversation par défaut
-        if (j.conversations && j.conversations.length > 0) {
-          setSelectedConversation(j.conversations[0].userId);
-        }
+        await fetchConversations();
       } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
+        // Erreur gérée par le contexte
       }
     };
     load();
-  }, [request, router]);
+  }, [fetchConversations, router]);
+
+  // Sélectionner la première conversation par défaut quand elles sont chargées
+  useEffect(() => {
+    if (conversations.length > 0 && !selectedConversation) {
+      setSelectedConversation(conversations[0].userId);
+    }
+  }, [conversations, selectedConversation]);
 
   // Charger les messages de la conversation sélectionnée
   useEffect(() => {
     if (!selectedConversation) {
-      setMessages([]);
+      clearMessages();
       return;
     }
-
-    const loadMessages = async () => {
-      setLoadingMessages(true);
-      try {
-        const res = await request(`/api/messages/${selectedConversation}`);
-        const j = await res.json();
-        if (!res.ok) throw new Error(j.error || "Erreur chargement");
-        setMessages(j.messages || []);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoadingMessages(false);
-      }
-    };
-
-    loadMessages();
-  }, [request, selectedConversation]);
+    fetchMessages(selectedConversation);
+  }, [selectedConversation, fetchMessages, clearMessages]);
 
   // Détecter la largeur pour bascule mobile
   useEffect(() => {
@@ -185,40 +137,13 @@ export default function MessagesPage() {
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation || sending) return;
 
-    setSending(true);
-    try {
-      const res = await request("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          recipientId: selectedConversation,
-          content: newMessage.trim(),
-        }),
-      });
-
-      const j = await res.json();
-      if (!res.ok) throw new Error(j.error || "Erreur envoi");
-
-      // Recharger les messages
-      const messagesRes = await request(`/api/messages/${selectedConversation}`);
-      const messagesData = await messagesRes.json();
-      if (messagesRes.ok) {
-        setMessages(messagesData.messages || []);
-      }
-
-      // Recharger les conversations pour mettre à jour le dernier message
-      const convRes = await request("/api/messages");
-      const convData = await convRes.json();
-      if (convRes.ok) {
-        setConversations(convData.conversations || []);
-      }
-
+    const messageSent = await sendMessage(selectedConversation, newMessage);
+    
+    if (messageSent) {
       setNewMessage("");
       success("Message envoyé", "Votre message a été envoyé avec succès");
-    } catch (e: any) {
-      notifyError("Erreur", e.message || "Erreur lors de l'envoi");
-    } finally {
-      setSending(false);
+    } else {
+      notifyError("Erreur", "Erreur lors de l'envoi du message");
     }
   };
 
@@ -229,39 +154,14 @@ export default function MessagesPage() {
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !selectedConversation) return;
-    try {
-      setUploadingImage(true);
-      const form = new FormData();
-      form.append("file", file);
-      const res = await request("/api/upload", { method: "POST", body: form });
-      const j = await res.json();
-      if (!res.ok) throw new Error(j.error || "Upload échoué");
-      const imageUrl = j.url as string;
-      // Envoyer le message image (contenu = URL)
-      const sendRes = await request("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipientId: selectedConversation, content: imageUrl }),
-      });
-      const sendJ = await sendRes.json();
-      if (!sendRes.ok) throw new Error(sendJ.error || "Envoi image échoué");
-      // Refresh messages & conversations
-      const [messagesRes, convRes] = await Promise.all([
-        request(`/api/messages/${selectedConversation}`),
-        request("/api/messages"),
-      ]);
-      const [messagesData, convData] = await Promise.all([
-        messagesRes.json(),
-        convRes.json(),
-      ]);
-      if (messagesRes.ok) setMessages(messagesData.messages || []);
-      if (convRes.ok) setConversations(convData.conversations || []);
-    } catch (err: any) {
-      alert(err.message || "Erreur lors de l'envoi de l'image");
-    } finally {
-      setUploadingImage(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    
+    const success = await uploadAndSendImage(file, selectedConversation);
+    
+    if (!success) {
+      alert("Erreur lors de l'envoi de l'image");
     }
+    
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const getAvatarUrl = (user: Conversation["user"]) => {
@@ -272,7 +172,7 @@ export default function MessagesPage() {
     return conversations.find((c) => c.userId === selectedConversation)?.user;
   };
 
-  if (loading) {
+  if (conversationsLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-gray-500">Chargement…</div>
@@ -280,10 +180,10 @@ export default function MessagesPage() {
     );
   }
 
-  if (error) {
+  if (conversationsError) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-red-600">{error}</div>
+        <div className="text-red-600">{conversationsError}</div>
       </div>
     );
   }
@@ -382,7 +282,7 @@ export default function MessagesPage() {
         })()}
       </div>
       <div className="flex-1 overflow-y-auto p-4 bg-gray-50" style={{ minHeight: 0 }}>
-        {loadingMessages ? (
+        {messagesLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-gray-500">Chargement des messages…</div>
           </div>

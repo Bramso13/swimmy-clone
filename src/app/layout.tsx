@@ -7,6 +7,7 @@ import { RenterProvider } from "@/context/RenterContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { ApiProvider } from "@/context/ApiContext";
 import { ComptabiliteProvider } from "@/context/ComptabiliteContext";
+import { MessagesProvider } from "@/context/MessagesContext";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import NotificationContainer from "@/components/NotificationContainer";
 import { Suspense } from "react";
@@ -40,8 +41,9 @@ export default function RootLayout({
         <Suspense fallback={<div>Loading...</div>}>
           <ApiProvider>
             <ComptabiliteProvider>
-              <NotificationProvider>
-                <RenterProvider>
+              <MessagesProvider>
+                <NotificationProvider>
+                  <RenterProvider>
                 <HeaderWrapper />
                 <NotificationContainer />
                 <main className="flex-1 w-full mx-auto max-w-7xl px-4">
@@ -243,8 +245,9 @@ export default function RootLayout({
                 <span className="font-medium">Aide</span>
               </Link>
             </div>
-                </RenterProvider>
-              </NotificationProvider>
+                  </RenterProvider>
+                </NotificationProvider>
+              </MessagesProvider>
             </ComptabiliteProvider>
           </ApiProvider>
         </Suspense>
