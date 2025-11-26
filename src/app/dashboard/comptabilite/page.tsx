@@ -1,27 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { usePools } from "@/context/PoolsContext";
+import { useComptabilite } from "@/context/ComptabiliteContext";
 import DashboardHero from "@/components/dashboard/DashboardHero";
 import SectionIntro from "@/components/dashboard/SectionIntro";
 import DashboardCtaCard from "@/components/dashboard/DashboardCtaCard";
-import { useApi } from "@/context/ApiContext";
-
-type RevenueSummary = {
-  currentMonth: number;
-  rolling90Days: number;
-  yearToDate: number;
-  totalPaid: number;
-  pending: number;
-  pendingCount: number;
-  lastPayoutAt: string | null;
-};
-
-type PendingRevenue = {
-  total: number;
-  count: number;
-};
 
 type SummaryCardProps = {
   label: string;
@@ -33,20 +18,22 @@ type SummaryCardProps = {
 
 const ComptabilitePage = () => {
   const { fetchOwnerPools } = usePools();
-  const { request } = useApi();
+  const {
+    revenue,
+    revenueLoading,
+    revenueError,
+    pendingRevenue,
+    pendingLoading,
+    pendingError,
+    poolsRevenue,
+    poolRevenueLoading,
+    poolRevenueError,
+    fetchPoolRevenue,
+  } = useComptabilite();
+  
   const [totalPools, setTotalPools] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  const [revenue, setRevenue] = useState<RevenueSummary | null>(null);
-  const [revenueLoading, setRevenueLoading] = useState(true);
-  const [revenueError, setRevenueError] = useState<string | null>(null);
-  const [pendingRevenue, setPendingRevenue] = useState<PendingRevenue | null>(null);
-  const [pendingLoading, setPendingLoading] = useState(true);
-  const [pendingError, setPendingError] = useState<string | null>(null);
-  const [poolRevenueLoading, setPoolRevenueLoading] = useState(false);
-  const [poolRevenueError, setPoolRevenueError] = useState<string | null>(null);
-  const [poolsRevenue, setPoolsRevenue] = useState<
-    { id: string; title: string | null; totalRevenue: number }[]
-  >([]);
+
   const SummaryCard = ({ label, value, helper, icon, loading }: SummaryCardProps) => (
     <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -60,60 +47,10 @@ const ComptabilitePage = () => {
     </div>
   );
 
-  const isPaidReservation = (reservation: any) => {
-    if (!reservation) return false;
-    const reservationStatus = reservation.status;
-    const transactionStatus = reservation.transaction?.status;
-    return (
-      reservationStatus === "paid" ||
-      transactionStatus === "succeeded" ||
-      transactionStatus === "paid" ||
-      transactionStatus === "completed"
-    );
-  };
-
-  const loadPoolRevenue = useCallback(async () => {
-    try {
-      setPoolRevenueLoading(true);
-      setPoolRevenueError(null);
-      const session = await authClient.getSession();
-      if (!session.data?.user?.id) {
-        throw new Error("Utilisateur non authentifié");
-      }
-      const res = await request(`/api/pools?includeReservations=true`, { cache: "no-store" });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Impossible de récupérer les revenus par piscine");
-      }
-      const data = await res.json();
-      const poolsData = Array.isArray(data?.pools) ? data.pools : [];
-      const formatted = poolsData.map((pool: any) => {
-        const paidReservations = Array.isArray(pool?.reservations)
-          ? pool.reservations.filter(isPaidReservation)
-          : [];
-
-        const totalRevenue = paidReservations.reduce(
-          (sum: number, reservation: any) => sum + Number(reservation?.amount || 0),
-          0
-        );
-
-        return {
-          id: pool.id,
-          title: pool.title,
-          totalRevenue,
-        };
-      });
-      setPoolsRevenue(formatted);
-    } catch (err: any) {
-      setPoolRevenueError(err.message || "Erreur lors du chargement des revenus par piscine");
-    } finally {
-      setPoolRevenueLoading(false);
-    }
-  }, [request]);
   useEffect(() => {
-    loadPoolRevenue();
-  }, [loadPoolRevenue]);
-
+    // Charger les revenus par piscine au montage
+    fetchPoolRevenue();
+  }, [fetchPoolRevenue]);
 
   useEffect(() => {
     const fetchPoolsCount = async () => {
@@ -137,78 +74,6 @@ const ComptabilitePage = () => {
 
     fetchPoolsCount();
   }, [fetchOwnerPools]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchRevenue = async () => {
-      setRevenueLoading(true);
-      setRevenueError(null);
-      try {
-        const res = await request("/api/dashboard/revenue", { cache: "no-store" });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data?.error || "Impossible de récupérer les revenus Stripe.");
-        }
-        if (!cancelled) {
-          if (process.env.NODE_ENV !== "production") {
-            console.log("[Comptabilité] Revenue API response", data);
-          }
-          setRevenue(data.revenue);
-        }
-      } catch (error: any) {
-        if (!cancelled) {
-          setRevenue(null);
-          setRevenueError(error.message || "Erreur de récupération des revenus.");
-        }
-      } finally {
-        if (!cancelled) {
-          setRevenueLoading(false);
-        }
-      }
-    };
-
-    fetchRevenue();
-    return () => {
-      cancelled = true;
-    };
-  }, [request]);
-
-  useEffect(() => {
-    let aborted = false;
-
-    const fetchPending = async () => {
-      setPendingLoading(true);
-      setPendingError(null);
-      try {
-        const res = await request("/api/dashboard/revenue/pending", { cache: "no-store" });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data?.error || "Impossible de récupérer les revenus en attente.");
-        }
-        if (!aborted) {
-          setPendingRevenue({
-            total: typeof data?.pending === "number" ? data.pending : 0,
-            count: typeof data?.count === "number" ? data.count : 0,
-          });
-        }
-      } catch (error: any) {
-        if (!aborted) {
-          setPendingRevenue(null);
-          setPendingError(error.message || "Erreur lors du calcul des revenus en attente.");
-        }
-      } finally {
-        if (!aborted) {
-          setPendingLoading(false);
-        }
-      }
-    };
-
-    fetchPending();
-    return () => {
-      aborted = true;
-    };
-  }, [request]);
 
   const formatCurrency = (amount?: number | null) => {
     const safeAmount = typeof amount === "number" ? amount : 0;
@@ -340,7 +205,7 @@ const ComptabilitePage = () => {
                   </p>
                 </div>
                 <button
-                  onClick={loadPoolRevenue}
+                  onClick={fetchPoolRevenue}
                   className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-60"
                   disabled={poolRevenueLoading}
                 >
