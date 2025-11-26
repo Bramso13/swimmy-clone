@@ -1,61 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import PoolCard from "@/components/PoolCard";
 import { useRouter } from "next/navigation";
-import { useApi } from "@/context/ApiContext";
-
-interface Favorite {
-  id: string;
-  pool: {
-    id: string;
-    title: string;
-    description: string;
-    address: string;
-    photos: string[];
-    pricePerHour: number;
-    latitude: number;
-    longitude: number;
-  };
-  createdAt: string;
-}
+import { useFavorites } from "@/context/FavoritesContext";
 
 export default function FavoritesPage() {
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { request } = useApi();
+  const { favorites, favoritesLoading, favoritesError, fetchFavorites } = useFavorites();
 
   useEffect(() => {
-    const fetchFavorites = async () => {
+    const checkAuth = async () => {
       try {
         const session = await authClient.getSession();
         if (!session.data?.user) {
           router.replace("/login");
           return;
         }
-
-        const response = await request("/api/favorites");
-        if (!response.ok) {
-          throw new Error("Erreur lors du chargement des favoris");
-        }
-
-        const data = await response.json();
-        setFavorites(data.favorites || []);
+        await fetchFavorites();
       } catch (err: any) {
-        setError(err.message || "Une erreur est survenue");
-      } finally {
-        setLoading(false);
+        // Erreur gérée par le contexte
       }
     };
 
-    fetchFavorites();
-  }, [request, router]);
+    checkAuth();
+  }, [fetchFavorites, router]);
 
-  if (loading) {
+  if (favoritesLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
         <div className="max-w-7xl mx-auto">
@@ -72,13 +45,13 @@ export default function FavoritesPage() {
     );
   }
 
-  if (error) {
+  if (favoritesError) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
             <h2 className="text-xl font-bold text-red-800 dark:text-red-400 mb-2">Erreur</h2>
-            <p className="text-red-700 dark:text-red-300">{error}</p>
+            <p className="text-red-700 dark:text-red-300">{favoritesError}</p>
             <Link
               href="/dashboard"
               className="inline-block mt-4 text-red-600 dark:text-red-400 hover:underline"

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useApi } from "@/context/ApiContext";
+import { useFavorites } from "@/context/FavoritesContext";
 
 export type Pool = {
   id: string;
@@ -36,11 +36,10 @@ export default function PoolCard({ pool }: { pool: Pool }) {
   const validPhotos = useMemo(() => (Array.isArray(pool.photos) ? pool.photos : []).filter(isValidSrc), [pool.photos]);
   const initialCover = validPhotos[0];
   const [showImage, setShowImage] = useState<boolean>(!!initialCover);
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const { request } = useApi();
+  const { isFavorite, checkFavorite, toggleFavorite, toggling } = useFavorites();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -50,19 +49,13 @@ export default function PoolCard({ pool }: { pool: Pool }) {
       
       // Vérifier si la piscine est dans les favoris
       if (isAuth) {
-        try {
-          const response = await request(`/api/favorites/check?poolId=${pool.id}`);
-          const data = await response.json();
-          setIsFavorite(data.isFavorite || false);
-        } catch (error) {
-          console.error("Erreur lors de la vérification du favori:", error);
-        }
+        await checkFavorite(pool.id);
       }
     };
     checkAuth();
-  }, [pool.id, request]);
+  }, [pool.id, checkFavorite]);
 
-  const toggleFavorite = async (e: React.MouseEvent) => {
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -71,26 +64,10 @@ export default function PoolCard({ pool }: { pool: Pool }) {
       return;
     }
 
-    try {
-      if (isFavorite) {
-        // Supprimer des favoris
-        await request(`/api/favorites?poolId=${pool.id}`, {
-          method: "DELETE",
-        });
-        setIsFavorite(false);
-      } else {
-        // Ajouter aux favoris
-        await request("/api/favorites", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ poolId: pool.id }),
-        });
-        setIsFavorite(true);
-      }
-    } catch (error) {
-      console.error("Erreur lors de la gestion du favori:", error);
-    }
+    await toggleFavorite(pool.id);
   };
+
+  const isFav = isFavorite(pool.id);
 
   const photosCount = validPhotos.length;
   const locationText = pool.address ?? "";
@@ -181,16 +158,17 @@ export default function PoolCard({ pool }: { pool: Pool }) {
         {/* Bouton favori en haut à droite de l'image */}
         {isAuthenticated && (
           <button
-            onClick={toggleFavorite}
-            className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-all shadow-md"
-            title={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+            onClick={handleToggleFavorite}
+            disabled={toggling[pool.id]}
+            className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-all shadow-md disabled:opacity-50"
+            title={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              fill={isFavorite ? "red" : "none"}
+              fill={isFav ? "red" : "none"}
               viewBox="0 0 24 24"
               strokeWidth={1.5}
-              stroke={isFavorite ? "red" : "currentColor"}
+              stroke={isFav ? "red" : "currentColor"}
               className="w-5 h-5"
             >
               <path

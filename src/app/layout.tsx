@@ -9,6 +9,7 @@ import { ApiProvider } from "@/context/ApiContext";
 import { ComptabiliteProvider } from "@/context/ComptabiliteContext";
 import { MessagesProvider } from "@/context/MessagesContext";
 import { ReservationsDashboardProvider } from "@/context/ReservationsDashboardContext";
+import { FavoritesProvider } from "@/context/FavoritesContext";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import NotificationContainer from "@/components/NotificationContainer";
 import { Suspense } from "react";
@@ -44,8 +45,9 @@ export default function RootLayout({
             <ComptabiliteProvider>
               <MessagesProvider>
                 <ReservationsDashboardProvider>
-                  <NotificationProvider>
-                    <RenterProvider>
+                  <FavoritesProvider>
+                    <NotificationProvider>
+                      <RenterProvider>
                 <HeaderWrapper />
                 <NotificationContainer />
                 <main className="flex-1 w-full mx-auto max-w-7xl px-4">
@@ -247,8 +249,9 @@ export default function RootLayout({
                 <span className="font-medium">Aide</span>
               </Link>
             </div>
-                    </RenterProvider>
-                  </NotificationProvider>
+                      </RenterProvider>
+                    </NotificationProvider>
+                  </FavoritesProvider>
                 </ReservationsDashboardProvider>
               </MessagesProvider>
             </ComptabiliteProvider>
